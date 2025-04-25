@@ -1220,7 +1220,7 @@ local function getObjGen()
             Gui.Watermark.BackgroundTransparency = 1.000
             Gui.Watermark.Size = UDim2.new(0.5, 0, 0.0199999996, 0)
             Gui.Watermark.Font = Enum.Font.Gotham
-            Gui.Watermark.Text = "visuals | nil | nil"
+            Gui.Watermark.Text = "visuals1 | nil | nil"
             Gui.Watermark.TextColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Watermark.TextSize = 14.000
             Gui.Watermark.TextStrokeTransparency = 0.800
@@ -1382,9 +1382,9 @@ local function getObjGen()
             Gui.Logo.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Logo.BackgroundTransparency = 1.000 -- Фон делаем невидимым
             Gui.Logo.LayoutOrder = -5 -- Ставим повыше в списке для UIListLayout
-            Gui.Logo.Size = UDim2.new(0.5, 0, 5, 0) -- Ширина 80% родителя, высота 0 (определится AspectRatio)
+            Gui.Logo.Size = UDim2.new(0.6, 0, 6, 0) -- Ширина 80% родителя, высота 0 (определится AspectRatio)
             Gui.Logo.AnchorPoint = Vector2.new(0.5, 0) -- Центрируем по горизонтали, верхняя точка
-            Gui.Logo.Position = UDim2.new(0.5, 0, 0, 0) -- Ставим в центр (UIListLayout с Padding позаботится об отступе)
+            Gui.Logo.Position = UDim2.new(0.5, 0, 0.5, 0) -- Ставим в центр (UIListLayout с Padding позаботится об отступе)
             local logoAspectRatio = Instance.new("UIAspectRatioConstraint")
             logoAspectRatio.Name = "LogoAspectRatio"
             -- <<< НАСТРОЙТЕ ЭТО ЗНАЧЕНИЕ! (ширина / высота вашего лого).
@@ -1402,12 +1402,12 @@ local function getObjGen()
             -- Это гарантирует, что сама картинка видима (если она загрузилась).
             Gui.Logo.ImageTransparency = 0.000
 
-            Gui.Logo.ImageColor3 = Color3.fromRGB(134, 142, 255) -- Цветной оттенок
+            Gui.Logo.ImageColor3 = Color3.fromRGB(255, 255, 255) -- Цветной оттенок
             Gui.Logo.ScaleType = Enum.ScaleType.Fit -- Масштабирование для вписывания без искажений
 
             -- ДОБАВЛЕНО: Явно устанавливаем видимость как true
             -- На случай, если где-то в другом месте она меняется.
-            Gui.Logo.Visible = true
+            --end
 
             Gui.UIGradient_5.Color =
                 ColorSequence.new {
@@ -3347,7 +3347,7 @@ function UILibrary.new(gameName, userId, rank)
     local Drag = Draggable.Drag(window.MainUI, Frame)
 
     --// Customize the GUI
-    window.Watermark.Text = ("visuals | %s | %s"):format(userId, gameName)
+    window.Watermark.Text = ("visuals1 | %s | %s"):format(userId, gameName)
     local userinfo = window.MainUI.Sidebar.ContentHolder.UserInfo.Content
     userinfo.Rank.Text = rank
     userinfo.Title.Text = userId
