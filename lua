@@ -1382,25 +1382,14 @@ local function getObjGen()
             Gui.Logo.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Logo.BackgroundTransparency = 1.000 -- Фон делаем невидимым
             Gui.Logo.LayoutOrder = -5 -- Ставим повыше в списке для UIListLayout
-
-            --[[ ИЗМЕНЕНО: Использование UIAspectRatioConstraint для надежного размера.
-                 Оригинальный размер зависел от высоты родителя (10%), что могло быть 0.
-                 Теперь ширина занимает 80% родителя (для учета возможного Padding),
-                 а высота определяется соотношением сторон.
-                 Подберите значение AspectRatio под ваше изображение.
-            ]]
-            Gui.Logo.Size = UDim2.new(0.8, 0, 0, 0) -- Ширина 80% родителя, высота 0 (определится AspectRatio)
+            Gui.Logo.Size = UDim2.new(0.5, 0, 5, 0) -- Ширина 80% родителя, высота 0 (определится AspectRatio)
             Gui.Logo.AnchorPoint = Vector2.new(0.5, 0) -- Центрируем по горизонтали, верхняя точка
             Gui.Logo.Position = UDim2.new(0.5, 0, 0, 0) -- Ставим в центр (UIListLayout с Padding позаботится об отступе)
-
-            -- ДОБАВЛЕНО: Ограничение соотношения сторон
-            -- Это гарантирует, что логотип не будет искажен и его высота будет рассчитана
-            -- автоматически на основе установленной ширины и соотношения сторон.
             local logoAspectRatio = Instance.new("UIAspectRatioConstraint")
             logoAspectRatio.Name = "LogoAspectRatio"
             -- <<< НАСТРОЙТЕ ЭТО ЗНАЧЕНИЕ! (ширина / высота вашего лого).
             -- Например, 1.0 для квадратного, 2.0 для лого в 2 раза шире, чем выше.
-            logoAspectRatio.AspectRatio = 3.0
+            logoAspectRatio.AspectRatio = 1.0
             logoAspectRatio.DominantAxis = Enum.DominantAxis.Width -- Высота подстраивается под ширину
             logoAspectRatio.Parent = Gui.Logo
 
