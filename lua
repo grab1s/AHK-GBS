@@ -5607,7 +5607,7 @@ function UILibrary.Section:Label(sett)
             descLabel.Size = UDim2.new(1, 0, 0, 0)
         end
     elseif sett.Description and sett.Description ~= "" then
-        warn("UILibrary: Не удалось найти 'Description' в шаблоне LabelElement, но описание было предоставлено
+        warn("UILibrary: Не удалось найти 'Description' в шаблоне LabelElement, но описание было предоставлено")
     end
 
     -- Устанавливаем порядок и родителя
