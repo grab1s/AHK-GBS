@@ -1,3 +1,5 @@
+-- START OF FILE uiLib.txt ---
+
 local UILibrary = {}
 --// Modules
 
@@ -1153,8 +1155,15 @@ local function getObjGen()
             Gui.Image.BackgroundTransparency = 1.000
             Gui.Image.Size = UDim2.new(0.400000006, 0, 0.400000006, 0)
             Gui.Image.ZIndex = 123
-            Gui.Image.Image = "rbxassetid://8349124615"
+            Gui.Image.Image = "rbxassetid://8349124615" -- Default icon, will be replaced by :Category()
             Gui.Image.ImageColor3 = Color3.fromRGB(90, 90, 90)
+
+            -- <<< ДОБАВЛЕНО: Сглаживание углов для иконки категории >>>
+            local categoryIconCorner = Instance.new("UICorner")
+            categoryIconCorner.CornerRadius = UDim.new(0.15, 0) -- Небольшое скругление (15%)
+            categoryIconCorner.Name = "CategoryIconRounding"
+            categoryIconCorner.Parent = Gui.Image
+            -- <<< КОНЕЦ ДОБАВЛЕНИЯ >>>
 
             Gui.UIAspectRatioConstraint_6.Parent = Gui.Image
 
@@ -1165,7 +1174,7 @@ local function getObjGen()
             Gui.Title.Size = UDim2.new(0.800000012, 0, 0.219999999, 0)
             Gui.Title.ZIndex = 123
             Gui.Title.Font = Enum.Font.Gotham
-            Gui.Title.Text = "MISC"
+            Gui.Title.Text = "MISC" -- Default title, will be replaced by :Category()
             Gui.Title.TextColor3 = Color3.fromRGB(90, 90, 90)
             Gui.Title.TextScaled = true
             Gui.Title.TextSize = 5.000
@@ -1296,7 +1305,7 @@ local function getObjGen()
             Gui.Rank.Size = UDim2.new(1, 0, 0.5, 0)
             Gui.Rank.ZIndex = 123
             Gui.Rank.Font = Enum.Font.Gotham
-            Gui.Rank.Text = "Admin"
+            Gui.Rank.Text = "Admin" -- Default rank, replaced by UILibrary.new()
             Gui.Rank.TextColor3 = Color3.fromRGB(94, 94, 94)
             Gui.Rank.TextSize = 14.000
             Gui.Rank.TextXAlignment = Enum.TextXAlignment.Left
@@ -1318,7 +1327,7 @@ local function getObjGen()
             Gui.Title_2.Size = UDim2.new(1, 0, 0.5, 0)
             Gui.Title_2.ZIndex = 123
             Gui.Title_2.Font = Enum.Font.GothamSemibold
-            Gui.Title_2.Text = "susss!!!"
+            Gui.Title_2.Text = "susss!!!" -- Default user ID, replaced by UILibrary.new()
             Gui.Title_2.TextColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Title_2.TextSize = 14.000
             Gui.Title_2.TextXAlignment = Enum.TextXAlignment.Left
@@ -1376,21 +1385,22 @@ local function getObjGen()
 
             Gui.Logo.Name = "Logo"
             Gui.Logo.Parent = Gui.Cheats_2
-            Gui.Logo.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            Gui.Logo.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Set to black as requested previously, or keep 255,255,255 if preferred
             Gui.Logo.BackgroundTransparency = 1.000
             Gui.Logo.LayoutOrder = -5
-            Gui.Logo.Size = UDim2.new(0.5, 0, 0.5, 0)
-            Gui.Logo.Size = UDim2.new(1, 0, 0.100000001, 0)
-
+            -- Gui.Logo.Size = UDim2.new(0.5, 0, 0.5, 0) -- Example square size
+            Gui.Logo.Size = UDim2.new(1, 0, 0.100000001, 0) -- Original rectangular size, will result in oval rounding
             Gui.Logo.ZIndex = 122
             Gui.Logo.Image = "rbxassetid://124259593098725"
-            Gui.Logo.ImageColor3 = Color3.fromRGB(255, 255, 255)
+            Gui.Logo.ImageColor3 = Color3.fromRGB(198, 128, 255) -- Restored original color
             Gui.Logo.ScaleType = Enum.ScaleType.Fit
 
+            -- <<< НАЧАЛО ИЗМЕНЕНИЯ: Уменьшено скругление для логотипа >>>
             local logoCorner = Instance.new("UICorner")
-            logoCorner.CornerRadius = UDim.new(0.5, 0)
-            logoCorner.Name = "LogoRoundCorner"
+            logoCorner.CornerRadius = UDim.new(0.15, 0) -- Небольшое скругление (15%)
+            logoCorner.Name = "LogoSlightRounding" -- Изменено имя для ясности
             logoCorner.Parent = Gui.Logo
+            -- <<< КОНЕЦ ИЗМЕНЕНИЯ >>>
 
             Gui.UIGradient_5.Color =
                 ColorSequence.new {
@@ -1991,8 +2001,15 @@ local function getObjGen()
             Gui.Image_2.BackgroundTransparency = 1.000
             Gui.Image_2.Size = UDim2.new(0.400000006, 0, 0.400000006, 0)
             Gui.Image_2.ZIndex = 124
-            Gui.Image_2.Image = "rbxassetid://8343977772"
+            Gui.Image_2.Image = "rbxassetid://8343977772" -- Default icon, will be replaced by :Button()
             Gui.Image_2.ImageColor3 = Color3.fromRGB(90, 90, 90)
+
+            -- <<< ДОБАВЛЕНО: Сглаживание углов для иконки вкладки >>>
+            local tabIconCorner = Instance.new("UICorner")
+            tabIconCorner.CornerRadius = UDim.new(0.15, 0) -- Небольшое скругление (15%)
+            tabIconCorner.Name = "TabIconRounding"
+            tabIconCorner.Parent = Gui.Image_2
+            -- <<< КОНЕЦ ДОБАВЛЕНИЯ >>>
 
             Gui.UIAspectRatioConstraint_12.Parent = Gui.Image_2
 
@@ -2003,7 +2020,7 @@ local function getObjGen()
             Gui.Title_3.Size = UDim2.new(0.800000012, 0, 0.219999999, 0)
             Gui.Title_3.ZIndex = 124
             Gui.Title_3.Font = Enum.Font.Gotham
-            Gui.Title_3.Text = "AIMBOT"
+            Gui.Title_3.Text = "AIMBOT" -- Default title, will be replaced by :Button()
             Gui.Title_3.TextColor3 = Color3.fromRGB(90, 90, 90)
             Gui.Title_3.TextScaled = true
             Gui.Title_3.TextSize = 5.000
@@ -2113,7 +2130,7 @@ local function getObjGen()
             Gui.SectionTitle.Size = UDim2.new(1, 0, 0, 20)
             Gui.SectionTitle.ZIndex = 110
             Gui.SectionTitle.Font = Enum.Font.GothamBold
-            Gui.SectionTitle.Text = "TEXT BOXES"
+            Gui.SectionTitle.Text = "TEXT BOXES" -- Default title, replaced by :Section()
             Gui.SectionTitle.TextColor3 = Color3.fromRGB(60, 60, 60)
             Gui.SectionTitle.TextScaled = true
             Gui.SectionTitle.TextSize = 14.000
@@ -2151,7 +2168,7 @@ local function getObjGen()
             Gui.DropShadow_16.BackgroundTransparency = 1.000
             Gui.DropShadow_16.BorderSizePixel = 0
             Gui.DropShadow_16.Position = UDim2.new(0.5, 0, 0.5, 0)
-            Gui.DropShadow_16.Size = UDim2.new(1, 47, 1, 47)
+            Gui.DropShadow_16.Size = UDim2.new(1, 47, 1, 47) -- Fixed shadow size
             Gui.DropShadow_16.ZIndex = 105
             Gui.DropShadow_16.Image = "rbxassetid://6014261993"
             Gui.DropShadow_16.ImageColor3 = Color3.fromRGB(0, 0, 0)
@@ -2518,7 +2535,7 @@ local function getObjGen()
             Gui.UIAspectRatioConstraint_17.Parent = Gui.Main_2
             Gui.UIAspectRatioConstraint_17.AspectRatio = 2.788
 
-            -- Свойства для нового шаблона LabelElement (ВСТАВИТЬ ЗДЕСЬ ПЕРЕД return Gui.UIObjects)
+            -- Свойства для нового шаблона LabelElement
             Gui.LabelElement.Name = "LabelElement"
             Gui.LabelElement.Parent = Gui.Objects -- Важно: Добавить в Objects для objectGenerator
             Gui.LabelElement.BackgroundTransparency = 1.000
@@ -3152,7 +3169,7 @@ local function getEffect()
             Event = HoverEvent.Event,
             Disconnect = function()
                 for i, v in pairs(conns) do
-                    conns:Disconnect()
+                    v:Disconnect() -- Исправлено с conns:Disconnect() на v:Disconnect()
                 end
 
                 End()
@@ -3229,7 +3246,7 @@ local function getEffect()
             Event = ClickEvent.Event,
             Disconnect = function()
                 for i, v in pairs(conns) do
-                    conns:Disconnect()
+                    v:Disconnect() -- Исправлено с conns:Disconnect() на v:Disconnect()
                 end
 
                 End()
@@ -3248,7 +3265,7 @@ local CircleClick = function(Button)
     circle.UICorner.CornerRadius = UDim.new(1, 0);
     circle.AnchorPoint = Vector2.new(0.5, 0.5);
     circle.BackgroundColor3 = Color3.fromRGB(0,0,0);
-    circle.Position = UDim2.new(0, game.Players.LocalPlayer:GetMouse().X - Button.AbsolutePosition.X, 0, game.Players.LocalPlayer:GetMouse().Y - Button.AbsolutePosition.Y);
+    circle.Position = UDim2.new(0, game.Players.LocalPlayer:GetMouse().X - Button.AbsolutePosition.X, 0, game:GetService("UserInputService"):GetMouseLocation().Y - Button.AbsolutePosition.Y); -- Исправлено на GetMouseLocation
     circle.Size = UDim2.new(0, 1, 0, 1);
     circle.Transparency = .8;
     circle.ZIndex = 999
@@ -3306,7 +3323,7 @@ function UILibrary.new(gameName, userId, rank)
     GUI.Parent =
         RunService:IsStudio() == false and game:GetService("CoreGui") or LocalPlayer:WaitForChild("PlayerGui")
     GUI.ResetOnSpawn = false
-    GUI.ZIndexBehavior = Enum.ZIndexBehavior.Global
+    GUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- Изменено на Sibling для лучшей совместимости
 
     local window = objectGenerator.new("Window")
     window.Parent = GUI
@@ -3330,9 +3347,9 @@ function UILibrary.new(gameName, userId, rank)
     local Drag = Draggable.Drag(window.MainUI, Frame)
 
     --// Customize the GUI
-    window.Watermark.Text = ("visuals | %s | %s"):format(userId, gameName)
+    window.Watermark.Text = ("stinkyhub v1 | %s | %s"):format(userId, gameName)
     local userinfo = window.MainUI.Sidebar.ContentHolder.UserInfo.Content
-    userinfo.Rank.Text = rank
+    userinfo.Rank.Text = rank or "User" -- Добавлено значение по умолчанию
     userinfo.Title.Text = userId
 
     return setmetatable(
@@ -3346,7 +3363,7 @@ function UILibrary.new(gameName, userId, rank)
             currentSelection = nil,
             currentCategorySelection = nil,
             currentTab = nil,
-            MainUI = window
+            MainUI = window -- Сохраняем ссылку на главный UI
         },
         UILibrary.Window
     )
@@ -3360,7 +3377,9 @@ function UILibrary.Window:Notification(sett)
     local Notif = objectGenerator.new("Notification").Main
 
     Notif.Size = UDim2.new(1, 0, 1, -5)
-    Notif:FindFirstChildOfClass("UIAspectRatioConstraint"):Destroy()
+    if Notif:FindFirstChildOfClass("UIAspectRatioConstraint") then -- Проверка на существование
+        Notif:FindFirstChildOfClass("UIAspectRatioConstraint"):Destroy()
+    end
 
     local ui = self.MainUI.Notifications
 
@@ -3376,7 +3395,7 @@ function UILibrary.Window:Notification(sett)
 
     Notif.Parent.Parent = ui
 
-    wait(.02)
+    task.wait(.02) -- Заменено wait на task.wait
 
     TweenService:Create(
         Notif.Parent,
@@ -3386,7 +3405,7 @@ function UILibrary.Window:Notification(sett)
         }
     ):Play()
 
-    wait(.2)
+    task.wait(.2) -- Заменено wait на task.wait
 
     TweenService:Create(
         Notif.Notification,
@@ -3436,35 +3455,35 @@ function UILibrary.Window:Notification(sett)
 
                 local parent = Notif.Parent
 
-                Notif.Parent:ClearAllChildren()
-
-                wait(.3)
-                parent:Destroy()
+                task.wait(.3) -- Заменено wait на task.wait
+                if parent and parent.Parent then -- Проверка перед Destroy
+                    parent:Destroy()
+                end
             end
         )
 
         for i, v in pairs(Notif:GetDescendants()) do
-            if v:IsA("ImageLabel") or v:IsA("ImageButton") then
-                TweenService:Create(
-                    v,
-                    TI,
-                    {
-                        ImageTransparency = 1
-                    }
-                ):Play()
-            elseif v:IsA("TextLabel") then
-                TweenService:Create(
-                    v,
-                    TI,
-                    {
-                        TextTransparency = 1
-                    }
-                ):Play()
-            end
+            pcall(function() -- Обернуто в pcall для безопасности
+                if v:IsA("ImageLabel") or v:IsA("ImageButton") then
+                    TweenService:Create(
+                        v,
+                        TI,
+                        {
+                            ImageTransparency = 1
+                        }
+                    ):Play()
+                elseif v:IsA("TextLabel") or v:IsA("TextBox") then -- Добавлен TextBox
+                    TweenService:Create(
+                        v,
+                        TI,
+                        {
+                            TextTransparency = 1
+                        }
+                    ):Play()
+                end
+            end)
         end
     end
-
-    --// too fucking lazy to re-encode all instances
 
     if sett.expire then
         task.delay(
@@ -3526,7 +3545,9 @@ function UILibrary.Window:Prompt(sett)
     local Notif = objectGenerator.new("Prompt").Main
 
     Notif.Size = UDim2.new(1, 0, 1, -5)
-    Notif:FindFirstChildOfClass("UIAspectRatioConstraint"):Destroy()
+    if Notif:FindFirstChildOfClass("UIAspectRatioConstraint") then -- Проверка на существование
+        Notif:FindFirstChildOfClass("UIAspectRatioConstraint"):Destroy()
+    end
 
     local ui = self.MainUI.Notifications
 
@@ -3542,7 +3563,7 @@ function UILibrary.Window:Prompt(sett)
 
     Notif.Parent.Parent = ui
 
-    wait(.02)
+    task.wait(.02) -- Заменено wait на task.wait
 
     TweenService:Create(
         Notif.Parent,
@@ -3552,7 +3573,7 @@ function UILibrary.Window:Prompt(sett)
         }
     ):Play()
 
-    wait(.2)
+    task.wait(.2) -- Заменено wait на task.wait
 
     TweenService:Create(
         Notif.Notification,
@@ -3607,31 +3628,33 @@ function UILibrary.Window:Prompt(sett)
 
                 local parent = Notif.Parent
 
-                Notif.Parent:ClearAllChildren()
-
-                wait(.3)
-                parent:Destroy()
+                task.wait(.3) -- Заменено wait на task.wait
+                if parent and parent.Parent then -- Проверка перед Destroy
+                    parent:Destroy()
+                end
             end
         )
 
         for i, v in pairs(Notif:GetDescendants()) do
-            if v:IsA("ImageLabel") or v:IsA("ImageButton") then
-                TweenService:Create(
-                    v,
-                    TI,
-                    {
-                        ImageTransparency = 1
-                    }
-                ):Play()
-            elseif v:IsA("TextLabel") then
-                TweenService:Create(
-                    v,
-                    TI,
-                    {
-                        TextTransparency = 1
-                    }
-                ):Play()
-            end
+             pcall(function() -- Обернуто в pcall для безопасности
+                if v:IsA("ImageLabel") or v:IsA("ImageButton") then
+                    TweenService:Create(
+                        v,
+                        TI,
+                        {
+                            ImageTransparency = 1
+                        }
+                    ):Play()
+                elseif v:IsA("TextLabel") or v:IsA("TextBox") then -- Добавлен TextBox
+                    TweenService:Create(
+                        v,
+                        TI,
+                        {
+                            TextTransparency = 1
+                        }
+                    ):Play()
+                end
+             end)
         end
     end
 
@@ -3826,11 +3849,12 @@ function UILibrary.Window:ChangeCategory(new)
         self.currentSelection = Object
 
         local firstChild = nil
-
-        for i, v in pairs(self.MainUI.MainUI.Sidebar.Sidebar2[Object.Name].Bar2Holder:GetChildren()) do
-            if v:IsA("GuiObject") then
+        local lowestLayoutOrder = math.huge
+        -- Ищем первый дочерний элемент с наименьшим LayoutOrder
+        for _, v in ipairs(self.MainUI.MainUI.Sidebar.Sidebar2[Object.Name].Bar2Holder:GetChildren()) do
+            if v:IsA("GuiObject") and v.LayoutOrder < lowestLayoutOrder then
+                 lowestLayoutOrder = v.LayoutOrder
                 firstChild = v
-                break
             end
         end
 
@@ -3878,13 +3902,15 @@ function UILibrary.Window:ChangeCategorySelection(name)
                 }
             ):Play()
 
-            TweenService:Create(
-                self.currentTab,
-                TI,
-                {
-                    Position = UDim2.fromScale(0, 1)
-                }
-            ):Play()
+            if self.currentTab then -- Проверка на существование self.currentTab
+                 TweenService:Create(
+                    self.currentTab,
+                    TI,
+                    {
+                        Position = UDim2.fromScale(0, 1)
+                    }
+                 ):Play()
+            end
         end
 
         TweenService:Create(
@@ -3941,7 +3967,7 @@ function UILibrary.Window:Category(name, icon)
     local category = objectGenerator.new("Category")
 
     category.Content.Title.Text = name
-    category.Content.Image.Image = icon
+    category.Content.Image.Image = icon or "rbxassetid://8349124615" -- Иконка по умолчанию, если не указана
 
     self.UI[name] = {}
 
@@ -3969,7 +3995,7 @@ function UILibrary.Window:Category(name, icon)
 
     Click.Event:Connect(
         function()
-            CircleClick(category, LocalPlayer:GetMouse().X, LocalPlayer:GetMouse().Y)
+            CircleClick(category) -- Убраны X, Y т.к. функция CircleClick их не использует
 
             self:ChangeCategory(name)
         end
@@ -3994,10 +4020,10 @@ function UILibrary.Window:Category(name, icon)
 end
 
 function UILibrary.Category:Button(name, icon)
-    local contentholder = self.ContentHolder
+    local contentholder = self.contentHolder -- Исправлено на contentHolder
     local button = objectGenerator.new("CategoryButton")
 
-    button.InnerContent.Image.Image = icon
+    button.InnerContent.Image.Image = icon or "rbxassetid://8343977772" -- Иконка по умолчанию
     button.InnerContent.Title.Text = name
 
     button.Parent = self.contentHolder.Bar2Holder
@@ -4011,6 +4037,7 @@ function UILibrary.Category:Button(name, icon)
             totalCount = totalCount + 1
         end
     end
+    totalCount = totalCount + 1 -- Учитываем добавляемую кнопку
 
     for i, v in pairs(self.contentHolder.Bar2Holder:GetChildren()) do
         if v:IsA("GuiObject") then
@@ -4031,7 +4058,7 @@ function UILibrary.Category:Button(name, icon)
         EffectLib.ButtonHoverEffect(
         button,
         function()
-            if self.currentCategorySelection ~= button then
+            if self.oldSelf.currentCategorySelection ~= button then
                 return true
             else
                 return false
@@ -4042,7 +4069,7 @@ function UILibrary.Category:Button(name, icon)
 
     Click.Event:Connect(
         function()
-            CircleClick(button, LocalPlayer:GetMouse().X, LocalPlayer:GetMouse().Y)
+            CircleClick(button) -- Убраны X, Y
 
             if self.oldSelf.currentSelection.Name == self.categoryUI.Name then
                 self.oldSelf:ChangeCategorySelection(name)
@@ -4074,27 +4101,37 @@ function UILibrary.Button:Section(name, side)
     Section.Border.SectionTitle.Text = name
 
     -- Устанавливаем ФИКСИРОВАННЫЙ размер тени для единообразия
-    Section.DropShadow.Size = UDim2.new(1, 47, 1, 47) -- Задай желаемый размер (например, 47)
+    Section.DropShadow.Size = UDim2.new(1, 47, 1, 47) -- Задан желаемый размер (например, 47)
     Section.Name = name
 
-    -- УДАЛЕН ИЛИ ЗАКОММЕНТИРОВАН БЛОК ChildAdded:
-    -- Section.Border.Content.ChildAdded:Connect(
-    --     function(c)
-    --         local n = 25 + (10 * math.clamp(#Section.Border.Content:GetChildren() - 2, 0, 3))
-    --         Section.DropShadow.Size = UDim2.new(1, n, 1, n)
-    --     end
-    -- )
+    -- Блок ChildAdded для тени удален/закомментирован ранее
+    -- Section.Border.Content.ChildAdded:Connect(...)
 
-    Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
-    Section.LayoutOrder = getLayoutOrder(self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side])
+    -- Определяем родительский фрейм (Left или Right)
+    local parentFrame = self.CategoryFrame:FindFirstChild(side)
+    if not parentFrame then
+         warn("UILibrary: Не удалось найти родительский фрейм '"..tostring(side).."' для секции '"..tostring(name).."'. Секция не будет добавлена.")
+         Section:Destroy()
+         return nil -- Возвращаем nil, если родитель не найден
+    end
 
-    self.oldSelf.oldSelf.UI[self.oldSelf.categoryUI.Name][self.SectionName][name] = {}
+    Section.Parent = parentFrame
+    Section.LayoutOrder = getLayoutOrder(parentFrame)
+
+    self.oldSelf.oldSelf.UI[self.CategoryName][self.SectionName][name] = {}
 
     -- Этот код отвечает за высоту самой секции, его оставляем
+    -- Небольшая задержка перед первой установкой размера, чтобы UIListLayout успел обновиться
+    task.wait()
     Section.Size = UDim2.new(1, 0, 0, Section.Border.Content.UIListLayout.AbsoluteContentSize.Y + 20)
-    Section.Border.Content.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(
+    local sizeConnection = Section.Border.Content.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(
         function()
-            Section.Size = UDim2.new(1, 0, 0, Section.Border.Content.UIListLayout.AbsoluteContentSize.Y + 20)
+             -- Проверка, существует ли еще секция
+             if Section and Section.Parent then
+                 Section.Size = UDim2.new(1, 0, 0, Section.Border.Content.UIListLayout.AbsoluteContentSize.Y + 20)
+             else
+                 if sizeConnection then sizeConnection:Disconnect() end -- Отключаем слушатель, если секция удалена
+             end
         end
     )
 
@@ -4107,6 +4144,7 @@ function UILibrary.Button:Section(name, side)
         UILibrary.Section
     )
 end
+
 
 --// now it gets fun!!!
 --// im jk this is where the pain begins
@@ -4130,6 +4168,15 @@ local cheatInfo = {
     },
     ["Toggle"] = {
         TextSize = UDim2.fromScale(.5, 1)
+    },
+     ["Keybind"] = { -- Добавлено для Keybind
+        TextSize = UDim2.fromScale(.5, 1) -- Пример, можно настроить
+    },
+    ["ColorPicker"] = { -- Добавлено для ColorPicker
+        TextSize = UDim2.fromScale(.5, 1) -- Пример, можно настроить
+    },
+    ["LabelElement"] = { -- Добавлено для LabelElement
+        FullSize = true -- Лейблы должны занимать всю ширину
     }
 }
 
@@ -4139,7 +4186,7 @@ local function generateCheatBase(Cheat, sett)
     local cheatinfo = cheatInfo[Cheat]
     local supportsFullSize = cheatinfo ~= nil and cheatinfo.FullSize or false
 
-    local Size = supportsFullSize and UDim2.fromScale(1, 1) or UDim2.fromScale(.5, 1)
+    local Size = supportsFullSize and UDim2.fromScale(0, 1) or UDim2.fromScale(.5, 1) -- Изменено с 1 на 0 для НЕ fullSize
 
     if sett.Title then
         if sett.Description then
@@ -4158,14 +4205,20 @@ local function generateCheatBase(Cheat, sett)
         if cheatinfo and cheatinfo.TextSize then
             Size = cheatinfo.TextSize
         else
-            Size = UDim2.fromScale(.5, 1)
+            Size = UDim2.fromScale(.5, 1) -- Размер по умолчанию для текста
         end
+    else
+         -- Если нет Title, текстовая часть не нужна
+         cheatBase.Content.Text:Destroy()
+         Size = UDim2.fromScale(0, 1) -- Текстовая часть занимает 0%
     end
 
     local XSize = 1 - Size.X.Scale
 
-    cheatBase.Content.ElementContent.Size = Size
-    cheatBase.Content.Text.Size = UDim2.fromScale(XSize, 1)
+    cheatBase.Content.ElementContent.Size = UDim2.fromScale(XSize, 1) -- Элемент занимает оставшееся место
+    if cheatBase.Content:FindFirstChild("Text") then -- Проверяем, не удалили ли мы текстовый блок
+        cheatBase.Content.Text.Size = Size -- Текстовая часть занимает свое место
+    end
 
     local Content = objectGenerator.new("Cheat", Cheat)
 
@@ -4175,6 +4228,7 @@ local function generateCheatBase(Cheat, sett)
 
     return cheatBase
 end
+
 
 --// some effects because my lazy ass is too lazy to put it in the module
 local function setupEffects(ui, hover)
@@ -4189,7 +4243,7 @@ local function setupEffects(ui, hover)
         }
     end
 
-    ui.InputBegan:Connect(
+    local conn1 = ui.InputBegan:Connect( -- Сохраняем соединение
         function(input, gp)
             if gp then
                 return
@@ -4203,7 +4257,7 @@ local function setupEffects(ui, hover)
         end
     )
 
-    ui.InputEnded:Connect(
+    local conn2 = ui.InputEnded:Connect( -- Сохраняем соединение
         function(input, gp)
             if gp then
                 return
@@ -4219,7 +4273,7 @@ local function setupEffects(ui, hover)
         end
     )
 
-    return ClickEvent.Event
+    return ClickEvent.Event, {conn1, conn2} -- Возвращаем соединения для возможного Disconnect
 end
 
 function UILibrary.Section:Button(sett, callback)
@@ -4232,29 +4286,49 @@ function UILibrary.Section:Button(sett, callback)
 
     local element = cheatBase.Content.ElementContent.Button
 
-    setupEffects(element, element.HoverFrame):Connect(
+    local clickEvent, connections = setupEffects(element, element.HoverFrame) -- Получаем соединения
+    clickEvent:Connect(
         function()
-            callback()
+            pcall(callback) -- Обертка в pcall для безопасности
         end
     )
 
-    element.Text.Text = sett.ButtonName
+    element.Text.Text = sett.ButtonName or "Button" -- Имя по умолчанию
 
     local meta =
         setmetatable(
         {
             element = element,
-            UI = cheatBase
+            UI = cheatBase,
+            _connections = connections -- Сохраняем соединения
         },
         functions
     )
 
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
+    -- Добавим метод Destroy для очистки
+    function meta:Destroy()
+         if self._connections then
+             for _, conn in ipairs(self._connections) do
+                 conn:Disconnect()
+             end
+             self._connections = nil
+         end
+         if self.UI and self.UI.Parent then
+             self.UI:Destroy()
+         end
+         -- Удаление из глобальной таблицы UI, если нужно
+         -- local uiTable = self.MainSelf.UI[self.oldSelf.CategoryName][self.oldSelf.SectionName][self.Section.Name]
+         -- if uiTable and uiTable[sett.Title] == self then
+         --     uiTable[sett.Title] = nil
+         -- end
+    end
+
+    -- Добавление в глобальную таблицу UI (опционально, раскомментировать блок выше, если нужно)
+    -- self.MainSelf.UI[self.oldSelf.CategoryName][self.oldSelf.SectionName][self.Section.Name][sett.Title or "Button"] = meta
 
     return meta
 end
+
 
 function UILibrary.Section:Checkbox(sett, callback)
     local functions = {}
@@ -4291,14 +4365,15 @@ function UILibrary.Section:Checkbox(sett, callback)
             ):Play()
         end
 
-        callback(toggleEnabled)
+        pcall(callback, toggleEnabled) -- Обертка в pcall
     end
 
     functions.getValue = function()
         return toggleEnabled
     end
 
-    setupEffects(element, element.HoverFrame):Connect(
+    local clickEvent, connections = setupEffects(element, element.HoverFrame) -- Получаем соединения
+    clickEvent:Connect(
         function()
             functions.setValue(not toggleEnabled)
         end
@@ -4312,14 +4387,24 @@ function UILibrary.Section:Checkbox(sett, callback)
         setmetatable(
         {
             element = element,
-            UI = cheatBase
+            UI = cheatBase,
+             _connections = connections -- Сохраняем соединения
         },
         functions
     )
 
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
+    -- Добавим метод Destroy для очистки
+    function meta:Destroy()
+        if self._connections then
+             for _, conn in ipairs(self._connections) do
+                 conn:Disconnect()
+             end
+             self._connections = nil
+         end
+         if self.UI and self.UI.Parent then
+             self.UI:Destroy()
+         end
+    end
 
     return meta
 end
@@ -4373,14 +4458,15 @@ function UILibrary.Section:Toggle(sett, callback)
             ):Play()
         end
 
-        callback(toggleEnabled)
+        pcall(callback, toggleEnabled) -- Обертка в pcall
     end
 
     functions.getValue = function()
         return toggleEnabled
     end
 
-    setupEffects(element, element.HoverFrame):Connect(
+    local clickEvent, connections = setupEffects(element, element.HoverFrame) -- Получаем соединения
+    clickEvent:Connect(
         function()
             functions.setValue(not toggleEnabled)
         end
@@ -4394,14 +4480,24 @@ function UILibrary.Section:Toggle(sett, callback)
         setmetatable(
         {
             element = element,
-            UI = cheatBase
+            UI = cheatBase,
+            _connections = connections -- Сохраняем соединения
         },
         functions
     )
 
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
+     -- Добавим метод Destroy для очистки
+    function meta:Destroy()
+        if self._connections then
+             for _, conn in ipairs(self._connections) do
+                 conn:Disconnect()
+             end
+             self._connections = nil
+         end
+         if self.UI and self.UI.Parent then
+             self.UI:Destroy()
+         end
+    end
 
     return meta
 end
@@ -4415,35 +4511,43 @@ function UILibrary.Section:Textbox(sett, callback)
     cheatBase.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
 
     local element = cheatBase.Content.ElementContent.Textbox
+    local textElement = element:FindFirstChild("Text") -- Получаем TextBox
+
+    if not textElement then warn("Textbox element 'Text' not found!") return nil end
+
+    local connections = {} -- Таблица для соединений
 
     local function updateSize()
-        local textBounds = math.clamp(element.Text.TextBounds.X, 10, element.Parent.AbsoluteSize.X) + 20
+         -- Используем TextBounds самого TextBox
+        local textBounds = math.clamp(textElement.TextBounds.X, 10, element.Parent.AbsoluteSize.X * 0.8) + 20 -- Ограничиваем максимальную ширину
+        local parentWidth = element.Parent.AbsoluteSize.X
+        local targetScale = (parentWidth > 0) and (textBounds / parentWidth) or 0.1 -- Защита от деления на 0
 
         TweenService:Create(
             element,
             TI,
             {
-                Size = UDim2.fromScale(textBounds / element.Parent.AbsoluteSize.X, 1)
+                Size = UDim2.fromScale(math.clamp(targetScale, 0.1, 1), 1) -- Минимальная и максимальная ширина
             }
         ):Play()
     end
 
     functions.setValue = function(new)
-        --/// anims
-        element.Text.Text = new
+        textElement.Text = tostring(new) -- Преобразуем в строку
         updateSize()
-        callback(element.Text.Text)
+        pcall(callback, textElement.Text) -- Обертка в pcall
     end
 
     functions.getValue = function()
-        return element.Text.Text
+        return textElement.Text
     end
 
+    -- Обновляем размер при инициализации
+    task.wait() -- Даем UI обновиться
     updateSize()
 
-    element.Text.Focused:Connect(
+    table.insert(connections, textElement.Focused:Connect( -- Сохраняем соединение
         function()
-            -- handle as hover
             TweenService:Create(
                 element,
                 TI,
@@ -4456,15 +4560,14 @@ function UILibrary.Section:Textbox(sett, callback)
                 element,
                 TI,
                 {
-                    Size = UDim2.fromScale(1, 1)
+                    Size = UDim2.fromScale(1, 1) -- Расширяем на всю ширину при фокусе
                 }
             ):Play()
         end
-    )
+    ))
 
-    element.Text.FocusLost:Connect(
-        function()
-            -- set it here
+    table.insert(connections, textElement.FocusLost:Connect( -- Сохраняем соединение
+        function(enterPressed) -- enterPressed = true, если нажат Enter
             TweenService:Create(
                 element,
                 TI,
@@ -4473,9 +4576,10 @@ function UILibrary.Section:Textbox(sett, callback)
                 }
             ):Play()
 
-            functions.setValue(element.Text.Text)
+            -- Обновляем значение и размер только если фокус потерян (неважно как)
+            functions.setValue(textElement.Text)
         end
-    )
+    ))
 
     if sett.Default then
         functions.setValue(sett.Default)
@@ -4485,17 +4589,28 @@ function UILibrary.Section:Textbox(sett, callback)
         setmetatable(
         {
             element = element,
-            UI = cheatBase
+            UI = cheatBase,
+            _connections = connections -- Сохраняем соединения
         },
         functions
     )
 
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
+    -- Добавим метод Destroy для очистки
+    function meta:Destroy()
+        if self._connections then
+             for _, conn in ipairs(self._connections) do
+                 conn:Disconnect()
+             end
+             self._connections = nil
+         end
+         if self.UI and self.UI.Parent then
+             self.UI:Destroy()
+         end
+    end
 
     return meta
 end
+
 
 local currentKBInfo = {}
 
@@ -4509,14 +4624,18 @@ function UILibrary.Section:Keybind(sett, callback)
 
     local element = cheatBase.Content.ElementContent.Keybind
 
+    local connections = {} -- Таблица для соединений
+
     local function updateSize()
-        local textBounds = math.clamp(element.Text.TextBounds.X, 10, element.Parent.AbsoluteSize.X) + 20
+        local textBounds = math.clamp(element.Text.TextBounds.X, 10, element.Parent.AbsoluteSize.X * 0.8) + 20 -- Ограничиваем макс. ширину
+        local parentWidth = element.Parent.AbsoluteSize.X
+        local targetScale = (parentWidth > 0) and (textBounds / parentWidth) or 0.1 -- Защита от деления на 0
 
         TweenService:Create(
             element,
             TI,
             {
-                Size = UDim2.fromScale(textBounds / element.Parent.AbsoluteSize.X, 1)
+                Size = UDim2.fromScale(math.clamp(targetScale, 0.1, 0.5), 1) -- Ограничиваем максимальную ширину Keybind
             }
         ):Play()
     end
@@ -4525,17 +4644,19 @@ function UILibrary.Section:Keybind(sett, callback)
     local keyPressConn = nil
 
     functions.setValue = function(new)
-        --/// anims
+        if not new then return end -- Проверка на nil
         element.Text.Text = new.Name
+        task.wait() -- Даем тексту обновиться перед расчетом размера
         updateSize()
 
         currentKb = new
 
         if keyPressConn then
             keyPressConn:Disconnect()
+            keyPressConn = nil -- Сбрасываем ссылку
         end
 
-        currentKBInfo = {}
+        -- currentKBInfo = {} -- Эта строка сбрасывала глобальную информацию, что не нужно
 
         keyPressConn =
             game:GetService("UserInputService").InputBegan:Connect(
@@ -4543,71 +4664,87 @@ function UILibrary.Section:Keybind(sett, callback)
                 if gp then
                     return
                 end
+                 if not currentKb then return end -- Доп. проверка
 
                 if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == currentKb then
-                    callback()
-                elseif input.UserInputType.Name == currentKb.Name then
-                    callback()
+                    pcall(callback) -- Обертка в pcall
+                elseif input.UserInputType == currentKb then -- Сравнение UserInputType напрямую
+                    pcall(callback) -- Обертка в pcall
                 end
             end
         )
+         table.insert(connections, keyPressConn) -- Сохраняем соединение
     end
 
     functions.getValue = function()
         return currentKb
     end
 
+    task.wait() -- Даем UI обновиться
     updateSize()
 
     local rebinding = false
     local conn
 
-    setupEffects(element, element.HoverFrame):Connect(
+    local clickEvent, clickConnections = setupEffects(element, element.HoverFrame) -- Получаем соединения setupEffects
+    table.insert(connections, clickConnections[1]) -- Добавляем в общую таблицу
+    table.insert(connections, clickConnections[2])
+
+    clickEvent:Connect(
         function()
             if rebinding then
                 return
             end
 
-            if currentKBInfo.old and currentKBInfo.set ~= functions.setValue then
+            -- Проверяем, не занят ли другой Keybind в данный момент
+            if currentKBInfo.activeRebinding and currentKBInfo.activeRebinding ~= functions.setValue then
+                -- Возможно, стоит показать уведомление пользователю
+                warn("Another keybind is currently being set.")
                 return
             end
 
             rebinding = true
+            currentKBInfo.activeRebinding = functions.setValue -- Отмечаем этот Keybind как активный для переназначения
 
             element.Text.Text = "..."
             updateSize()
 
             local old = functions.getValue()
 
+            -- Отключаем предыдущий слушатель InputBegan для этого Keybind, если он был
+            if conn then conn:Disconnect() conn = nil end
+
             conn =
                 game:GetService("UserInputService").InputBegan:Connect(
                 function(input, gp)
-                    --if gp then return end
+                    -- if gp then return end -- Закомментировано, чтобы можно было биндить клавиши, используемые игрой
 
-                    if input.UserInputType == Enum.UserInputType.Keyboard then
-                        currentKb = input.KeyCode
+                    if input.UserInputType == Enum.UserInputType.Keyboard or
+                       input.UserInputType == Enum.UserInputType.MouseButton1 or
+                       input.UserInputType == Enum.UserInputType.MouseButton2 then
 
-                        rebinding = false
+                        if conn then conn:Disconnect() conn = nil end -- Отключаем этот слушатель
 
-                        functions.setValue(currentKb)
-                        conn:Disconnect()
-                    elseif
-                        input.UserInputType == Enum.UserInputType.MouseButton2 or
-                            input.UserInputType == Enum.UserInputType.MouseButton1
-                        then
-                        currentKb = input.UserInputType
+                        currentKb = input.KeyCode or input.UserInputType -- Сохраняем KeyCode или UserInputType
 
                         rebinding = false
+                        if currentKBInfo.activeRebinding == functions.setValue then -- Сбрасываем флаг, только если это наш Keybind
+                            currentKBInfo.activeRebinding = nil
+                        end
 
-                        functions.setValue(currentKb)
-                        conn:Disconnect()
+                        functions.setValue(currentKb) -- Устанавливаем новое значение
+
+                    elseif input.KeyCode == Enum.KeyCode.Escape then -- Отмена бинда по Escape
+                         if conn then conn:Disconnect() conn = nil end
+                         rebinding = false
+                         if currentKBInfo.activeRebinding == functions.setValue then
+                              currentKBInfo.activeRebinding = nil
+                         end
+                         functions.setValue(old) -- Восстанавливаем старое значение
                     end
                 end
             )
-
-            currentKBInfo.old = old
-            currentKBInfo.conn = conn
-            currentKBInfo.set = functions.setValue
+            table.insert(connections, conn) -- Сохраняем соединение
         end
     )
 
@@ -4619,50 +4756,56 @@ function UILibrary.Section:Keybind(sett, callback)
         setmetatable(
         {
             element = element,
-            UI = cheatBase
+            UI = cheatBase,
+            _connections = connections -- Сохраняем все соединения
         },
         functions
     )
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
+
+     -- Добавим метод Destroy для очистки
+    function meta:Destroy()
+        if keyPressConn then keyPressConn:Disconnect() keyPressConn = nil end -- Отдельно отключаем слушатель нажатия
+        if self._connections then
+             for _, conn_item in ipairs(self._connections) do
+                 if typeof(conn_item) == "RBXScriptConnection" then -- Убедимся, что это соединение
+                      conn_item:Disconnect()
+                 end
+             end
+             self._connections = nil
+        end
+         -- Если этот Keybind был активен для переназначения, сбрасываем флаг
+         if currentKBInfo.activeRebinding == functions.setValue then
+             currentKBInfo.activeRebinding = nil
+         end
+         if self.UI and self.UI.Parent then
+             self.UI:Destroy()
+         end
+    end
 
     return meta
 end
 
+
 function toInteger(color)
-    return math.floor(color.r * 255) * 256 ^ 2 + math.floor(color.g * 255) * 256 + math.floor(color.b * 255)
+    return math.floor(color.R * 255) * 65536 + math.floor(color.G * 255) * 256 + math.floor(color.B * 255) -- Исправлено R на color.R и т.д.
 end
 
 function toHex(color)
-    local int = toInteger(color)
-
-    local current = int
-    local final = ""
-
-    local hexChar = {
-        "A",
-        "B",
-        "C",
-        "D",
-        "E",
-        "F"
-    }
-
-    repeat
-        local remainder = current % 16
-        local char = tostring(remainder)
-
-        if remainder >= 10 then
-            char = hexChar[1 + remainder - 10]
-        end
-
-        current = math.floor(current / 16)
-        final = final .. char
-    until current <= 0
-
-    return "#" .. string.reverse(final)
+    local r = string.format("%02X", math.floor(color.R * 255 + 0.5)) -- Используем string.format для HEX и округления
+    local g = string.format("%02X", math.floor(color.G * 255 + 0.5))
+    local b = string.format("%02X", math.floor(color.B * 255 + 0.5))
+    return "#" .. r .. g .. b
 end
+
+function fromHex(hex)
+	hex = hex:gsub("#", "")
+	return Color3.fromRGB(
+		tonumber("0x"..hex:sub(1,2)),
+		tonumber("0x"..hex:sub(3,4)),
+		tonumber("0x"..hex:sub(5,6))
+	)
+end
+
 
 function UILibrary.Section:ColorPicker(sett, callback)
     local functions = {}
@@ -4676,8 +4819,10 @@ function UILibrary.Section:ColorPicker(sett, callback)
 
     local menuIsOpen = false
     local currentclr = Color3.fromRGB(255, 255, 255)
+    local savedConnections = {} -- Для хранения соединений ColorPicker'а
 
     functions.setValue = function(clr)
+        if typeof(clr) ~= "Color3" then clr = Color3.fromRGB(255,255,255) end -- Проверка типа
         TweenService:Create(
             element.Preview,
             TI,
@@ -4688,7 +4833,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
 
         currentclr = clr
 
-        callback(clr)
+        pcall(callback, clr) -- Обертка в pcall
         element.Text.Label.Text =
             math.floor(clr.R * 255) .. ", " .. math.floor(clr.G * 255) .. ", " .. math.floor(clr.B * 255)
     end
@@ -4704,13 +4849,14 @@ function UILibrary.Section:ColorPicker(sett, callback)
 
         menuIsOpen = true
 
-        local oldColor
-        local oldPos
+        local oldColor = currentclr -- Сохраняем текущий цвет для отмены
+        local oldPosH, oldPosS, oldPosV -- Для сохранения позиций
 
-        self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Visible = true
+        local colorPickerOverlay = self.MainSelf.MainUI.MainUI.ColorPickerOverlay
+        colorPickerOverlay.Visible = true
 
         TweenService:Create(
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay,
+            colorPickerOverlay,
             TI,
             {
                 ImageTransparency = .07
@@ -4718,149 +4864,177 @@ function UILibrary.Section:ColorPicker(sett, callback)
         ):Play()
 
         TweenService:Create(
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content,
+            colorPickerOverlay.Content,
             TI,
             {
                 Position = UDim2.fromScale(.5, 0.5)
             }
         ):Play()
 
-        local Content = self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content
+        local Content = colorPickerOverlay.Content
         local colourWheel = Content.MainWindow.Wheel
-        local darknessSlider = Content.MainWindow.Saturation.Pointer
+        local darknessSliderPointer = Content.MainWindow.Saturation.Pointer -- Переименовано для ясности
         local darknessPicker = Content.MainWindow.Saturation
+
+        -- Функция для установки позиций указателей по цвету
+        local function setPointersFromColor(clr)
+             local h, s, v = Color3.toHSV(clr)
+
+             -- Saturation/Value Pointer (Круг на колесе)
+             local angle = h * (math.pi * 2)
+             local radius = s * (colourWheel.AbsoluteSize.X / 2)
+             local xOffset = math.cos(angle) * radius
+             local yOffset = -math.sin(angle) * radius -- Y инвертирован в GUI
+             local centreOfWheel = colourWheel.AbsolutePosition + colourWheel.AbsoluteSize / 2
+             colourWheel.Pointer.Position = UDim2.fromOffset(centreOfWheel.X + xOffset - colourWheel.AbsolutePosition.X, centreOfWheel.Y + yOffset - colourWheel.AbsolutePosition.Y)
+
+             -- Darkness Pointer (Ползунок справа)
+             local yPos = (1 - v) * darknessPicker.AbsoluteSize.Y
+             darknessSliderPointer.Position = UDim2.fromOffset(darknessSliderPointer.Position.X.Offset, yPos)
+
+             -- Обновляем цвет ползунка Saturation
+             darknessPicker.ImageColor3 = Color3.fromHSV(h, s, 1) -- Всегда максимальная яркость для градиента
+
+             -- Обновляем текст
+             Content.ClrDisplay.RGB.Textbox.Text = string.format("%d, %d, %d", math.floor(clr.R * 255 + 0.5), math.floor(clr.G * 255 + 0.5), math.floor(clr.B * 255 + 0.5))
+             Content.ClrDisplay.Hex.Textbox.Text = toHex(clr)
+        end
+
+        -- Устанавливаем начальные позиции по текущему цвету
+        setPointersFromColor(currentclr)
+        oldPosH, oldPosS, oldPosV = Color3.toHSV(currentclr) -- Сохраняем HSV
 
         local function updateWheel()
             local centreOfWheel =
-                Vector2.new(
-                colourWheel.AbsolutePosition.X + (colourWheel.AbsoluteSize.X / 2),
-                colourWheel.AbsolutePosition.Y + (colourWheel.AbsoluteSize.Y / 2)
-            )
+                colourWheel.AbsolutePosition + colourWheel.AbsoluteSize / 2
 
-            local colourPickerCentre =
-                Vector2.new(
-                colourWheel.Pointer.AbsolutePosition.X + (colourWheel.Pointer.AbsoluteSize.X / 2),
-                colourWheel.Pointer.AbsolutePosition.Y + (colourWheel.Pointer.AbsoluteSize.Y / 2)
-            )
+            local colourPickerPos = colourWheel.Pointer.AbsolutePosition + colourWheel.Pointer.AbsoluteSize / 2 -- Центр указателя
 
-            local h =
-                (math.pi -
-                math.atan2(colourPickerCentre.Y - centreOfWheel.Y, colourPickerCentre.X - centreOfWheel.X)) /
-                (math.pi * 2)
+            -- Используем atan2 для получения угла, math.pi - угол для коррекции ориентации
+            local angle = math.atan2(centreOfWheel.Y - colourPickerPos.Y, colourPickerPos.X - centreOfWheel.X) -- Y инвертирован
+             if angle < 0 then angle = angle + (2*math.pi) end -- Нормализуем угол к 0 - 2pi
+             local h = angle / (math.pi * 2) -- Преобразуем в диапазон 0-1
 
-            local s = (centreOfWheel - colourPickerCentre).Magnitude / (colourWheel.AbsoluteSize.X / 2)
+             -- Saturation - расстояние от центра к указателю, нормализованное
+            local s = (colourPickerPos - centreOfWheel).Magnitude / (colourWheel.AbsoluteSize.X / 2)
 
-            local v =
-                math.abs(
-                (darknessSlider.AbsolutePosition.Y - darknessPicker.AbsolutePosition.Y) /
-                    darknessPicker.AbsoluteSize.Y -
-                    1
-            )
+            -- Value (яркость) - позиция ползунка справа
+            local v = 1 - (darknessSliderPointer.AbsolutePosition.Y - darknessPicker.AbsolutePosition.Y) / darknessPicker.AbsoluteSize.Y
 
             local hsv = Color3.fromHSV(math.clamp(h, 0, 1), math.clamp(s, 0, 1), math.clamp(v, 0, 1))
+            local baseColor = Color3.fromHSV(math.clamp(h, 0, 1), math.clamp(s, 0, 1), 1) -- Цвет для ползунка яркости
 
-            return hsv, Color3.fromHSV(math.clamp(h, 0, 1), math.clamp(s, 0, 1), 1)
+            return hsv, baseColor
         end
 
         local holdingHsv = false
         local holdingSaturation = false
 
-        local connections = {}
+        local connections = {} -- Локальная таблица для соединений этого окна
 
         table.insert(
             connections,
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content.MainWindow.Wheel.Hitbox.InputBegan:Connect(
+            Content.MainWindow.Wheel.Hitbox.InputBegan:Connect(
                 function(input, gp)
-                    if gp == true then
-                        return
-                    end
-
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        holdingHsv = true
-                    end
+                    if gp == true or input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+                    holdingHsv = true
                 end
             )
         )
 
         table.insert(
             connections,
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content.MainWindow.Wheel.Hitbox.InputEnded:Connect(
+             Content.MainWindow.Wheel.Hitbox.InputEnded:Connect(
                 function(input, gp)
-                    if gp == true then
-                        return
-                    end
-
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        holdingHsv = false
-                    end
+                     if gp == true or input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+                    holdingHsv = false
                 end
             )
         )
 
         table.insert(
             connections,
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content.MainWindow.Saturation.Hitbox.InputBegan:Connect(
-                function(input, gp)
-                    if gp == true then
-                        return
-                    end
-
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        holdingSaturation = true
-                    end
+            Content.MainWindow.Saturation.Hitbox.InputBegan:Connect(
+                 function(input, gp)
+                    if gp == true or input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+                    holdingSaturation = true
                 end
             )
         )
 
         table.insert(
             connections,
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content.MainWindow.Saturation.Hitbox.InputEnded:Connect(
+            Content.MainWindow.Saturation.Hitbox.InputEnded:Connect(
                 function(input, gp)
-                    if gp == true then
-                        return
-                    end
-
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        holdingSaturation = false
-                    end
+                    if gp == true or input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+                    holdingSaturation = false
                 end
             )
         )
+
+         -- Обработка ввода текста RGB
+         local rgbTextbox = Content.ClrDisplay.RGB.Textbox
+         table.insert(connections, rgbTextbox.FocusLost:Connect(function(enterPressed)
+             local parts = rgbTextbox.Text:split(",")
+             if #parts == 3 then
+                 local r, g, b = tonumber(parts[1]), tonumber(parts[2]), tonumber(parts[3])
+                 if r and g and b then
+                      local newColor = Color3.fromRGB(math.clamp(r, 0, 255), math.clamp(g, 0, 255), math.clamp(b, 0, 255))
+                      setPointersFromColor(newColor) -- Обновляем указатели
+                      return -- Выходим, если ввод корректен
+                 end
+             end
+             -- Если ввод некорректен, восстанавливаем текст из текущего цвета
+             local currentRGBColor, _ = updateWheel()
+             rgbTextbox.Text = string.format("%d, %d, %d", math.floor(currentRGBColor.R * 255 + 0.5), math.floor(currentRGBColor.G * 255 + 0.5), math.floor(currentRGBColor.B * 255 + 0.5))
+         end))
+
+         -- Обработка ввода текста HEX
+         local hexTextbox = Content.ClrDisplay.Hex.Textbox
+         table.insert(connections, hexTextbox.FocusLost:Connect(function(enterPressed)
+             local success, newColor = pcall(fromHex, hexTextbox.Text)
+             if success and typeof(newColor) == "Color3" then
+                 setPointersFromColor(newColor) -- Обновляем указатели
+             else
+                 -- Если ввод некорректен, восстанавливаем текст из текущего цвета
+                 local currentHexColor, _ = updateWheel()
+                 hexTextbox.Text = toHex(currentHexColor)
+             end
+         end))
+
 
         table.insert(
             connections,
             RunService.RenderStepped:Connect(
                 function()
+                    if not menuIsOpen then return end -- Выходим, если меню закрыто
+
                     local mousePos =
                         game:GetService("UserInputService"):GetMouseLocation() -
                         Vector2.new(0, game:GetService("GuiService"):GetGuiInset().Y)
 
                     local centreOfWheel =
-                        Vector2.new(
-                        colourWheel.AbsolutePosition.X + (colourWheel.AbsoluteSize.X / 2),
-                        colourWheel.AbsolutePosition.Y + (colourWheel.AbsoluteSize.Y / 2)
-                    )
+                        colourWheel.AbsolutePosition + colourWheel.AbsoluteSize / 2
 
                     local distanceFromWheel = (mousePos - centreOfWheel).Magnitude
 
                     if holdingHsv then
-                        if distanceFromWheel <= colourWheel.AbsoluteSize.X / 2 then
-                            colourWheel.Pointer.Position =
-                                UDim2.new(
-                                0,
-                                mousePos.X - colourWheel.AbsolutePosition.X,
-                                0,
-                                mousePos.Y - colourWheel.AbsolutePosition.Y
-                            )
-                        end
+                        -- Ограничиваем позицию указателя внутри круга
+                        local direction = (mousePos - centreOfWheel).Unit
+                        local clampedDistance = math.min(distanceFromWheel, colourWheel.AbsoluteSize.X / 2)
+                        local pointerPos = centreOfWheel + direction * clampedDistance
+
+                        colourWheel.Pointer.Position =
+                            UDim2.fromOffset(
+                            pointerPos.X - colourWheel.AbsolutePosition.X,
+                            pointerPos.Y - colourWheel.AbsolutePosition.Y
+                        )
                     end
 
                     if holdingSaturation then
-                        darknessSlider.Position =
-                            UDim2.new(
-                            darknessSlider.Position.X.Scale,
-                            0,
-                            0,
+                        darknessSliderPointer.Position =
+                            UDim2.fromOffset(
+                            darknessSliderPointer.Position.X.Offset, -- X не меняем
                             math.clamp(
                                 mousePos.Y - darknessPicker.AbsolutePosition.Y,
                                 0,
@@ -4869,29 +5043,47 @@ function UILibrary.Section:ColorPicker(sett, callback)
                         )
                     end
 
-                    local clr, new = updateWheel()
+                    -- Обновляем цвет только если зажат один из ползунков
+                    if holdingHsv or holdingSaturation then
+                        local clr, baseClr = updateWheel()
 
-                    darknessPicker.ImageColor3 = new
+                        darknessPicker.ImageColor3 = baseClr
 
-                    if clr ~= oldColor then
-                        oldColor = clr
+                        if clr ~= oldColor then -- Обновляем текст только при изменении
+                            oldColor = clr -- Обновляем временный цвет
 
-                        Content.ClrDisplay.RGB.Textbox.Text =
-                            math.floor(clr.R * 255) ..
-                            ", " .. math.floor(clr.G * 255) .. ", " .. math.floor(clr.B * 255)
-                        Content.ClrDisplay.Hex.Textbox.Text = toHex(clr)
+                            Content.ClrDisplay.RGB.Textbox.Text =
+                                string.format("%d, %d, %d", math.floor(clr.R * 255 + 0.5), math.floor(clr.G * 255 + 0.5), math.floor(clr.B * 255 + 0.5))
+                            Content.ClrDisplay.Hex.Textbox.Text = toHex(clr)
+                        end
                     end
                 end
             )
         )
 
-        local function closeMenu()
-            for i, v in pairs(connections) do
-                v:Disconnect()
+        local function closeMenu(applyChange)
+            if not menuIsOpen then return end -- Предотвращаем двойное закрытие
+
+            menuIsOpen = false -- Сначала ставим флаг
+
+            for _, v in pairs(connections) do -- Отключаем все слушатели этого окна
+                 if v and typeof(v) == "RBXScriptConnection" then -- Проверяем перед отключением
+                     v:Disconnect()
+                 end
+            end
+            connections = {} -- Очищаем таблицу
+
+            if applyChange then
+                local finalColor, _ = updateWheel()
+                functions.setValue(finalColor) -- Применяем выбранный цвет
+            else
+                -- Восстанавливаем указатели на сохраненный цвет (oldColor в начале openMenu)
+                setPointersFromColor(currentclr)
             end
 
+
             TweenService:Create(
-                self.MainSelf.MainUI.MainUI.ColorPickerOverlay,
+                colorPickerOverlay,
                 TI,
                 {
                     ImageTransparency = 1
@@ -4899,28 +5091,28 @@ function UILibrary.Section:ColorPicker(sett, callback)
             ):Play()
 
             TweenService:Create(
-                self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content,
+                colorPickerOverlay.Content,
                 TI,
                 {
                     Position = UDim2.fromScale(.5, 1.5)
                 }
             ):Play()
 
-            wait(.5)
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Visible = false
-            menuIsOpen = false
+            task.delay(.5, function()
+                 if colorPickerOverlay and colorPickerOverlay.Parent then -- Проверка перед изменением Visible
+                     colorPickerOverlay.Visible = false
+                 end
+            end)
         end
 
         table.insert(
             connections,
             Content.Buttons.Cancel.InputBegan:Connect(
                 function(input, gp)
-                    if gp == true then
-                        return
-                    end
+                    if gp == true then return end
 
                     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        closeMenu()
+                        closeMenu(false) -- Закрываем без применения изменений
                     elseif input.UserInputType == Enum.UserInputType.MouseMovement then
                         TweenService:Create(
                             Content.Buttons.Cancel.OtherFill,
@@ -4938,9 +5130,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
             connections,
             Content.Buttons.Cancel.InputEnded:Connect(
                 function(input, gp)
-                    if gp == true then
-                        return
-                    end
+                    if gp == true then return end
 
                     if input.UserInputType == Enum.UserInputType.MouseMovement then
                         TweenService:Create(
@@ -4959,22 +5149,16 @@ function UILibrary.Section:ColorPicker(sett, callback)
             connections,
             Content.Buttons.Confirm.InputBegan:Connect(
                 function(input, gp)
-                    if gp == true then
-                        return
-                    end
+                    if gp == true then return end
 
                     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        local actual, clr = updateWheel()
-
-                        functions.setValue(actual)
-
-                        closeMenu()
+                         closeMenu(true) -- Закрываем с применением изменений
                     elseif input.UserInputType == Enum.UserInputType.MouseMovement then
                         TweenService:Create(
                             Content.Buttons.Confirm.OtherFill,
                             TI,
                             {
-                                ImageColor3 = Color3.fromRGB(60, 150, 107)
+                                ImageColor3 = Color3.fromRGB(60, 150, 107) -- Используем оригинальный цвет из шаблона
                             }
                         ):Play()
                     end
@@ -4986,23 +5170,25 @@ function UILibrary.Section:ColorPicker(sett, callback)
             connections,
             Content.Buttons.Confirm.InputEnded:Connect(
                 function(input, gp)
-                    if gp == true then
-                        return
-                    end
+                    if gp == true then return end
 
                     if input.UserInputType == Enum.UserInputType.MouseMovement then
                         TweenService:Create(
                             Content.Buttons.Confirm.OtherFill,
                             TI,
                             {
-                                ImageColor3 = Color3.fromRGB(85, 170, 127)
+                                ImageColor3 = Color3.fromRGB(85, 170, 127) -- Используем оригинальный цвет из шаблона
                             }
                         ):Play()
                     end
                 end
             )
         )
-    end
+
+        -- Сохраняем созданные соединения в глобальную таблицу для этого ColorPicker'а
+        savedConnections = connections
+
+    end -- Конец функции openMenu
 
     element.Text.Label.Focused:Connect(
         function()
@@ -5017,7 +5203,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
     )
 
     element.Text.Label.FocusLost:Connect(
-        function()
+        function(enterPressed)
             TweenService:Create(
                 element.Text,
                 TI,
@@ -5027,33 +5213,44 @@ function UILibrary.Section:ColorPicker(sett, callback)
             ):Play()
 
             local split = element.Text.Label.Text:split(",")
-
+            local success = true
+            local nums = {}
             if #split == 3 then
-                for i, v in pairs(split) do
-                    if tonumber(v) == nil then
-                        element.Text.Label.Text =
-                            math.floor(currentclr.R * 255) ..
-                            ", " .. math.floor(currentclr.G * 255) .. ", " .. math.floor(currentclr.B * 255)
-                        return
-                    end
-                end
-
-                local clr3 = Color3.fromRGB(split[1], split[2], split[3])
-
-                functions.setValue(clr3)
+                 for i, v in ipairs(split) do
+                     local num = tonumber(v)
+                     if num and num >= 0 and num <= 255 then
+                         table.insert(nums, num)
+                     else
+                         success = false
+                         break
+                     end
+                 end
             else
-                element.Text.Label.Text =
-                    math.floor(currentclr.R * 255) ..
-                    ", " .. math.floor(currentclr.G * 255) .. ", " .. math.floor(currentclr.B * 255)
+                 success = false
+            end
+
+            if success then
+                 local clr3 = Color3.fromRGB(nums[1], nums[2], nums[3])
+                 functions.setValue(clr3)
+            else
+                 -- Восстанавливаем текст, если ввод неверный
+                 element.Text.Label.Text =
+                     math.floor(currentclr.R * 255) ..
+                     ", " .. math.floor(currentclr.G * 255) .. ", " .. math.floor(currentclr.B * 255)
             end
         end
     )
 
-    setupEffects(element.Preview, element.Preview.Hover):Connect(
+    local previewClickEvent, previewConnections = setupEffects(element.Preview, element.Preview.Hover) -- Получаем соединения
+    previewClickEvent:Connect(
         function()
             functions.openMenu()
         end
     )
+    -- Добавляем соединения Preview к общим соединениям ColorPicker'а
+    table.insert(savedConnections, previewConnections[1])
+    table.insert(savedConnections, previewConnections[2])
+
 
     if sett.Default then
         functions.setValue(sett.Default)
@@ -5065,17 +5262,41 @@ function UILibrary.Section:ColorPicker(sett, callback)
         setmetatable(
         {
             element = element,
-            UI = cheatBase
+            UI = cheatBase,
+            _connections = savedConnections -- Сохраняем все соединения
         },
         functions
     )
 
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
+    -- Добавим метод Destroy для очистки
+    function meta:Destroy()
+        if self._connections then
+             for _, conn in ipairs(self._connections) do
+                 if conn and typeof(conn) == "RBXScriptConnection" then
+                     conn:Disconnect()
+                 end
+             end
+             self._connections = nil
+         end
+         if self.UI and self.UI.Parent then
+             self.UI:Destroy()
+         end
+         -- Если меню было открыто, его нужно закрыть при уничтожении элемента
+         if menuIsOpen then
+             -- Напрямую изменяем состояние, т.к. closeMenu уже не будет работать из-за отключенных соединений
+             local colorPickerOverlay = self.MainSelf.MainUI.MainUI.ColorPickerOverlay
+             if colorPickerOverlay and colorPickerOverlay.Parent then
+                 colorPickerOverlay.Visible = false
+                 colorPickerOverlay.ImageTransparency = 1
+                 colorPickerOverlay.Content.Position = UDim2.fromScale(.5, 1.5)
+             end
+             menuIsOpen = false
+         end
+    end
 
     return meta
 end
+
 
 function UILibrary.Section:Slider(sett, callback)
     local functions = {}
@@ -5086,6 +5307,7 @@ function UILibrary.Section:Slider(sett, callback)
     cheatBase.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
 
     local element = cheatBase.Content.ElementContent.Slider
+    local connections = {} -- Таблица для соединений
 
     if sett.Min == nil then
         sett.Min = 0
@@ -5093,6 +5315,10 @@ function UILibrary.Section:Slider(sett, callback)
 
     if sett.Max == nil then
         sett.Max = 10
+    end
+    if sett.Max <= sett.Min then -- Защита от некорректных Min/Max
+         warn("Slider Max value must be greater than Min value. Setting Max to Min + 1.")
+         sett.Max = sett.Min + 1
     end
 
     local sliderValue = sett.Min
@@ -5103,10 +5329,11 @@ function UILibrary.Section:Slider(sett, callback)
     end
 
     functions.setValue = function(v, scale)
-        sliderValue = math.floor(v)
+        v = math.clamp(v, sett.Min, sett.Max) -- Убедимся, что значение в пределах Min/Max
+        sliderValue = v -- Сохраняем точное значение
         scaleValue = scale
 
-        element.KeyInput.Text.Text = tostring(math.floor(v))
+        element.KeyInput.Text.Text = string.format("%.0f", sliderValue) -- Отображаем целое число
 
         TweenService:Create(
             element.Drag.Frame.UIGradient,
@@ -5116,14 +5343,16 @@ function UILibrary.Section:Slider(sett, callback)
             }
         ):Play()
 
-        callback(v)
+        pcall(callback, v) -- Обертка в pcall
     end
 
     functions.getValue = function()
         return sliderValue
     end
 
-    element.KeyInput.Text.Focused:Connect(
+    local keyInputText = element.KeyInput.Text -- Сохраняем ссылку на TextBox
+
+    table.insert(connections, keyInputText.Focused:Connect( -- Сохраняем соединение
         function()
             TweenService:Create(
                 element.KeyInput,
@@ -5133,10 +5362,10 @@ function UILibrary.Section:Slider(sett, callback)
                 }
             ):Play()
         end
-    )
+    ))
 
-    element.KeyInput.Text.FocusLost:Connect(
-        function()
+    table.insert(connections, keyInputText.FocusLost:Connect( -- Сохраняем соединение
+        function(enterPressed)
             TweenService:Create(
                 element.KeyInput,
                 TI,
@@ -5145,88 +5374,105 @@ function UILibrary.Section:Slider(sett, callback)
                 }
             ):Play()
 
-            if tonumber(element.KeyInput.Text.Text) then
-                element.KeyInput.Text.Text = math.clamp(tonumber(element.KeyInput.Text.Text), sett.Min, sett.Max)
-            end
-
-            if tonumber(element.KeyInput.Text.Text) then
-                local scale = math.clamp(tonumber(element.KeyInput.Text.Text) / sett.Max, 0, 1)
-
-                functions.setValue(tonumber(element.KeyInput.Text.Text), scale)
+            local num = tonumber(keyInputText.Text)
+            if num then
+                num = math.clamp(num, sett.Min, sett.Max)
+                local scale = (num - sett.Min) / (sett.Max - sett.Min) -- Правильный расчет scale
+                functions.setValue(num, scale)
             else
-                element.KeyInput.Text.Text = tostring(math.floor(sliderValue))
+                -- Если ввод не число, восстанавливаем предыдущее значение
+                keyInputText.Text = string.format("%.0f", sliderValue)
             end
         end
-    )
+    ))
 
     local holding = false
+    local dragConnection = nil -- Для RenderStepped
 
-    RunService.RenderStepped:Connect(
-        function()
-            if holding then
-                local mouseX = LocalPlayer:GetMouse().X
-                local sliderPos = element.Drag.AbsolutePosition.X
-
-                local leftBoundary = element.Drag.AbsolutePosition.X - (element.Drag.AbsoluteSize.X)
-
-                local rightBoundary = element.Drag.AbsolutePosition.X + (element.Drag.AbsoluteSize.X)
-
-                local maxPos = math.clamp((mouseX - sliderPos) / (rightBoundary - sliderPos), 0, 1)
-
-                local val = ((sett.Max - sett.Min) * maxPos) + sett.Min
-
-                functions.setValue(val, maxPos)
-            end
-        end
-    )
-
-    element.Drag.InputBegan:Connect(
+    table.insert(connections, element.Drag.InputBegan:Connect( -- Сохраняем соединение
         function(input, gp)
-            if gp == true then
+            if gp == true or input.UserInputType ~= Enum.UserInputType.MouseButton1 then
                 return
             end
+            holding = true
+            -- Создаем соединение RenderStepped только когда начали тащить
+            if not dragConnection then
+                dragConnection = RunService.RenderStepped:Connect(
+                    function()
+                        if holding then
+                            local mouseX = LocalPlayer:GetMouse().X
+                            local sliderFrame = element.Drag
+                            local startX = sliderFrame.AbsolutePosition.X
+                            local width = sliderFrame.AbsoluteSize.X
 
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                holding = true
+                            local relativeX = mouseX - startX
+                            local scale = math.clamp(relativeX / width, 0, 1)
+
+                            local val = sett.Min + (sett.Max - sett.Min) * scale
+
+                            functions.setValue(val, scale)
+                        end
+                    end
+                )
+                 table.insert(connections, dragConnection) -- Добавляем RenderStepped к общим соединениям
             end
         end
-    )
+    ))
 
-    element.Drag.InputEnded:Connect(
+    table.insert(connections, element.Drag.InputEnded:Connect( -- Сохраняем соединение
         function(input, gp)
-            if gp == true then
+            if gp == true or input.UserInputType ~= Enum.UserInputType.MouseButton1 then
                 return
             end
-
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                holding = false
-            end
+            holding = false
+            -- Отключаем RenderStepped когда отпустили, если он был создан
+            -- if dragConnection then
+            --      dragConnection:Disconnect()
+            --      dragConnection = nil
+                 -- Не нужно удалять из connections, т.к. он будет отключен в Destroy
+            -- end
         end
-    )
+    ))
 
     if sett.Default then
-        local scale = math.clamp(tonumber(sett.Default) / sett.Max, 0, 1)
-        functions.setValue(tonumber(sett.Default), scale)
+         local defaultVal = math.clamp(tonumber(sett.Default) or sett.Min, sett.Min, sett.Max)
+         local scale = (defaultVal - sett.Min) / (sett.Max - sett.Min)
+         functions.setValue(defaultVal, scale)
     else
-        local scale = math.clamp((((sett.Max - sett.Min) / 2) + sett.Min) / sett.Max, 0, 1)
-        functions.setValue(tonumber((((sett.Max - sett.Min) / 2) + sett.Min)), scale)
+         -- Значение по умолчанию - середина
+         local midVal = sett.Min + (sett.Max - sett.Min) / 2
+         local scale = 0.5
+         functions.setValue(midVal, scale)
     end
 
     local meta =
         setmetatable(
         {
             element = element,
-            UI = cheatBase
+            UI = cheatBase,
+            _connections = connections -- Сохраняем все соединения
         },
         functions
     )
 
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
+     -- Добавим метод Destroy для очистки
+    function meta:Destroy()
+        if self._connections then
+             for _, conn in ipairs(self._connections) do
+                 if conn and typeof(conn) == "RBXScriptConnection" then
+                     conn:Disconnect()
+                 end
+             end
+             self._connections = nil
+         end
+         if self.UI and self.UI.Parent then
+             self.UI:Destroy()
+         end
+    end
 
     return meta
 end
+
 
 function UILibrary.Section:Dropdown(sett, callback)
     local functions = {}
@@ -5238,57 +5484,66 @@ function UILibrary.Section:Dropdown(sett, callback)
 
     local element = cheatBase.Content.ElementContent.Dropdown
 
-    local slot = element.Slot:Clone()
+    -- Клонируем шаблоны ДО их удаления
+    local slotTemplate = element.Slot:Clone()
+    local bottomTemplate = element.Bottom:Clone()
+    local topTemplate = element.Top:Clone()
+
     element.Slot:Destroy()
-
-    local bottom = element.Bottom:Clone()
     element.Bottom:Destroy()
-
-    local top = element.Top:Clone()
     element.Top:Destroy()
 
-    local conns = {}
+    local conns = {} -- Для соединений самого дропдауна (открытие/закрытие)
     local menuOpen = false
 
-    local options = sett.Options ~= nil and sett.Options or {}
-    local selectedOptions = {}
+    local options = sett.Options or {} -- Используем переданные опции или пустую таблицу
+    local selectedOptions = {} -- Для Multi select (не используется в текущей логике, но может пригодиться)
 
-    local optionConnections = {}
+    local optionConnections = {} -- Для соединений опций внутри списка
 
     functions.refreshUI = function()
         local String = ""
+        local firstSelected = nil
 
-        for i, v in pairs(options) do
-            local ui = element.OptionHolder.ContentHolder.Content:FindFirstChild(i)
+        for optName, isSelected in pairs(options) do
+             local ui = element.OptionHolder.ContentHolder.Content:FindFirstChild(optName)
+             if ui then
+                 if isSelected then
+                      TweenService:Create(
+                          ui.Select,
+                          TI,
+                          {
+                              ImageTransparency = 0
+                          }
+                      ):Play()
 
-            if options[i] then
-                TweenService:Create(
-                    ui.Select,
-                    TI,
-                    {
-                        ImageTransparency = 0
-                    }
-                ):Play()
+                      if not firstSelected then firstSelected = optName end
 
-                if String == "" then
-                    String = i
-                else
-                    String = String .. ", " .. i
-                end
-            else
-                TweenService:Create(
-                    ui.Select,
-                    TI,
-                    {
-                        ImageTransparency = 1
-                    }
-                ):Play()
-            end
+                      if sett.Multi == true then
+                         if String == "" then
+                             String = optName
+                         else
+                             String = String .. ", " .. optName
+                         end
+                      end
+                 else
+                      TweenService:Create(
+                          ui.Select,
+                          TI,
+                          {
+                              ImageTransparency = 1
+                          }
+                      ):Play()
+                 end
+             end
         end
 
-        if String == "" then
-            String = "None"
+        if sett.Multi ~= true then -- Если не мультивыбор, показываем только первый выбранный
+            String = firstSelected or "None"
+        elseif String == "" then
+             String = "None"
         end
+
 
         element.MainHolder.Content.Text.Text = String
     end
@@ -5298,297 +5553,285 @@ function UILibrary.Section:Dropdown(sett, callback)
             if element.OptionHolder.ContentHolder.Content:FindFirstChild(option) then
                 if sett.Multi == true then
                     options[option] = value
-
-                    functions.refreshUI()
                 else
                     if value == true then
-                        for i, v in pairs(options) do
-                            options[i] = false
+                        for i, _ in pairs(options) do
+                            options[i] = false -- Сбрасываем все остальные
                         end
-
-                        if isDefault == nil then
-                            functions.openMenu()
+                        options[option] = true -- Устанавливаем выбранный
+                        -- Закрываем меню только если это не установка по умолчанию
+                        if isDefault == nil or isDefault == false then
+                            functions.openMenu(false) -- Закрыть меню
                         end
-
-                        options[option] = true
-
-                        functions.refreshUI()
+                    else
+                         -- В режиме одиночного выбора нельзя "снять" выбор кликом,
+                         -- только выбрав другую опцию. Поэтому здесь ничего не делаем.
+                         return
                     end
                 end
-
-                callback(options)
+                functions.refreshUI()
+                pcall(callback, options) -- Вызываем callback с актуальным состоянием
             end
         end
     end
 
     local function updateDropdown()
-        for i, v in pairs(element.OptionHolder.ContentHolder.Content:GetChildren()) do
-            if v:IsA("GuiObject") then
-                v:Destroy()
+         -- Отключаем старые соединения опций
+        for _, conn in ipairs(optionConnections) do
+            if conn and typeof(conn) == "RBXScriptConnection" then
+                 conn:Disconnect()
             end
         end
+        optionConnections = {} -- Очищаем таблицу
 
-        for i, v in pairs(optionConnections) do
-            v:Disconnect()
+        element.OptionHolder.ContentHolder.Content:ClearAllChildren() -- Очищаем старые опции
+
+        local optionNames = {} -- Собираем имена для сортировки (если нужно)
+        for name, _ in pairs(options) do
+            table.insert(optionNames, name)
         end
+        -- table.sort(optionNames) -- Раскомментировать для сортировки по имени
 
+        local totalCounter = #optionNames
         local counter = 0
-        local totalCounter = 0
 
-        for i, v in pairs(options) do
-            totalCounter = totalCounter + 1
-        end
-
-        for v, i in pairs(options) do
+        for _, v in ipairs(optionNames) do -- Используем отсортированный (или нет) список имен
             local Option
+            local isSelected = options[v] -- Получаем состояние
 
             counter = counter + 1
 
-            if counter == totalCounter then
-                Option = bottom:Clone()
-            elseif counter ~= 1 then
-                Option = slot:Clone()
-            else
-                Option = top:Clone()
+            if counter == totalCounter and totalCounter == 1 then -- Единственный элемент
+                 Option = topTemplate:Clone() -- Используем верхний шаблон с закруглением сверху и снизу
+                 Option:FindFirstChild("Line"):Destroy() -- Удаляем нижнюю линию
+                 local bottomCorner = bottomTemplate:FindFirstChild("BottomCorner") -- Ищем нижнее скругление (если оно есть)
+                 if bottomCorner then bottomCorner:Clone().Parent = Option end -- Клонируем нижнее скругление
+            elif counter == totalCounter then -- Последний элемент
+                Option = bottomTemplate:Clone()
+            elseif counter == 1 then -- Первый элемент
+                Option = topTemplate:Clone()
+            else -- Средний элемент
+                Option = slotTemplate:Clone()
             end
 
             Option.Name = v
             Option.Parent = element.OptionHolder.ContentHolder.Content
-            Option.LayoutOrder = i
-            Option.Size = UDim2.fromScale(1, 1 / totalCounter)
+            -- Option.LayoutOrder = counter -- LayoutOrder не нужен при использовании ipairs
 
             Option.Current.Text = v
+            Option.Select.ImageTransparency = isSelected and 0 or 1 -- Устанавливаем видимость галочки
 
-            table.insert(
-                optionConnections,
-                Option.InputBegan:Connect(
-                    function(input, gp)
-                        if gp then
-                            return
-                        end
+            local optConn1 = Option.InputBegan:Connect( -- Сохраняем соединения
+                function(input, gp)
+                    if gp then return end
 
-                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                            functions.setValue(v, not options[v])
-                        elseif input.UserInputType == Enum.UserInputType.MouseMovement then
-                            TweenService:Create(
-                                Option,
-                                TI,
-                                {
-                                    ImageColor3 = Color3.fromRGB(20, 20, 20)
-                                }
-                            ):Play()
-                        end
-                    end
-                )
-            )
-
-            table.insert(
-                optionConnections,
-                Option.InputEnded:Connect(
-                    function(input, gp)
-                        if input.UserInputType == Enum.UserInputType.MouseMovement then
-                            TweenService:Create(
-                                Option,
-                                TI,
-                                {
-                                    ImageColor3 = Color3.fromRGB(25, 25, 25)
-                                }
-                            ):Play()
-                        end
-                    end
-                )
-            )
-        end
-    end
-
-    updateDropdown()
-
-    functions.updateDropdown = function(new)
-        options = new
-
-        updateDropdown()
-        functions.refreshUI()
-    end
-
-    functions.openMenu = function()
-        local totalCounter = 0
-
-        for i, v in pairs(options) do
-            totalCounter = totalCounter + 1
-        end
-
-        if totalCounter == 0 then
-            return
-        end
-
-        menuOpen = not menuOpen
-
-        if menuOpen then
-            TweenService:Create(
-                element.MainHolder.Content.Icon.Holder,
-                TI,
-                {
-                    Rotation = 180
-                }
-            ):Play()
-
-            TweenService:Create(
-                element.OptionHolder,
-                TI,
-                {
-                    Size = UDim2.fromScale(1, math.clamp(totalCounter, 0, 999) * .7)
-                }
-            ):Play()
-
-            local n = 15 + (10 * math.clamp(totalCounter, 0, 3))
-
-            TweenService:Create(
-                element.OptionHolder.Cover.DropShadow,
-                TI,
-                {
-                    ImageTransparency = 0.5,
-                    Size = UDim2.new(1, n, 1, n)
-                }
-            ):Play()
-
-            element.OptionHolder.Visible = true
-
-            task.delay(
-                .4,
-                function()
-                    if menuOpen then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        functions.setValue(v, not options[v])
+                    elseif input.UserInputType == Enum.UserInputType.MouseMovement then
                         TweenService:Create(
-                            element.OptionHolder.Cover,
+                            Option,
                             TI,
                             {
-                                BackgroundTransparency = 1
+                                ImageColor3 = Color3.fromRGB(20, 20, 20)
                             }
                         ):Play()
                     end
                 end
             )
-        else
-            TweenService:Create(
-                element.MainHolder.Content.Icon.Holder,
-                TI,
-                {
-                    Rotation = 0
-                }
-            ):Play()
+            table.insert(optionConnections, optConn1)
 
-            TweenService:Create(
-                element.OptionHolder,
-                TI,
-                {
-                    Size = UDim2.fromScale(1, 0)
-                }
-            ):Play()
-
-            TweenService:Create(
-                element.OptionHolder.Cover.DropShadow,
-                TI,
-                {
-                    ImageTransparency = 1,
-                    Size = UDim2.new(1, 0, 1, 0)
-                }
-            ):Play()
-
-            TweenService:Create(
-                element.OptionHolder.Cover,
-                TweenInfo.new(.2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
-                {
-                    BackgroundTransparency = 0
-                }
-            ):Play()
-
-            task.delay(
-                .4,
-                function()
-                    if menuOpen then
-                        return
+            local optConn2 = Option.InputEnded:Connect( -- Сохраняем соединения
+                function(input, gp)
+                    if input.UserInputType == Enum.UserInputType.MouseMovement then
+                        TweenService:Create(
+                            Option,
+                            TI,
+                            {
+                                ImageColor3 = Color3.fromRGB(25, 25, 25)
+                            }
+                        ):Play()
                     end
-
-                    element.OptionHolder.Visible = false
                 end
             )
+            table.insert(optionConnections, optConn2)
+        end
+         -- Обновляем высоту ScrollingFrame после добавления элементов
+         element.OptionHolder.ContentHolder.Content.CanvasSize = UDim2.new(0, 0, 0, element.OptionHolder.ContentHolder.Content.UIListLayout.AbsoluteContentSize.Y)
+         -- Обновляем текст основной кнопки
+         functions.refreshUI()
+    end
+
+    updateDropdown() -- Первичная отрисовка
+
+    functions.updateDropdown = function(newOptions)
+        options = newOptions or {}
+        updateDropdown()
+    end
+
+    functions.openMenu = function(state) -- state: true - открыть, false - закрыть, nil - переключить
+        local totalCounter = 0
+        for _ in pairs(options) do totalCounter = totalCounter + 1 end
+
+        if totalCounter == 0 then return end -- Не открывать пустое меню
+
+        local shouldBeOpen = (state == nil and not menuOpen) or (state == true)
+
+        if shouldBeOpen == menuOpen then return end -- Не делать ничего, если состояние уже нужное
+
+        menuOpen = shouldBeOpen
+
+        local targetIconRotation = menuOpen and 180 or 0
+        local targetMenuSizeYScale = menuOpen and math.clamp(totalCounter, 1, 5) * 0.7 or 0 -- Ограничиваем высоту 5 элементами
+        local targetShadowTransparency = menuOpen and 0.5 or 1
+        local targetShadowSize = menuOpen and 15 + (10 * math.clamp(totalCounter, 0, 3)) or 0
+        local targetCoverTransparency = menuOpen and 1 or 0
+
+        TweenService:Create(
+            element.MainHolder.Content.Icon.Holder,
+            TI,
+            { Rotation = targetIconRotation }
+        ):Play()
+
+        if menuOpen then element.OptionHolder.Visible = true end -- Показываем перед анимацией
+
+        TweenService:Create(
+            element.OptionHolder,
+            TI,
+            { Size = UDim2.new(1, 0, targetMenuSizeYScale / 10, 0) } -- Делим на 10, т.к. 0.7 = 70%
+        ):Play()
+
+        TweenService:Create(
+            element.OptionHolder.Cover.DropShadow,
+            TI,
+            {
+                ImageTransparency = targetShadowTransparency,
+                Size = UDim2.new(1, targetShadowSize, 1, targetShadowSize)
+            }
+        ):Play()
+
+        TweenService:Create(
+            element.OptionHolder.Cover,
+            TweenInfo.new(menuOpen and 0 or 0.2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), -- Быстрее скрываем
+            { BackgroundTransparency = targetCoverTransparency }
+        ):Play()
+
+
+        if not menuOpen then
+             task.delay(.4, function()
+                 if not menuOpen and element.OptionHolder.Parent then -- Прячем только если все еще закрыто
+                     element.OptionHolder.Visible = false
+                 end
+             end)
         end
     end
 
-    functions.getValue = function()
-        return options
+    functions.getValue = function(returnOnlySelected)
+         if returnOnlySelected then
+             local selected = {}
+             for name, isSelected in pairs(options) do
+                 if isSelected then table.insert(selected, name) end
+             end
+             return selected
+         else
+            return options -- Возвращаем всю таблицу состояний
+         end
     end
 
-    table.insert(
-        conns,
-        element.MainHolder.Content.Icon.InputBegan:Connect(
-            function(input, gp)
-                if gp then
-                    return
-                end
+    -- Соединения для открытия/закрытия меню
+    local iconHolder = element.MainHolder.Content.Icon.Holder
+    local mainHolder = element.MainHolder
 
-                if input.UserInputType == Enum.UserInputType.MouseMovement then
-                    TweenService:Create(
-                        element.MainHolder.Content.Icon.Holder.Icon,
-                        TI,
-                        {
-                            Position = UDim2.fromScale(0, .2),
-                            ImageColor3 = Color3.fromRGB(50, 50, 50)
-                        }
-                    ):Play()
-                elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    functions.openMenu()
-                end
+    table.insert(conns, mainHolder.InputBegan:Connect(
+        function(input, gp)
+            if gp then return end
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                functions.openMenu() -- Переключить состояние
             end
-        )
-    )
+        end
+    ))
 
-    table.insert(
-        conns,
-        element.MainHolder.Content.Icon.InputEnded:Connect(
-            function(input, gp)
-                if gp then
-                    return
-                end
+    table.insert(conns, iconHolder.InputBegan:Connect(
+         function(input, gp)
+             if gp then return end
+             if input.UserInputType == Enum.UserInputType.MouseMovement then
+                 TweenService:Create(
+                     iconHolder.Icon, TI,
+                     { ImageColor3 = Color3.fromRGB(50, 50, 50) }
+                 ):Play()
+             end
+         end
+    ))
+     table.insert(conns, iconHolder.InputEnded:Connect(
+         function(input, gp)
+             if gp then return end
+             if input.UserInputType == Enum.UserInputType.MouseMovement then
+                 TweenService:Create(
+                      iconHolder.Icon, TI,
+                     { ImageColor3 = Color3.fromRGB(100, 100, 100) }
+                 ):Play()
+             end
+         end
+     ))
 
-                if input.UserInputType == Enum.UserInputType.MouseMovement then
-                    TweenService:Create(
-                        element.MainHolder.Content.Icon.Holder.Icon,
-                        TI,
-                        {
-                            Position = UDim2.fromScale(0, 0),
-                            ImageColor3 = Color3.fromRGB(100, 100, 100)
-                        }
-                    ):Play()
-                end
-            end
-        )
-    )
 
+    -- Установка значения по умолчанию
     if sett.Default then
-        functions.setValue(sett.Default, true, true)
+         if sett.Multi == true and typeof(sett.Default) == "table" then
+             for _, optName in ipairs(sett.Default) do
+                 functions.setValue(optName, true, true)
+             end
+         elseif sett.Multi ~= true and typeof(sett.Default) == "string" then
+             functions.setValue(sett.Default, true, true)
+         end
     end
+    functions.refreshUI() -- Обновляем текст после установки default
+
 
     local meta =
         setmetatable(
         {
             element = element,
-            UI = cheatBase
+            UI = cheatBase,
+            _connections = conns, -- Соединения для самого дропдауна
+            _optionConnections = optionConnections -- Соединения для опций
         },
         functions
     )
 
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
+     -- Добавим метод Destroy для очистки
+    function meta:Destroy()
+        -- Отключаем соединения дропдауна
+        if self._connections then
+             for _, conn in ipairs(self._connections) do
+                 if conn and typeof(conn) == "RBXScriptConnection" then conn:Disconnect() end
+             end
+             self._connections = nil
+         end
+         -- Отключаем соединения опций
+         if self._optionConnections then
+             for _, conn in ipairs(self._optionConnections) do
+                  if conn and typeof(conn) == "RBXScriptConnection" then conn:Disconnect() end
+             end
+             self._optionConnections = nil
+         end
+         -- Уничтожаем UI
+         if self.UI and self.UI.Parent then
+             self.UI:Destroy()
+         end
+    end
 
     return meta
 end
 
--- ВСТАВИТЬ ЗДЕСЬ (после end от Dropdown)
 
 function UILibrary.Section:Label(sett)
     -- Создаем экземпляр нашего нового текстового шаблона
-    local labelElement = objectGenerator.new("LabelElement")
+    local labelElement = objectGenerator.new("Cheat", "LabelElement") -- Используем тип "Cheat" и имя шаблона
+
+    if not labelElement then
+         warn("UILibrary: Не удалось создать LabelElement.")
+         return nil
+    end
 
     local titleLabel = labelElement:FindFirstChild("Title")
     local descLabel = labelElement:FindFirstChild("Description")
@@ -5609,19 +5852,22 @@ function UILibrary.Section:Label(sett)
             descLabel.Visible = true -- Показываем описание
         else
             descLabel.Visible = false -- Скрываем, если текста нет
-            -- Можно также установить размер в 0, чтобы гарантировать отсутствие пустого места
-            descLabel.Size = UDim2.new(1, 0, 0, 0)
+            descLabel.Size = UDim2.new(1, 0, 0, 0) -- Убираем высоту
         end
     elseif sett.Description and sett.Description ~= "" then
         warn("UILibrary: Не удалось найти 'Description' в шаблоне LabelElement, но описание было предоставлено")
     end
 
-    -- Устанавливаем порядок и родителя
-    labelElement.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
-    labelElement.Parent = self.Section.Border.Content
+     -- Создаем CheatBase для обертки LabelElement
+     local cheatBase = objectGenerator.new("CheatBase")
+     labelElement.Parent = cheatBase.Content.ElementContent -- Помещаем LabelElement внутрь ElementContent
+     cheatBase.Content.Text:Destroy() -- Удаляем стандартный текстовый блок Title/Desc из CheatBase
+     cheatBase.Content.ElementContent.Size = UDim2.fromScale(1, 1) -- Занимаем всю ширину
 
-    -- Для статического текста обычно не нужны методы setValue/getValue,
-    -- но можно вернуть объект для консистентности или для возможного обновления текста позже.
+    -- Устанавливаем порядок и родителя для CheatBase
+    cheatBase.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
+    cheatBase.Parent = self.Section.Border.Content
+
     local functions = {}
     functions.__index = functions
 
@@ -5642,11 +5888,16 @@ function UILibrary.Section:Label(sett)
     end
 
     local meta = setmetatable({
-        UI = labelElement
+        element = labelElement, -- Ссылка на сам LabelElement
+        UI = cheatBase -- Ссылка на обертку CheatBase
     }, functions)
 
-    -- Опционально: добавить в общую таблицу UI для отслеживания, если нужно
-    -- self.MainSelf.UI[self.oldSelf.CategoryName][self.oldSelf.SectionName][self.Section.Name][sett.Title or "Label"] = meta
+    -- Добавим метод Destroy для очистки
+    function meta:Destroy()
+         if self.UI and self.UI.Parent then
+             self.UI:Destroy()
+         end
+    end
 
     return meta
 end
