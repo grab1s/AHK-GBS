@@ -1,5 +1,3 @@
---- START OF FILE uiLIB.txt ---
-
 local UILibrary = {}
 --// Modules
 
