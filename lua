@@ -1387,7 +1387,7 @@ local function getObjGen()
             Gui.Logo.ImageColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Logo.ScaleType = Enum.ScaleType.Fit
 
-            logoCorner = Instance.new("UICorner")
+            local logoCorner = Instance.new("UICorner")
             logoCorner.CornerRadius = UDim.new(0.5, 0)
             logoCorner.Name = "LogoRoundCorner"
             logoCorner.Parent = Gui.Logo
