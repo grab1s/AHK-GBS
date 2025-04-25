@@ -1376,16 +1376,49 @@ local function getObjGen()
             Gui.UIPadding_8.PaddingRight = UDim.new(0, 4)
             Gui.UIPadding_8.PaddingTop = UDim.new(0, 16)
 
+            --logo
             Gui.Logo.Name = "Logo"
             Gui.Logo.Parent = Gui.Cheats_2
             Gui.Logo.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Gui.Logo.BackgroundTransparency = 1.000
-            Gui.Logo.LayoutOrder = -5
-            Gui.Logo.Size = UDim2.new(1, 0, 0.100000001, 0)
-            Gui.Logo.ZIndex = 122
+            Gui.Logo.BackgroundTransparency = 1.000 -- Фон делаем невидимым
+            Gui.Logo.LayoutOrder = -5 -- Ставим повыше в списке для UIListLayout
+
+            --[[ ИЗМЕНЕНО: Использование UIAspectRatioConstraint для надежного размера.
+                 Оригинальный размер зависел от высоты родителя (10%), что могло быть 0.
+                 Теперь ширина занимает 80% родителя (для учета возможного Padding),
+                 а высота определяется соотношением сторон.
+                 Подберите значение AspectRatio под ваше изображение.
+            ]]
+            Gui.Logo.Size = UDim2.new(0.8, 0, 0, 0) -- Ширина 80% родителя, высота 0 (определится AspectRatio)
+            Gui.Logo.AnchorPoint = Vector2.new(0.5, 0) -- Центрируем по горизонтали, верхняя точка
+            Gui.Logo.Position = UDim2.new(0.5, 0, 0, 0) -- Ставим в центр (UIListLayout с Padding позаботится об отступе)
+
+            -- ДОБАВЛЕНО: Ограничение соотношения сторон
+            -- Это гарантирует, что логотип не будет искажен и его высота будет рассчитана
+            -- автоматически на основе установленной ширины и соотношения сторон.
+            local logoAspectRatio = Instance.new("UIAspectRatioConstraint")
+            logoAspectRatio.Name = "LogoAspectRatio"
+            -- <<< НАСТРОЙТЕ ЭТО ЗНАЧЕНИЕ! (ширина / высота вашего лого).
+            -- Например, 1.0 для квадратного, 2.0 для лого в 2 раза шире, чем выше.
+            logoAspectRatio.AspectRatio = 3.0
+            logoAspectRatio.DominantAxis = Enum.DominantAxis.Width -- Высота подстраивается под ширину
+            logoAspectRatio.Parent = Gui.Logo
+
+            Gui.Logo.ZIndex = 122 -- ZIndex для порядка отрисовки
+
+            -- ID изображения (вы подтвердили, что он верный)
             Gui.Logo.Image = "rbxassetid://124259593098725"
-            Gui.Logo.ImageColor3 = Color3.fromRGB(134, 142, 255)
-            Gui.Logo.ScaleType = Enum.ScaleType.Fit
+
+            -- ДОБАВЛЕНО: Явно устанавливаем прозрачность изображения в 0
+            -- Это гарантирует, что сама картинка видима (если она загрузилась).
+            Gui.Logo.ImageTransparency = 0.000
+
+            Gui.Logo.ImageColor3 = Color3.fromRGB(134, 142, 255) -- Цветной оттенок
+            Gui.Logo.ScaleType = Enum.ScaleType.Fit -- Масштабирование для вписывания без искажений
+
+            -- ДОБАВЛЕНО: Явно устанавливаем видимость как true
+            -- На случай, если где-то в другом месте она меняется.
+            Gui.Logo.Visible = true
 
             Gui.UIGradient_5.Color =
                 ColorSequence.new {
