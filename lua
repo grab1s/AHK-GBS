@@ -4069,13 +4069,13 @@ function UILibrary.Button:Section(name, side)
     Section.DropShadow.Size = UDim2.new(1, 25, 1, 25)
     Section.Name = name
 
-    Section.Border.Content.ChildAdded:Connect(
-        function(c)
-            local n = 25 + (10 * math.clamp(#Section.Border.Content:GetChildren() - 2, 0, 3))
-
-            Section.DropShadow.Size = UDim2.new(1, n, 1, n)
-        end
-    )
+-- ЗАКОММЕНТИРУЙ ИЛИ УДАЛИ ЭТИ СТРОКИ (Примерно строки 2200-2206):
+-- Section.Border.Content.ChildAdded:Connect(
+--    function(c)
+--        local n = 25 + (10 * math.clamp(#Section.Border.Content:GetChildren() - 2, 0, 3))
+--        Section.DropShadow.Size = UDim2.new(1, n, 1, n)
+--    end
+-- )
 
     Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
     Section.LayoutOrder = getLayoutOrder(self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side])
