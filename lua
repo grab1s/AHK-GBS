@@ -1379,11 +1379,18 @@ local function getObjGen()
             Gui.Logo.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
             Gui.Logo.BackgroundTransparency = 1.000
             Gui.Logo.LayoutOrder = -5
+            Gui.Logo.Size = UDim2.new(0.1, 0, 0.1, 0)
             Gui.Logo.Size = UDim2.new(1, 0, 0.100000001, 0)
+
             Gui.Logo.ZIndex = 122
-            Gui.Logo.Image = "rbxassetid://94578381977183"
+            Gui.Logo.Image = "rbxassetid://124259593098725"
             Gui.Logo.ImageColor3 = Color3.fromRGB(198, 128, 255)
             Gui.Logo.ScaleType = Enum.ScaleType.Fit
+
+            local logoCorner = Instance.new("UICorner")
+            logoCorner.CornerRadius = UDim.new(0.5, 0)
+            logoCorner.Name = "LogoRoundCorner"
+            logoCorner.Parent = Gui.Logo
 
             Gui.UIGradient_5.Color =
                 ColorSequence.new {
