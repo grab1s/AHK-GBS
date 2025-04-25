@@ -1376,13 +1376,13 @@ local function getObjGen()
 
             Gui.Logo.Name = "Logo"
             Gui.Logo.Parent = Gui.Cheats_2
-            Gui.Logo.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            Gui.Logo.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
             Gui.Logo.BackgroundTransparency = 1.000
             Gui.Logo.LayoutOrder = -5
             Gui.Logo.Size = UDim2.new(1, 0, 0.100000001, 0)
             Gui.Logo.ZIndex = 122
             Gui.Logo.Image = "rbxassetid://94578381977183"
-            Gui.Logo.ImageColor3 = Color3.fromRGB(255, 255, 255)
+            Gui.Logo.ImageColor3 = Color3.fromRGB(198, 128, 255)
             Gui.Logo.ScaleType = Enum.ScaleType.Fit
 
             Gui.UIGradient_5.Color =
