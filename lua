@@ -1,3 +1,5 @@
+--- START OF FILE uiLIB.txt ---
+
 local UILibrary = {}
 --// Modules
 
@@ -283,7 +285,16 @@ local function getObjGen()
                 UIPadding_14 = Instance.new("UIPadding"),
                 Notification_3 = Instance.new("Frame"),
                 UICorner_23 = Instance.new("UICorner"),
-                UIAspectRatioConstraint_17 = Instance.new("UIAspectRatioConstraint")
+                UIAspectRatioConstraint_17 = Instance.new("UIAspectRatioConstraint"),
+
+                -- Новый шаблон для текстового элемента (ВСТАВИТЬ ЗДЕСЬ)
+                LabelElement = Instance.new("Frame"),
+                UIListLayout_Label = Instance.new("UIListLayout"), -- Уникальное имя
+                UIPadding_Label = Instance.new("UIPadding"),       -- Уникальное имя
+                Title_Label = Instance.new("TextLabel"),           -- Уникальное имя
+                Desc_Label = Instance.new("TextLabel"),            -- Уникальное имя
+
+                Objects = Instance.new("Folder") -- Эта строка должна быть последней в списке инстансов
             }
 
             --Properties:
@@ -2502,6 +2513,55 @@ local function getObjGen()
             Gui.UIAspectRatioConstraint_17.Parent = Gui.Main_2
             Gui.UIAspectRatioConstraint_17.AspectRatio = 2.788
 
+            -- Свойства для нового шаблона LabelElement (ВСТАВИТЬ ЗДЕСЬ ПЕРЕД return Gui.UIObjects)
+            Gui.LabelElement.Name = "LabelElement"
+            Gui.LabelElement.Parent = Gui.Objects -- Важно: Добавить в Objects для objectGenerator
+            Gui.LabelElement.BackgroundTransparency = 1.000
+            Gui.LabelElement.Size = UDim2.new(1, 0, 0, 0) -- Начальная высота 0
+            Gui.LabelElement.AutomaticSize = Enum.AutomaticSize.Y -- Автоматическая высота
+            Gui.LabelElement.LayoutOrder = 1 -- Можно задать по умолчанию
+
+            Gui.UIListLayout_Label.Name = "ListLayout" -- Можно дать имя для поиска
+            Gui.UIListLayout_Label.Parent = Gui.LabelElement
+            Gui.UIListLayout_Label.SortOrder = Enum.SortOrder.LayoutOrder
+            Gui.UIListLayout_Label.Padding = UDim.new(0, 2) -- Небольшой отступ между Title и Desc
+
+            Gui.UIPadding_Label.Name = "Padding" -- Можно дать имя для поиска
+            Gui.UIPadding_Label.Parent = Gui.LabelElement
+            Gui.UIPadding_Label.PaddingTop = UDim.new(0, 2) -- Отступ сверху/снизу если нужно
+            Gui.UIPadding_Label.PaddingBottom = UDim.new(0, 2)
+
+            Gui.Title_Label.Name = "Title"
+            Gui.Title_Label.Parent = Gui.LabelElement
+            Gui.Title_Label.BackgroundTransparency = 1.000
+            Gui.Title_Label.Size = UDim2.new(1, 0, 0, 0) -- Начальная высота 0
+            Gui.Title_Label.AutomaticSize = Enum.AutomaticSize.Y -- Автоматическая высота
+            Gui.Title_Label.TextWrapped = true -- <<< ВАЖНО: Перенос строк
+            Gui.Title_Label.TextScaled = false -- Не использовать TextScaled с AutomaticSize
+            Gui.Title_Label.Font = Enum.Font.GothamSemibold -- Стиль как у других Title
+            Gui.Title_Label.TextColor3 = Color3.fromRGB(100, 100, 100) -- Стиль как у других Title
+            Gui.Title_Label.TextSize = 14 -- Размер как у других (или какой нужен)
+            Gui.Title_Label.TextXAlignment = Enum.TextXAlignment.Left
+            Gui.Title_Label.LayoutOrder = 1
+            Gui.Title_Label.ZIndex = 111
+
+            Gui.Desc_Label.Name = "Description"
+            Gui.Desc_Label.Parent = Gui.LabelElement
+            Gui.Desc_Label.BackgroundTransparency = 1.000
+            Gui.Desc_Label.Size = UDim2.new(1, 0, 0, 0) -- Начальная высота 0
+            Gui.Desc_Label.AutomaticSize = Enum.AutomaticSize.Y -- Автоматическая высота
+            Gui.Desc_Label.TextWrapped = true -- <<< ВАЖНО: Перенос строк
+            Gui.Desc_Label.TextScaled = false -- Не использовать TextScaled с AutomaticSize
+            Gui.Desc_Label.Font = Enum.Font.Gotham -- Стиль как у других Desc
+            Gui.Desc_Label.TextColor3 = Color3.fromRGB(60, 60, 60) -- Стиль как у других Desc
+            Gui.Desc_Label.TextSize = 12 -- Размер как у других Desc
+            Gui.Desc_Label.TextXAlignment = Enum.TextXAlignment.Left
+            Gui.Desc_Label.Visible = false -- Скрыт по умолчанию, покажем если есть текст
+            Gui.Desc_Label.LayoutOrder = 2
+            Gui.Desc_Label.ZIndex = 111
+
+            -- Конец свойств для LabelElement
+
             return Gui.UIObjects
         end
 
@@ -2529,7 +2589,7 @@ local function getObjGen()
         if script.Objects:FindFirstChild(objectType) then
             return script.Objects[objectType]:Clone()
         else
-            error("Invalid objectType")
+            error("Invalid objectType: " .. tostring(objectType)) -- Добавлено сообщение об ошибке
         end
     end
 
@@ -2558,18 +2618,18 @@ local function initUtils()
         if Boundary then
             local Size = Boundary.AbsoluteSize
             local Position = Boundary.AbsolutePosition
-            
+
             local Min = -(Size-Position) + Size
             local Max = (Size+Position) - Object.AbsoluteSize
-            
+
             local ObjPos = Object.Position
             local X , Y = utils.ScaleToOffset({ObjPos.X.Scale,ObjPos.Y.Scale})
-            
+
             local GuiVector = Vector2.new(ObjPos.X.Offset+Change.X+X,ObjPos.Y.Offset+Change.Y+Y)
-            
+
             X = math.clamp(GuiVector.X,Min.X,Max.X)
             Y = math.clamp(GuiVector.Y,Min.Y,Max.Y)
-            
+
             return X , Y
         end
     end
@@ -2579,7 +2639,7 @@ local function initUtils()
         Current = Current or {}
         local Suitable
         local CurrentDist
-        
+
         pcall(function()
             if Object then
                 for _ , v in ipairs(Current) do
@@ -2598,7 +2658,7 @@ local function initUtils()
                 end
             end
         end)
-        
+
         return Suitable
     end
 
@@ -2609,7 +2669,7 @@ local function initUtils()
             return 'Down'
         elseif E  <= 135 and E > 45 then
             return 'Right'
-        else 
+        else
             return 'Up'
         end
     end
@@ -2619,28 +2679,28 @@ local function initUtils()
         local aPos = C.AbsolutePosition - centre
         local bPos = B.AbsolutePosition - centre
         local bPos = aPos - bPos
-        
-        
+
+
         local Dot = math.deg(math.atan2(bPos.X, bPos.Y))
-        
+
         local SideGot = utils.Side(Dot)
         local Size = B.Size
         local CSize = C.Size
-        
-        local CSizeX,CSizeY= table.unpack(utils.OffsetToScale({CSize.X.Offset,CSize.Y.Offset})) 
+
+        local CSizeX,CSizeY= table.unpack(utils.OffsetToScale({CSize.X.Offset,CSize.Y.Offset}))
         CSizeX = CSizeX + CSize.X.Scale
         CSizeY = CSizeY + CSize.Y.Scale
-        
+
         local Size1,Size2 = table.unpack(utils.OffsetToScale({Size.X.Offset,Size.Y.Offset}))
         Size1 = Size1 + Size.X.Scale
         Size2 = Size2 + Size.Y.Scale
-        
+
         local Size = {Size1,Size2}
 
         local Pos1,Pos2 = table.unpack(utils.OffsetToScale({B.Position.X.Offset,B.Position.Y.Offset}))
         local X =  (Target and utils.OffsetToScale({Target.X.Offset,0})[1])  or utils.OffsetToScale({C.Position.X.Offset,0})[1]
         local Y =  (Target and utils.OffsetToScale({0,Target.Y.Offset})[2])  or utils.OffsetToScale({0,C.Position.Y.Offset})[2]
-        
+
         if SideGot == 'Up' then
             local Pos = UDim2.new(X,0,Pos2+B.Position.Y.Scale,0)
             Size[2] = Size[2] + CSizeY-Size2
@@ -2659,7 +2719,7 @@ local function initUtils()
     end
 
     return utils
-    
+
 end
 
 local function getDragIt()
@@ -3179,7 +3239,7 @@ local EffectLib = getEffect()
 local CircleClick = function(Button)
     local circle = Instance.new("Frame");
     Instance.new("UICorner", circle);
-    
+
     circle.UICorner.CornerRadius = UDim.new(1, 0);
     circle.AnchorPoint = Vector2.new(0.5, 0.5);
     circle.BackgroundColor3 = Color3.fromRGB(0,0,0);
@@ -3187,15 +3247,15 @@ local CircleClick = function(Button)
     circle.Size = UDim2.new(0, 1, 0, 1);
     circle.Transparency = .8;
     circle.ZIndex = 999
-    
+
     circle.Parent = Button;
-    
+
     local finalGoal = {};
     finalGoal.Size = UDim2.new(0, (Button.AbsoluteSize.X), 0, (Button.AbsoluteSize.X));
     finalGoal.Transparency = 1;
-    
+
     game.Debris:AddItem(circle,.4)
-    
+
     local tween = game:GetService("TweenService"):Create(circle, TweenInfo.new(.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), finalGoal);
     tween:Play();
 end
@@ -5518,4 +5578,72 @@ function UILibrary.Section:Dropdown(sett, callback)
     return meta
 end
 
+-- ВСТАВИТЬ ЗДЕСЬ (после end от Dropdown)
+
+function UILibrary.Section:Label(sett)
+    -- Создаем экземпляр нашего нового текстового шаблона
+    local labelElement = objectGenerator.new("LabelElement")
+
+    local titleLabel = labelElement:FindFirstChild("Title")
+    local descLabel = labelElement:FindFirstChild("Description")
+
+    if not titleLabel then
+        warn("UILibrary: Не удалось найти 'Title' в шаблоне LabelElement.")
+        labelElement:Destroy() -- Очистка, если шаблон поврежден
+        return nil
+    end
+
+    -- Устанавливаем текст заголовка
+    titleLabel.Text = sett.Title or sett.Text or "Label Text" -- Используем Title, Text или значение по умолчанию
+
+    -- Устанавливаем текст описания, если он есть
+    if descLabel then
+        if sett.Description and sett.Description ~= "" then
+            descLabel.Text = sett.Description
+            descLabel.Visible = true -- Показываем описание
+        else
+            descLabel.Visible = false -- Скрываем, если текста нет
+            -- Можно также установить размер в 0, чтобы гарантировать отсутствие пустого места
+            descLabel.Size = UDim2.new(1, 0, 0, 0)
+        end
+    elseif sett.Description and sett.Description ~= "" then
+        warn("UILibrary: Не удалось найти 'Description' в шаблоне LabelElement, но описание было предоставлено
+    end
+
+    -- Устанавливаем порядок и родителя
+    labelElement.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
+    labelElement.Parent = self.Section.Border.Content
+
+    -- Для статического текста обычно не нужны методы setValue/getValue,
+    -- но можно вернуть объект для консистентности или для возможного обновления текста позже.
+    local functions = {}
+    functions.__index = functions
+
+    function functions:SetTitle(newTitle)
+        if titleLabel then titleLabel.Text = newTitle end
+    end
+
+    function functions:SetDescription(newDescription)
+        if descLabel then
+             if newDescription and newDescription ~= "" then
+                descLabel.Text = newDescription
+                descLabel.Visible = true
+             else
+                 descLabel.Visible = false
+                 descLabel.Size = UDim2.new(1, 0, 0, 0)
+             end
+        end
+    end
+
+    local meta = setmetatable({
+        UI = labelElement
+    }, functions)
+
+    -- Опционально: добавить в общую таблицу UI для отслеживания, если нужно
+    -- self.MainSelf.UI[self.oldSelf.CategoryName][self.oldSelf.SectionName][self.Section.Name][sett.Title or "Label"] = meta
+
+    return meta
+end
+
+-- Конец недостающей части
 return UILibrary
