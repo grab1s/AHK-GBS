@@ -373,7 +373,7 @@ local function getObjGen()
             Gui.Selection.Name = "Selection"
             Gui.Selection.Parent = Gui.Checkbox
             Gui.Selection.AnchorPoint = Vector2.new(0.5, 0.5)
-            Gui.Selection.BackgroundColor3 = Color3.fromRGB(83, 87, 158)
+            Gui.Selection.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Selection.BackgroundTransparency = 1.000
             Gui.Selection.BorderSizePixel = 0
             Gui.Selection.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -1016,7 +1016,7 @@ local function getObjGen()
             Gui.Select.Size = UDim2.new(1, 0, 1, 0)
             Gui.Select.ZIndex = 120
             Gui.Select.Image = "rbxassetid://7890831727"
-            Gui.Select.ImageColor3 = Color3.fromRGB(83, 87, 158)
+            Gui.Select.ImageColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Select.ImageTransparency = 1.000
             Gui.Select.ScaleType = Enum.ScaleType.Slice
             Gui.Select.SliceCenter = Rect.new(512, 512, 512, 512)
@@ -1053,7 +1053,7 @@ local function getObjGen()
             Gui.Select_2.Size = UDim2.new(1, 0, 1, 0)
             Gui.Select_2.ZIndex = 121
             Gui.Select_2.Image = "rbxassetid://7890925834"
-            Gui.Select_2.ImageColor3 = Color3.fromRGB(83, 87, 158)
+            Gui.Select_2.ImageColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Select_2.ImageTransparency = 1.000
             Gui.Select_2.ScaleType = Enum.ScaleType.Slice
             Gui.Select_2.SliceCenter = Rect.new(512, 512, 512, 512)
@@ -1103,7 +1103,7 @@ local function getObjGen()
             Gui.Select_3.Size = UDim2.new(1, 0, 1, 0)
             Gui.Select_3.ZIndex = 121
             Gui.Select_3.Image = "http://www.roblox.com/asset/?id=8374820043"
-            Gui.Select_3.ImageColor3 = Color3.fromRGB(83, 87, 158)
+            Gui.Select_3.ImageColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Select_3.ImageTransparency = 1.000
             Gui.Select_3.ScaleType = Enum.ScaleType.Slice
             Gui.Select_3.SliceCenter = Rect.new(512, 512, 512, 512)
@@ -1218,7 +1218,7 @@ local function getObjGen()
             Gui.Watermark.BackgroundTransparency = 1.000
             Gui.Watermark.Size = UDim2.new(0.5, 0, 0.0199999996, 0)
             Gui.Watermark.Font = Enum.Font.Gotham
-            Gui.Watermark.Text = "stinkyhub v1 | nil | nil"
+            Gui.Watermark.Text = "visuals | nil | nil"
             Gui.Watermark.TextColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Watermark.TextSize = 14.000
             Gui.Watermark.TextStrokeTransparency = 0.800
@@ -3788,7 +3788,7 @@ function UILibrary.Window:ChangeCategory(new)
             Object.Content.Image,
             TI,
             {
-                ImageColor3 = Color3.fromRGB(83, 87, 158)
+                ImageColor3 = Color3.fromRGB(255, 255, 255)
             }
         ):Play()
 
@@ -3796,7 +3796,7 @@ function UILibrary.Window:ChangeCategory(new)
             Object.Content.Title,
             TI,
             {
-                TextColor3 = Color3.fromRGB(83, 87, 158)
+                TextColor3 = Color3.fromRGB(255, 255, 255)
             }
         ):Play()
 
@@ -3884,7 +3884,7 @@ function UILibrary.Window:ChangeCategorySelection(name)
             Object.InnerContent.Image,
             TI,
             {
-                ImageColor3 = Color3.fromRGB(83, 87, 158)
+                ImageColor3 = Color3.fromRGB(255, 255, 255)
             }
         ):Play()
 
@@ -3892,7 +3892,7 @@ function UILibrary.Window:ChangeCategorySelection(name)
             Object.InnerContent.Title,
             TI,
             {
-                TextColor3 = Color3.fromRGB(83, 87, 158)
+                TextColor3 = Color3.fromRGB(255, 255, 255)
             }
         ):Play()
 
