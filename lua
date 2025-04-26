@@ -286,8 +286,6 @@ local function getObjGen()
                 Notification_3 = Instance.new("Frame"),
                 UICorner_23 = Instance.new("UICorner"),
                 UIAspectRatioConstraint_17 = Instance.new("UIAspectRatioConstraint"),
-
-                -- Новый шаблон для текстового элемента (ВСТАВИТЬ ЗДЕСЬ)
                 LabelElement = Instance.new("Frame"),
                 UIListLayout_Label = Instance.new("UIListLayout"), -- Уникальное имя
                 UIPadding_Label = Instance.new("UIPadding"),       -- Уникальное имя
@@ -297,7 +295,6 @@ local function getObjGen()
                 Objects = Instance.new("Folder") -- Эта строка должна быть последней в списке инстансов
             }
 
-            --Properties:
 
             Gui.UIObjects.Name = "UIObjects"
 
@@ -346,7 +343,7 @@ local function getObjGen()
             Gui.Text.ZIndex = 112
             Gui.Text.Font = Enum.Font.GothamSemibold
             Gui.Text.Text = "BUTTON WITHOUT TITLE OR DESC"
-            Gui.Text.TextColor3 = Color3.fromRGB(100, 100, 100)
+            Gui.Text.TextColor3 = Color3.fromRGB(181, 181, 181)
             Gui.Text.TextScaled = true
             Gui.Text.TextSize = 14.000
             Gui.Text.TextWrapped = true
@@ -541,7 +538,7 @@ local function getObjGen()
             Gui.Text_2.ClearTextOnFocus = false
             Gui.Text_2.Font = Enum.Font.GothamSemibold
             Gui.Text_2.Text = ""
-            Gui.Text_2.TextColor3 = Color3.fromRGB(100, 100, 100)
+            Gui.Text_2.TextColor3 = Color3.fromRGB(181, 181, 181)
             Gui.Text_2.TextScaled = true
             Gui.Text_2.TextSize = 14.000
             Gui.Text_2.TextWrapped = true
@@ -591,7 +588,7 @@ local function getObjGen()
             Gui.Text_3.ZIndex = 112
             Gui.Text_3.Font = Enum.Font.GothamSemibold
             Gui.Text_3.Text = "..."
-            Gui.Text_3.TextColor3 = Color3.fromRGB(100, 100, 100)
+            Gui.Text_3.TextColor3 = Color3.fromRGB(181, 181, 181)
             Gui.Text_3.TextSize = 14.000
 
             Gui.HoverFrame_4.Name = "HoverFrame"
@@ -666,7 +663,7 @@ local function getObjGen()
             Gui.Label.ZIndex = 112
             Gui.Label.Font = Enum.Font.Gotham
             Gui.Label.Text = ""
-            Gui.Label.TextColor3 = Color3.fromRGB(100, 100, 100)
+            Gui.Label.TextColor3 = Color3.fromRGB(181, 181, 181)
             Gui.Label.TextSize = 11.000
             Gui.Label.TextWrapped = true
 
@@ -804,7 +801,7 @@ local function getObjGen()
             Gui.Text_5.ZIndex = 111
             Gui.Text_5.Font = Enum.Font.GothamSemibold
             Gui.Text_5.Text = "10"
-            Gui.Text_5.TextColor3 = Color3.fromRGB(100, 100, 100)
+            Gui.Text_5.TextColor3 = Color3.fromRGB(181, 181, 181)
             Gui.Text_5.TextSize = 14.000
             Gui.Text_5.TextScaled = true
             Gui.Text_5.TextWrapped = true
@@ -868,7 +865,7 @@ local function getObjGen()
             Gui.Text_6.ZIndex = 113
             Gui.Text_6.Font = Enum.Font.Gotham
             Gui.Text_6.Text = "None"
-            Gui.Text_6.TextColor3 = Color3.fromRGB(100, 100, 100)
+            Gui.Text_6.TextColor3 = Color3.fromRGB(181, 181, 181)
             Gui.Text_6.TextScaled = true
             Gui.Text_6.TextSize = 14.000
             Gui.Text_6.TextWrapped = true
@@ -904,7 +901,7 @@ local function getObjGen()
             Gui.Icon_2.Size = UDim2.new(1, 0, 1, 0)
             Gui.Icon_2.ZIndex = 111
             Gui.Icon_2.Image = "rbxassetid://7072706663"
-            Gui.Icon_2.ImageColor3 = Color3.fromRGB(100, 100, 100)
+            Gui.Icon_2.ImageColor3 = Color3.fromRGB(181, 181, 181)
             Gui.Icon_2.ScaleType = Enum.ScaleType.Fit
 
             Gui.UIAspectRatioConstraint_5.Parent = Gui.Holder
@@ -2186,7 +2183,7 @@ local function getObjGen()
             Gui.Text_8.ZIndex = 111
             Gui.Text_8.Font = Enum.Font.GothamSemibold
             Gui.Text_8.Text = "Title"
-            Gui.Text_8.TextColor3 = Color3.fromRGB(100, 100, 100)
+            Gui.Text_8.TextColor3 = Color3.fromRGB(181, 181, 181)
             Gui.Text_8.TextSize = 18.000
             Gui.Text_8.TextWrapped = true
             Gui.Text_8.TextXAlignment = Enum.TextXAlignment.Left
@@ -2539,7 +2536,7 @@ local function getObjGen()
             Gui.Title_Label.TextWrapped = true -- <<< ВАЖНО: Перенос строк
             Gui.Title_Label.TextScaled = false -- Не использовать TextScaled с AutomaticSize
             Gui.Title_Label.Font = Enum.Font.GothamSemibold -- Стиль как у других Title
-            Gui.Title_Label.TextColor3 = Color3.fromRGB(100, 100, 100) -- Стиль как у других Title
+            Gui.Title_Label.TextColor3 = Color3.fromRGB(181, 181, 181) -- Стиль как у других Title
             Gui.Title_Label.TextSize = 14 -- Размер как у других (или какой нужен)
             Gui.Title_Label.TextXAlignment = Enum.TextXAlignment.Left
             Gui.Title_Label.LayoutOrder = 1
@@ -3485,7 +3482,7 @@ function UILibrary.Window:Notification(sett)
                         Notif.Content.Buttons.Close,
                         TI,
                         {
-                            ImageColor3 = Color3.fromRGB(100, 100, 100)
+                            ImageColor3 = Color3.fromRGB(181, 181, 181)
                         }
                     ):Play()
                 elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -3667,7 +3664,7 @@ function UILibrary.Window:Prompt(sett)
                         Close.Button,
                         TI,
                         {
-                            ImageColor3 = Color3.fromRGB(100, 100, 100)
+                            ImageColor3 = Color3.fromRGB(181, 181, 181)
                         }
                     ):Play()
                 elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -3711,7 +3708,7 @@ function UILibrary.Window:Prompt(sett)
                         Accept.Button,
                         TI,
                         {
-                            ImageColor3 = Color3.fromRGB(100, 100, 100)
+                            ImageColor3 = Color3.fromRGB(181, 181, 181)
                         }
                     ):Play()
                 elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -5550,7 +5547,7 @@ function UILibrary.Section:Dropdown(sett, callback)
                         TI,
                         {
                             Position = UDim2.fromScale(0, 0),
-                            ImageColor3 = Color3.fromRGB(100, 100, 100)
+                            ImageColor3 = Color3.fromRGB(181, 181, 181)
                         }
                     ):Play()
                 end
@@ -5577,8 +5574,6 @@ function UILibrary.Section:Dropdown(sett, callback)
 
     return meta
 end
-
--- ВСТАВИТЬ ЗДЕСЬ (после end от Dropdown)
 
 function UILibrary.Section:Label(sett)
     -- Создаем экземпляр нашего нового текстового шаблона
