@@ -1372,7 +1372,7 @@ local function getObjGen()
             Gui.UIPadding_8.PaddingLeft = UDim.new(0, 4)
             Gui.UIPadding_8.PaddingRight = UDim.new(0, 4)
             Gui.UIPadding_8.PaddingTop = UDim.new(0, 16)
-
+           
             Gui.Logo.Name = "Logo"
             Gui.Logo.Parent = Gui.Cheats_2
             Gui.Logo.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -1383,7 +1383,7 @@ local function getObjGen()
             Gui.Logo.Image = "rbxassetid://123705956220882"
             Gui.Logo.ImageColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Logo.ScaleType = Enum.ScaleType.Fit
-
+            --лого дщпщ kjuj logo
             Gui.UIGradient_5.Color =
                 ColorSequence.new {
                 ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 255, 255)),
