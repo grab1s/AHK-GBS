@@ -5438,15 +5438,20 @@ function UILibrary.Section:Dropdown(sett, callback)
         for i, v in pairs(optionConnections) do
             v:Disconnect()
         end
+        optionConnections = {} -- Очищаем таблицу
 
         local counter = 0
         local totalCounter = 0
+        local optionKeys = {} -- Сохраняем ключи для сортировки или определения порядка
 
-        for i, v in pairs(options) do
+        for k, _ in pairs(options) do
+            table.insert(optionKeys, k)
             totalCounter = totalCounter + 1
         end
+        -- Опционально: сортируем ключи, если порядок важен
+        -- table.sort(optionKeys)
 
-        for v, i in pairs(options) do
+        for _, v in ipairs(optionKeys) do -- Итерируем по сохраненным ключам
             local Option
 
             counter = counter + 1
@@ -5461,10 +5466,17 @@ function UILibrary.Section:Dropdown(sett, callback)
 
             Option.Name = v
             Option.Parent = element.OptionHolder.ContentHolder.Content
-            Option.LayoutOrder = i
+            Option.LayoutOrder = counter -- Используем counter для порядка
             Option.Size = UDim2.fromScale(1, 1 / totalCounter)
 
             Option.Current.Text = v
+
+            -- Обновляем начальное состояние Select ImageTransparency
+            if options[v] then
+                 Option.Select.ImageTransparency = 0
+            else
+                 Option.Select.ImageTransparency = 1
+            end
 
             table.insert(
                 optionConnections,
@@ -5519,105 +5531,68 @@ function UILibrary.Section:Dropdown(sett, callback)
 
     functions.openMenu = function()
         local totalCounter = 0
+        for _ in pairs(options) do totalCounter = totalCounter + 1 end
 
-        for i, v in pairs(options) do
-            totalCounter = totalCounter + 1
-        end
-
-        if totalCounter == 0 then
-            return
-        end
+        if totalCounter == 0 then return end
 
         menuOpen = not menuOpen
 
         if menuOpen then
+            element.OptionHolder.Visible = true -- Показываем сразу
             TweenService:Create(
                 element.MainHolder.Content.Icon.Holder,
                 TI,
-                {
-                    Rotation = 180
-                }
+                { Rotation = 180 }
             ):Play()
 
             TweenService:Create(
                 element.OptionHolder,
                 TI,
-                {
-                    Size = UDim2.fromScale(1, math.clamp(totalCounter, 0, 999) * .7)
-                }
+                { Size = UDim2.fromScale(1, math.min(totalCounter, 5) * 0.15) } -- Ограничиваем высоту (например, макс 5 элементов)
             ):Play()
 
             local n = 15 + (10 * math.clamp(totalCounter, 0, 3))
-
             TweenService:Create(
                 element.OptionHolder.Cover.DropShadow,
                 TI,
-                {
-                    ImageTransparency = 0.5,
-                    Size = UDim2.new(1, n, 1, n)
-                }
+                { ImageTransparency = 0.5, Size = UDim2.new(1, n, 1, n) }
             ):Play()
 
-            element.OptionHolder.Visible = true
-
-            task.delay(
-                .4,
-                function()
-                    if menuOpen then
-                        TweenService:Create(
-                            element.OptionHolder.Cover,
-                            TI,
-                            {
-                                BackgroundTransparency = 1
-                            }
-                        ):Play()
-                    end
+            task.delay(.4, function()
+                if menuOpen then
+                    TweenService:Create(element.OptionHolder.Cover, TI, { BackgroundTransparency = 1 }):Play()
                 end
-            )
+            end)
         else
             TweenService:Create(
                 element.MainHolder.Content.Icon.Holder,
                 TI,
-                {
-                    Rotation = 0
-                }
+                { Rotation = 0 }
             ):Play()
 
             TweenService:Create(
                 element.OptionHolder,
                 TI,
-                {
-                    Size = UDim2.fromScale(1, 0)
-                }
+                { Size = UDim2.fromScale(1, 0) }
             ):Play()
 
             TweenService:Create(
                 element.OptionHolder.Cover.DropShadow,
                 TI,
-                {
-                    ImageTransparency = 1,
-                    Size = UDim2.new(1, 0, 1, 0)
-                }
+                { ImageTransparency = 1, Size = UDim2.new(1, 0, 1, 0) }
             ):Play()
 
             TweenService:Create(
                 element.OptionHolder.Cover,
                 TweenInfo.new(.2, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
-                {
-                    BackgroundTransparency = 0
-                }
+                { BackgroundTransparency = 0 }
             ):Play()
 
-            task.delay(
-                .4,
-                function()
-                    if menuOpen then
-                        return
-                    end
-
-                    element.OptionHolder.Visible = false
+            task.delay(.4, function()
+                if not menuOpen then
+                     element.OptionHolder.Visible = false
                 end
-            )
+            end)
         end
     end
 
@@ -5629,19 +5604,9 @@ function UILibrary.Section:Dropdown(sett, callback)
         conns,
         element.MainHolder.Content.Icon.InputBegan:Connect(
             function(input, gp)
-                if gp then
-                    return
-                end
-
+                if gp then return end
                 if input.UserInputType == Enum.UserInputType.MouseMovement then
-                    TweenService:Create(
-                        element.MainHolder.Content.Icon.Holder.Icon,
-                        TI,
-                        {
-                            Position = UDim2.fromScale(0, .2),
-                            ImageColor3 = Color3.fromRGB(50, 50, 50)
-                        }
-                    ):Play()
+                    TweenService:Create(element.MainHolder.Content.Icon.Holder.Icon, TI, { Position = UDim2.fromScale(0, .2), ImageColor3 = Color3.fromRGB(50, 50, 50) }):Play()
                 elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
                     functions.openMenu()
                 end
@@ -5653,27 +5618,33 @@ function UILibrary.Section:Dropdown(sett, callback)
         conns,
         element.MainHolder.Content.Icon.InputEnded:Connect(
             function(input, gp)
-                if gp then
-                    return
-                end
-
+                if gp then return end
                 if input.UserInputType == Enum.UserInputType.MouseMovement then
-                    TweenService:Create(
-                        element.MainHolder.Content.Icon.Holder.Icon,
-                        TI,
-                        {
-                            Position = UDim2.fromScale(0, 0),
-                            ImageColor3 = Color3.fromRGB(181, 181, 181)
-                        }
-                    ):Play()
+                    TweenService:Create(element.MainHolder.Content.Icon.Holder.Icon, TI, { Position = UDim2.fromScale(0, 0), ImageColor3 = Color3.fromRGB(181, 181, 181) }):Play()
                 end
             end
         )
     )
 
+    -- Установка начального значения
     if sett.Default then
-        functions.setValue(sett.Default, true, true)
+        if sett.Multi then
+             -- Для мультивыбора, default может быть таблицей { ["Option1"] = true, ["Option3"] = true }
+             if type(sett.Default) == "table" then
+                 for opt, val in pairs(sett.Default) do
+                     if options[opt] ~= nil and type(val) == "boolean" then
+                          options[opt] = val
+                     end
+                 end
+             end
+        else
+            -- Для одиночного выбора, default - это строка с именем опции
+            if type(sett.Default) == "string" and options[sett.Default] ~= nil then
+                 functions.setValue(sett.Default, true, true)
+            end
+        end
     end
+    functions.refreshUI() -- Обновляем UI после установки дефолтных значений
 
     local meta =
         setmetatable(
@@ -5756,5 +5727,4 @@ function UILibrary.Section:Label(sett)
     return meta
 end
 
--- Конец недостающей части
 return UILibrary
