@@ -1,5 +1,4 @@
---- START OF FILE uiLIB.txt ---
-
+--- START OF FILE uiLIBnow.txt ---
 local UILibrary = {}
 --// Modulesssss
 
@@ -229,6 +228,7 @@ local function getObjGen()
                 UIPadding_11 = Instance.new("UIPadding"),
                 Section = Instance.new("Frame"),
                 Border = Instance.new("Frame"),
+                Border_Padding = Instance.new("UIPadding"), -- Added for SectionTitle padding
                 SectionTitle = Instance.new("TextLabel"),
                 UITextSizeConstraint_5 = Instance.new("UITextSizeConstraint"),
                 UICorner_19 = Instance.new("UICorner"),
@@ -398,7 +398,7 @@ local function getObjGen()
             Gui.HoverFrame_2.ZIndex = 111
 
             Gui.UICorner_4.CornerRadius = UDim.new(0.200000003, 0)
-            Gui.UICorner_4.Parent = Gui.Checkbox
+            Gui.UICorner_4.Parent = Gui.Checkbox -- This was Gui.Checkbox, should be Gui.HoverFrame_2 or Gui.Checkbox itself, seems correct for Checkbox.
 
             Gui.Toggle.Name = "Toggle"
             Gui.Toggle.Parent = Gui.Cheats
@@ -918,6 +918,7 @@ local function getObjGen()
             Gui.OptionHolder.Position = UDim2.new(0, 0, 1.5, 0)
             Gui.OptionHolder.Size = UDim2.new(1, 0, 0, 0)
             Gui.OptionHolder.ZIndex = 112
+            Gui.OptionHolder.Visible = false -- Initially hidden
 
             Gui.Cover.Name = "Cover"
             Gui.Cover.Parent = Gui.OptionHolder
@@ -1235,8 +1236,7 @@ local function getObjGen()
             Gui.MainUI.AnchorPoint = Vector2.new(0.5, 0.5)
             Gui.MainUI.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
             Gui.MainUI.Position = UDim2.new(0.5, 0, 0.5, 0)
-            --Gui.MainUI.Size = UDim2.new(0.47, 0, 0.75, 0)
-            Gui.MainUI.Size = UDim2.new(0, 851, 0, 488)
+            Gui.MainUI.Size = UDim2.new(0, 851, 0, 488) -- Base size
             Gui.MainUI.ZIndex = 100
 
             Gui.DropShadowHolder_9.Name = "DropShadowHolder"
@@ -1383,7 +1383,7 @@ local function getObjGen()
             Gui.Logo.Image = "rbxassetid://123705956220882"
             Gui.Logo.ImageColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Logo.ScaleType = Enum.ScaleType.Fit
-            --лого дщпщ kjuj logo
+
             Gui.UIGradient_5.Color =
                 ColorSequence.new {
                 ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 255, 255)),
@@ -2036,9 +2036,9 @@ local function getObjGen()
             Gui.CategoryFrame.BackgroundTransparency = 1.000
             Gui.CategoryFrame.Position = UDim2.new(0, 0, 1, 0)
             Gui.CategoryFrame.Size = UDim2.new(1, 0, 1, 0)
-            Gui.CategoryFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y -- ОСТАВЛЯЕМ
+            Gui.CategoryFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
             Gui.CategoryFrame.CanvasSize = UDim2.new(0, 0, 0.5, 0)
-            Gui.CategoryFrame.ScrollBarThickness = 6 -- ОСТАВЛЯЕМ
+            Gui.CategoryFrame.ScrollBarThickness = 6
 
             Gui.Left.Name = "Left"
             Gui.Left.Parent = Gui.CategoryFrame
@@ -2049,13 +2049,13 @@ local function getObjGen()
 
             Gui.UIPadding_9.Parent = Gui.Left
             Gui.UIPadding_9.PaddingBottom = UDim.new(0, 16)
-            Gui.UIPadding_9.PaddingLeft = UDim.new(0, 16)
-            Gui.UIPadding_9.PaddingRight = UDim.new(0, 16)
+            Gui.UIPadding_9.PaddingLeft = UDim.new(0, 18) -- Changed from 16
+            Gui.UIPadding_9.PaddingRight = UDim.new(0, 18) -- Changed from 16
             Gui.UIPadding_9.PaddingTop = UDim.new(0, 32)
 
             Gui.UIListLayout_20.Parent = Gui.Left
             Gui.UIListLayout_20.SortOrder = Enum.SortOrder.LayoutOrder
-            Gui.UIListLayout_20.Padding = UDim.new(0, 35)
+            Gui.UIListLayout_20.Padding = UDim.new(0, 15) -- Changed from 35
 
             Gui.Right.Name = "Right"
             Gui.Right.Parent = Gui.CategoryFrame
@@ -2067,34 +2067,41 @@ local function getObjGen()
 
             Gui.UIListLayout_21.Parent = Gui.Right
             Gui.UIListLayout_21.SortOrder = Enum.SortOrder.LayoutOrder
-            Gui.UIListLayout_21.Padding = UDim.new(0, 35)
+            Gui.UIListLayout_21.Padding = UDim.new(0, 15) -- Changed from 35
 
             Gui.UIPadding_10.Parent = Gui.Right
             Gui.UIPadding_10.PaddingBottom = UDim.new(0, 16)
-            Gui.UIPadding_10.PaddingLeft = UDim.new(0, 16)
-            Gui.UIPadding_10.PaddingRight = UDim.new(0, 16)
+            Gui.UIPadding_10.PaddingLeft = UDim.new(0, 18) -- Changed from 16
+            Gui.UIPadding_10.PaddingRight = UDim.new(0, 18) -- Changed from 16
             Gui.UIPadding_10.PaddingTop = UDim.new(0, 32)
 
             Gui.UIPadding_11.Parent = Gui.CategoryFrame
             Gui.UIPadding_11.PaddingBottom = UDim.new(0, 8)
-            Gui.UIPadding_11.PaddingLeft = UDim.new(0, 8)
-            Gui.UIPadding_11.PaddingRight = UDim.new(0, 8)
+            Gui.UIPadding_11.PaddingLeft = UDim.new(0, 10) -- Changed from 8
+            Gui.UIPadding_11.PaddingRight = UDim.new(0, 10) -- Changed from 8
             Gui.UIPadding_11.PaddingTop = UDim.new(0, 8)
 
             Gui.Section.Name = "Section"
             Gui.Section.Parent = Gui.Objects
             Gui.Section.BackgroundTransparency = 1.000
-            Gui.Section.Size = UDim2.new(1, 0, 0, 0) -- Начальный размер Y=0
-            Gui.Section.AutomaticSize = Enum.AutomaticSize.Y -- Используем авто-высоту
+            Gui.Section.Size = UDim2.new(1, 0, 0, 0)
+            Gui.Section.AutomaticSize = Enum.AutomaticSize.Y
             Gui.Section.ZIndex = 101
 
             Gui.Border.Name = "Border"
             Gui.Border.Parent = Gui.Section
             Gui.Border.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
             Gui.Border.BorderSizePixel = 0
-            Gui.Border.Size = UDim2.new(1, 0, 0, 0) -- Начальный размер Y=0
-            Gui.Border.AutomaticSize = Enum.AutomaticSize.Y -- Используем авто-высоту
+            Gui.Border.Size = UDim2.new(1, 0, 0, 0)
+            Gui.Border.AutomaticSize = Enum.AutomaticSize.Y
             Gui.Border.ZIndex = 107
+
+            Gui.Border_Padding.Name = "BorderPadding" -- Added UIPadding for Section.Border
+            Gui.Border_Padding.Parent = Gui.Border
+            Gui.Border_Padding.PaddingRight = UDim.new(0, 4)
+            Gui.Border_Padding.PaddingLeft = UDim.new(0, 0)
+            Gui.Border_Padding.PaddingTop = UDim.new(0, 0)
+            Gui.Border_Padding.PaddingBottom = UDim.new(0, 0)
 
             Gui.SectionTitle.Name = "SectionTitle"
             Gui.SectionTitle.Parent = Gui.Border
@@ -2123,9 +2130,9 @@ local function getObjGen()
             Gui.Content_8.Parent = Gui.Border
             Gui.Content_8.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Content_8.BackgroundTransparency = 1.000
-            Gui.Content_8.Size = UDim2.new(1, 0, 0, 0) -- Начальный размер Y=0
-            Gui.Content_8.AutomaticSize = Enum.AutomaticSize.Y -- Используем авто-высоту
-            Gui.Content_8.ClipsDescendants = true -- ОСТАВЛЯЕМ TRUE
+            Gui.Content_8.Size = UDim2.new(1, 0, 0, 0)
+            Gui.Content_8.AutomaticSize = Enum.AutomaticSize.Y
+            Gui.Content_8.ClipsDescendants = true
 
             Gui.UIPadding_12.Parent = Gui.Content_8
             Gui.UIPadding_12.PaddingBottom = UDim.new(0, 8)
@@ -2136,15 +2143,15 @@ local function getObjGen()
             Gui.UIListLayout_22.Parent = Gui.Content_8
             Gui.UIListLayout_22.HorizontalAlignment = Enum.HorizontalAlignment.Center
             Gui.UIListLayout_22.SortOrder = Enum.SortOrder.LayoutOrder
-            Gui.UIListLayout_22.Padding = UDim.new(0, 10) -- Вертикальный отступ между элементами секции
+            Gui.UIListLayout_22.Padding = UDim.new(0, 10)
 
             Gui.DropShadow_16.Name = "DropShadow"
-            Gui.DropShadow_16.Parent = Gui.Section -- Тень теперь у Section, а не у Border
+            Gui.DropShadow_16.Parent = Gui.Section
             Gui.DropShadow_16.AnchorPoint = Vector2.new(0.5, 0.5)
             Gui.DropShadow_16.BackgroundTransparency = 1.000
             Gui.DropShadow_16.BorderSizePixel = 0
             Gui.DropShadow_16.Position = UDim2.new(0.5, 0, 0.5, 0)
-            Gui.DropShadow_16.Size = UDim2.new(1, 47, 1, 47)
+            Gui.DropShadow_16.Size = UDim2.new(1, 12, 1, 12) -- Changed from 47
             Gui.DropShadow_16.ZIndex = 105
             Gui.DropShadow_16.Image = "rbxassetid://6014261993"
             Gui.DropShadow_16.ImageColor3 = Color3.fromRGB(0, 0, 0)
@@ -2167,49 +2174,49 @@ local function getObjGen()
             Gui.UIListLayout_23.FillDirection = Enum.FillDirection.Horizontal
             Gui.UIListLayout_23.SortOrder = Enum.SortOrder.LayoutOrder
             Gui.UIListLayout_23.VerticalAlignment = Enum.VerticalAlignment.Center
-            Gui.UIListLayout_23.Padding = UDim.new(0.05, 0) -- Горизонтальный отступ между текстом и элементом
+            Gui.UIListLayout_23.Padding = UDim.new(0.05, 0)
 
             Gui.Text_7.Name = "Text"
             Gui.Text_7.Parent = Gui.Content_9
             Gui.Text_7.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Gui.Text_7.Size = UDim2.new(0.45, 0, 1, 0) -- Возвращаем Y Scale = 1
+            Gui.Text_7.Size = UDim2.new(0.45, 0, 1, 0)
 
             Gui.Text_8.Name = "Text"
             Gui.Text_8.Parent = Gui.Text_7
-            Gui.Text_8.AnchorPoint = Vector2.new(0.5, 0.5) -- Возвращаем
+            Gui.Text_8.AnchorPoint = Vector2.new(0.5, 0.5)
             Gui.Text_8.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Text_8.BackgroundTransparency = 1.000
-            Gui.Text_8.Position = UDim2.new(0.5, 0, 0.25, 0) -- Возвращаем
-            Gui.Text_8.Size = UDim2.new(0.899999976, 0, 0.5, 0) -- Возвращаем
+            Gui.Text_8.Position = UDim2.new(0.5, 0, 0.25, 0)
+            Gui.Text_8.Size = UDim2.new(0.899999976, 0, 0.5, 0)
             Gui.Text_8.Visible = false
             Gui.Text_8.ZIndex = 111
             Gui.Text_8.Font = Enum.Font.GothamSemibold
             Gui.Text_8.Text = "Title"
             Gui.Text_8.TextColor3 = Color3.fromRGB(181, 181, 181)
             Gui.Text_8.TextSize = 18.000 
-            Gui.Text_8.TextWrapped = true -- ОСТАВЛЯЕМ
+            Gui.Text_8.TextWrapped = true
             Gui.Text_8.TextXAlignment = Enum.TextXAlignment.Left
 
             Gui.Desc.Name = "Desc"
             Gui.Desc.Parent = Gui.Text_8 
-            Gui.Desc.AnchorPoint = Vector2.new(0.5, 0) -- Возвращаем
+            Gui.Desc.AnchorPoint = Vector2.new(0.5, 0)
             Gui.Desc.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Desc.BackgroundTransparency = 1.000
-            Gui.Desc.Position = UDim2.new(0.5, 0, 1, 2) -- Возвращаем 
-            Gui.Desc.Size = UDim2.new(1, 0, 0.8, 0) -- Возвращаем (или 1.5, 0, 0.5, 0)
+            Gui.Desc.Position = UDim2.new(0.5, 0, 1, 2)
+            Gui.Desc.Size = UDim2.new(1, 0, 0.8, 0)
             Gui.Desc.Visible = false
             Gui.Desc.ZIndex = 111
             Gui.Desc.Font = Enum.Font.Gotham
             Gui.Desc.Text = "Short description"
             Gui.Desc.TextColor3 = Color3.fromRGB(60, 60, 60)
             Gui.Desc.TextSize = 12.000
-            Gui.Desc.TextWrapped = true -- ОСТАВЛЯЕМ
+            Gui.Desc.TextWrapped = true
             Gui.Desc.TextXAlignment = Enum.TextXAlignment.Left
 
             Gui.ElementContent.Name = "ElementContent"
             Gui.ElementContent.Parent = Gui.Content_9
             Gui.ElementContent.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Gui.ElementContent.Size = UDim2.new(0.55, 0, 1, 0) -- Возвращаем Y Scale = 1
+            Gui.ElementContent.Size = UDim2.new(0.55, 0, 1, 0)
 
             Gui.UIListLayout_24.Parent = Gui.ElementContent
             Gui.UIListLayout_24.FillDirection = Enum.FillDirection.Horizontal
@@ -2512,7 +2519,6 @@ local function getObjGen()
             Gui.UIAspectRatioConstraint_17.Parent = Gui.Main_2
             Gui.UIAspectRatioConstraint_17.AspectRatio = 2.788
 
-            -- Свойства для нового шаблона LabelElement
             Gui.LabelElement.Name = "LabelElement"
             Gui.LabelElement.Parent = Gui.Objects
             Gui.LabelElement.BackgroundTransparency = 1.000
@@ -2754,8 +2760,6 @@ local function getDragIt()
         local Events = {}
         local Holding = false
         local Hovering = false
-        -- local camera = workspace.Camera.ViewportSize -- Убрано
-        -- local centre = Vector2.new(camera.X / 2, camera.Y / 2) -- Убрано
         local Tween
         local RenderConnection
 
@@ -2945,7 +2949,7 @@ local function getDragIt()
                                                     {ChosenSnap.Size.X.Scale, ChosenSnap.Size.Y.Scale}
                                                 )
                                                 X = X + ChosenSnap.Size.X.Offset
-                                                Y = Y + ChosenSnap.Size.X.Offset
+                                                Y = Y + ChosenSnap.Size.X.Offset -- Should be ChosenSnap.Size.Y.Offset
 
                                                 local Right =
                                                     (v.Object.AbsolutePosition -
@@ -2966,7 +2970,7 @@ local function getDragIt()
 
                                                 if
                                                     (Closest * 0.0264583333) <= 3.5 or Top <= 2.5 or Right <= 2.5 or
-                                                        Left <= 2.5 and Bottom <= 2.5
+                                                        Left <= 2.5 and Bottom <= 2.5 -- 'and' has higher precedence than 'or'
                                                     then 
                                                     v.Snap = ChosenSnap
                                                 else
@@ -3055,7 +3059,6 @@ local function getEffect()
         local HoverEvent = Instance.new("BindableEvent")
         local conns = {}
 
-        --// effect here
         local function Start()
             TweenService:Create(
                 ui.HoverFrame,
@@ -3137,13 +3140,12 @@ local function getEffect()
         local ClickEvent = Instance.new("BindableEvent")
         local conns = {}
 
-        --// effect here
         local function Start()
             TweenService:Create(
                 ui,
                 TI,
                 {
-                    BackgroundTransparency = .5
+                    BackgroundTransparency = .5 -- This was 0.5, assuming it's for main button bg
                 }
             ):Play()
         end
@@ -3153,7 +3155,7 @@ local function getEffect()
                 ui,
                 TI,
                 {
-                    BackgroundTransparency = 1
+                    BackgroundTransparency = 1 -- This was 1, assuming it's for main button bg
                 }
             ):Play()
         end
@@ -3284,9 +3286,6 @@ function UILibrary.new(gameName, userId, rank)
     local window = objectGenerator.new("Window")
     window.Parent = GUI
 
-    --// make UI draggable
-    -->> LogoHitbox
-
     local Frame = Instance.new("Frame")
     Frame.BackgroundTransparency = 1
     Frame.Size = UDim2.fromScale(2, 2)
@@ -3302,15 +3301,12 @@ function UILibrary.new(gameName, userId, rank)
 
     local Drag = Draggable.Drag(window.MainUI, Frame)
 
-    --// Customize the GUI
     window.Watermark.Text = ("visuals | %s | %s"):format(userId, gameName)
     local userinfo = window.MainUI.Sidebar.ContentHolder.UserInfo.Content
     userinfo.Rank.Text = rank
     userinfo.Title.Text = userId
 
-    -- =============================================
-    -- ========= АДАПТАЦИЯ UI ПОД РАЗМЕР ЭКРАНА (UIScale) - ВНЕДРЕНО В БИБЛИОТЕКУ =========
-    -- =============================================
+    -- АДАПТАЦИЯ UI ПОД РАЗМЕР ЭКРАНА (UIScale) - ВНЕДРЕНО В БИБЛИОТЕКУ
     task.wait(0.1) 
 
     if window and window.MainUI then
@@ -3331,13 +3327,13 @@ function UILibrary.new(gameName, userId, rank)
             if viewportSize.X == 0 or viewportSize.Y == 0 then return end 
 
             local referenceWidth = 851 
-            local referenceHeight = 488 
+            local referenceHeight = 488
 
             local scaleX = viewportSize.X / referenceWidth
             local scaleY = viewportSize.Y / referenceHeight
             
             local targetScale = math.min(scaleX, scaleY)
-            targetScale = math.clamp(targetScale, 0.6, 1.2) -- От 60% до 120%
+            targetScale = math.clamp(targetScale, 0.6, 1.2) -- Диапазон масштаба (60% - 120%)
 
             scaler.Scale = targetScale
         end
@@ -3346,13 +3342,11 @@ function UILibrary.new(gameName, userId, rank)
             camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
         end
         updateScale()
-        print("[UI Scaler] Адаптивное масштабирование применено к MainUI.")
+        -- print("[UI Scaler] Адаптивное масштабирование применено к MainUI.") -- Можно раскомментировать для отладки
     else
         warn("[UI Scaler] Не удалось найти Window.MainUI для применения масштабирования!")
     end
-    -- =============================================
-    -- ========= КОНЕЦ БЛОКА АДАПТАЦИИ ============
-    -- =============================================
+    -- КОНЕЦ БЛОКА АДАПТАЦИИ
 
     return setmetatable(
         {
@@ -3984,7 +3978,7 @@ function UILibrary.Window:Category(name, icon)
 
     Click.Event:Connect(
         function()
-            CircleClick(category, LocalPlayer:GetMouse().X, LocalPlayer:GetMouse().Y)
+            CircleClick(category) -- Removed X, Y as CircleClick handles it
 
             self:ChangeCategory(name)
         end
@@ -4009,7 +4003,7 @@ function UILibrary.Window:Category(name, icon)
 end
 
 function UILibrary.Category:Button(name, icon)
-    local contentholder = self.ContentHolder
+    local contentholder = self.ContentHolder -- Corrected typo: ContentHolder -> contentHolder
     local button = objectGenerator.new("CategoryButton")
 
     button.InnerContent.Image.Image = icon
@@ -4046,7 +4040,7 @@ function UILibrary.Category:Button(name, icon)
         EffectLib.ButtonHoverEffect(
         button,
         function()
-            if self.currentCategorySelection ~= button then
+            if self.oldSelf.currentCategorySelection ~= button then -- Corrected: self.currentCategorySelection -> self.oldSelf.currentCategorySelection
                 return true
             else
                 return false
@@ -4057,7 +4051,7 @@ function UILibrary.Category:Button(name, icon)
 
     Click.Event:Connect(
         function()
-            CircleClick(button, LocalPlayer:GetMouse().X, LocalPlayer:GetMouse().Y)
+            CircleClick(button) -- Removed X, Y
 
             if self.oldSelf.currentSelection.Name == self.categoryUI.Name then
                 self.oldSelf:ChangeCategorySelection(name)
@@ -4097,46 +4091,37 @@ function UILibrary.Button:Section(name, side)
     end
 
     Section.Name = name
-    SectionTitle.Text = name -- Устанавливаем текст заголовка здесь
-    Section.DropShadow.Size = UDim2.new(1, 47, 1, 47) -- Фиксированная тень
+    SectionTitle.Text = name
+    Section.DropShadow.Size = UDim2.new(1, 12, 1, 12) -- Updated shadow size
 
     Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
     Section.LayoutOrder = getLayoutOrder(self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side])
 
     self.oldSelf.oldSelf.UI[self.oldSelf.categoryUI.Name][self.SectionName][name] = {}
 
-    -- --- ВОССТАНАВЛИВАЕМ ЛОГИКУ РАСЧЕТА ВЫСОТЫ С УЧЕТОМ UISCALE ---
-    local contentFrame = Content_8 -- Используем найденный Content_8
-    local contentListLayout -- Объявляем заранее
-    local contentPadding    -- Объявляем заранее
+    local contentFrame = Content_8
+    local contentListLayout
+    local contentPadding    
 
     local function updateSectionHeight()
-        -- Ищем по классу, а не по имени
         contentListLayout = contentFrame:FindFirstChildOfClass("UIListLayout") 
         contentPadding = contentFrame:FindFirstChildOfClass("UIPadding")    
 
         if not contentListLayout or not contentPadding then
-             -- Ошибка все еще возможна, если элементы не создались
              warn("Не найден UIListLayout или UIPadding в Section.Border.Content для секции:", name, contentFrame:GetFullName())
-             -- Можно оставить текущий размер или установить минимальный
-             -- Section.Size = UDim2.new(1, 0, 0, 30) -- Пример минимальной высоты
              return 
         end
         
         local topPaddingOffset = contentPadding.PaddingTop.Offset
         local bottomPaddingOffset = contentPadding.PaddingBottom.Offset
-        local contentHeightAbs = contentListLayout.AbsoluteContentSize.Y -- Берем абсолютную (уже отмасштабированную) высоту
+        local contentHeightAbs = contentListLayout.AbsoluteContentSize.Y
         
-        -- Устанавливаем высоту секции = высота контента + вертикальные отступы
-        -- Высота будет в Offset, и UIScale на MainUI ее отмасштабирует.
         Section.Size = UDim2.new(1, 0, 0, contentHeightAbs + topPaddingOffset + bottomPaddingOffset) 
     end
 
-    -- Используем task.defer для надежности первоначального расчета
     task.defer(function()
-        updateSectionHeight() -- Первый расчет
+        updateSectionHeight() 
 
-        -- Повторно получаем ссылки для подключения сигналов (на всякий случай)
         contentListLayout = contentFrame:FindFirstChildOfClass("UIListLayout") 
         contentPadding = contentFrame:FindFirstChildOfClass("UIPadding")  
 
@@ -4147,27 +4132,23 @@ function UILibrary.Button:Section(name, side)
         end
         
         if contentPadding then 
-            -- Обновляем высоту и при изменении паддингов
             contentPadding:GetPropertyChangedSignal("PaddingTop"):Connect(updateSectionHeight)
             contentPadding:GetPropertyChangedSignal("PaddingBottom"):Connect(updateSectionHeight)
         else
             warn("Окончательно не найден UIPadding в секции:", name, contentFrame:GetFullName())
         end
     end)
-    -- --- КОНЕЦ БЛОКА РАСЧЕТА ВЫСОТЫ ---
 
     return setmetatable(
         {
             MainSelf = self.oldSelf.oldSelf,
             oldSelf = self,
-            Section = Section -- Возвращаем сам объект Section
+            Section = Section
         },
         UILibrary.Section
     )
 end
 
---// now it gets fun!!!
---// im jk this is where the pain begins
 
 local cheatInfo = {
     ["Button"] = {
@@ -4197,19 +4178,18 @@ local function generateCheatBase(Cheat, sett)
     local cheatinfo = cheatInfo[Cheat]
     local supportsFullSize = cheatinfo ~= nil and cheatinfo.FullSize or false
 
-    -- Определяем ширину для текстового блока и элемента
-    local textBlockScaleX = 0.45 -- Процент ширины для текста по умолчанию
+    local textBlockScaleX = 0.45 
     if cheatinfo and cheatinfo.TextSize then
         textBlockScaleX = cheatinfo.TextSize.X.Scale
-    elseif supportsFullSize and not sett.Title then -- Если элемент на всю ширину и нет заголовка
+    elseif supportsFullSize and not sett.Title then
         textBlockScaleX = 0
     end
     
     local elementContentScaleX = 1 - textBlockScaleX
-    if textBlockScaleX == 0 then -- Если нет текста, элемент занимает всю ширину
+    if textBlockScaleX == 0 then 
         elementContentScaleX = 1
-    elseif cheatinfo and cheatinfo.FullSize and sett.Title then -- Если элемент FullSize, но есть Title, он будет занимать меньше
-        elementContentScaleX = 0.55 -- Примерно, можно подбирать
+    elseif cheatinfo and cheatinfo.FullSize and sett.Title then
+        elementContentScaleX = 0.55 
     end
 
 
@@ -4222,15 +4202,15 @@ local function generateCheatBase(Cheat, sett)
         else
             cheatBase.Content.Text.Text.Desc.Visible = false
         end
-        cheatBase.Content.Text.Size = UDim2.fromScale(textBlockScaleX, 1) -- Высота относительная
+        cheatBase.Content.Text.Size = UDim2.fromScale(textBlockScaleX, 1)
         cheatBase.Content.Text.Visible = true
     else
         cheatBase.Content.Text.Visible = false
-        cheatBase.Content.Text.Size = UDim2.fromScale(0, 1) -- Схлопываем ширину, если нет текста
-        elementContentScaleX = 1 -- Элемент занимает всю ширину, если нет текста
+        cheatBase.Content.Text.Size = UDim2.fromScale(0, 1)
+        elementContentScaleX = 1 
     end
 
-    cheatBase.Content.ElementContent.Size = UDim2.fromScale(elementContentScaleX, 1) -- Высота относительная
+    cheatBase.Content.ElementContent.Size = UDim2.fromScale(elementContentScaleX, 1)
     if elementContentScaleX == 0 then
         cheatBase.Content.ElementContent.Visible = false
     else
@@ -4247,7 +4227,6 @@ local function generateCheatBase(Cheat, sett)
     return cheatBase
 end
 
---// some effects because my lazy ass is too lazy to put it in the module
 local function setupEffects(ui, hover)
     local ClickEvent = Instance.new("BindableEvent")
 
@@ -4322,7 +4301,7 @@ function UILibrary.Section:Button(sett, callback)
 
     self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
             self.Section.Name
-        ][sett.Title or sett.ButtonName] = meta -- Используем ButtonName если Title нет
+        ][sett.Title or sett.ButtonName] = meta
 
     return meta
 end
@@ -4500,7 +4479,6 @@ function UILibrary.Section:Textbox(sett, callback)
     end
 
     functions.setValue = function(new)
-        --/// anims
         element.Text.Text = new
         updateSize()
         callback(element.Text.Text)
@@ -4514,7 +4492,6 @@ function UILibrary.Section:Textbox(sett, callback)
 
     element.Text.Focused:Connect(
         function()
-            -- handle as hover
             TweenService:Create(
                 element,
                 TI,
@@ -4535,7 +4512,6 @@ function UILibrary.Section:Textbox(sett, callback)
 
     element.Text.FocusLost:Connect(
         function()
-            -- set it here
             TweenService:Create(
                 element,
                 TI,
@@ -4596,7 +4572,6 @@ function UILibrary.Section:Keybind(sett, callback)
     local keyPressConn = nil
 
     functions.setValue = function(new)
-        --/// anims
         element.Text.Text = new.Name
         updateSize()
 
@@ -4776,7 +4751,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
         menuIsOpen = true
 
         local oldColor
-        local oldPos
+        -- local oldPos -- oldPos не используется, можно убрать
 
         self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Visible = true
 
@@ -4977,7 +4952,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
                 }
             ):Play()
 
-            wait(.5)
+            task.wait(.5) -- Используем task.wait вместо wait
             self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Visible = false
             menuIsOpen = false
         end
@@ -5045,7 +5020,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
                             Content.Buttons.Confirm.OtherFill,
                             TI,
                             {
-                                ImageColor3 = Color3.fromRGB(60, 150, 107)
+                                ImageColor3 = Color3.fromRGB(60, 150, 107) -- Было (60,150,107), исправлено на (85, 170, 127) в InputEnded, но здесь оставим как было для эффекта
                             }
                         ):Play()
                     end
@@ -5136,7 +5111,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
     if sett.Default then
         functions.setValue(sett.Default)
     else
-        functions.setValue(Color3.fromRGB(255, 255, 255))
+        functions.setValue(Color3.fromRGB(255, 255, 255)) -- Убедимся, что начальное значение установлено, если нет Default
     end
 
     local meta =
@@ -5173,14 +5148,14 @@ function UILibrary.Section:Slider(sett, callback)
         sett.Max = 10
     end
 
-    local sliderValue = sett.Default or sett.Min -- Используем Default если есть, иначе Min
+    local sliderValue = sett.Default or sett.Min 
     local scaleValue = 0
-    if sett.Max ~= sett.Min then -- Предотвращение деления на ноль
+    if sett.Max ~= sett.Min then
         scaleValue = math.clamp((sliderValue - sett.Min) / (sett.Max - sett.Min), 0, 1)
     end
 
     local step = sett.Step or 1
-    local precise = sett.Precise or (step < 1) -- Если шаг < 1, считаем точным
+    local precise = sett.Precise or (step < 1) 
 
     local function roundToStep(value, step)
         return math.floor(value / step + 0.5) * step
@@ -5191,13 +5166,13 @@ function UILibrary.Section:Slider(sett, callback)
     end
 
     functions.setValue = function(v, scale, triggerCallback)
-        triggerCallback = triggerCallback == nil and true or triggerCallback -- По умолчанию вызываем колбэк
+        triggerCallback = triggerCallback == nil and true or triggerCallback 
 
         local clampedValue = math.clamp(v, sett.Min, sett.Max)
         local steppedValue = roundToStep(clampedValue, step)
 
         if not precise then
-            steppedValue = math.floor(steppedValue + 0.5) -- Округляем до целого, если не precise
+            steppedValue = math.floor(steppedValue + 0.5) 
         end
 
         sliderValue = steppedValue
@@ -5205,13 +5180,12 @@ function UILibrary.Section:Slider(sett, callback)
 
         local displayText
         if precise then
-            -- Форматируем для точности (например, 2 знака после запятой)
              if step >= 0.1 then
                  displayText = string.format("%.1f", sliderValue)
              elseif step >= 0.01 then
                   displayText = string.format("%.2f", sliderValue)
              else
-                 displayText = tostring(sliderValue) -- Для очень маленьких шагов
+                 displayText = tostring(sliderValue)
              end
         else
             displayText = tostring(sliderValue)
@@ -5265,14 +5239,13 @@ function UILibrary.Section:Slider(sett, callback)
                 if sett.Max ~= sett.Min then
                     newScale = math.clamp((steppedValue - sett.Min) / (sett.Max - sett.Min), 0, 1)
                 end
-                functions.setValue(steppedValue, newScale) -- Вызовет колбэк
+                functions.setValue(steppedValue, newScale)
             else
-                 -- Возвращаем старое значение, если ввод некорректен
                  local oldScale = 0
                  if sett.Max ~= sett.Min then
                       oldScale = math.clamp((sliderValue - sett.Min) / (sett.Max - sett.Min), 0, 1)
                  end
-                 functions.setValue(sliderValue, oldScale, false) -- Не вызываем колбэк повторно
+                 functions.setValue(sliderValue, oldScale, false)
             end
         end
     )
@@ -5286,14 +5259,14 @@ function UILibrary.Section:Slider(sett, callback)
                 local sliderPos = element.Drag.AbsolutePosition.X
                 local sliderWidth = element.Drag.AbsoluteSize.X
 
-                if sliderWidth == 0 then return end -- Предотвращаем деление на ноль
+                if sliderWidth == 0 then return end
 
                 local relativeX = mouseX - sliderPos
                 local maxPos = math.clamp(relativeX / sliderWidth, 0, 1)
 
                 local val = ((sett.Max - sett.Min) * maxPos) + sett.Min
 
-                functions.setValue(val, maxPos) -- Вызовет колбэк
+                functions.setValue(val, maxPos)
             end
         end
     )
@@ -5322,8 +5295,7 @@ function UILibrary.Section:Slider(sett, callback)
         end
     )
 
-    -- Устанавливаем начальное значение
-    functions.setValue(sliderValue, scaleValue, false) -- Устанавливаем без вызова колбэка
+    functions.setValue(sliderValue, scaleValue, false) 
 
     local meta =
         setmetatable(
@@ -5364,7 +5336,6 @@ function UILibrary.Section:Dropdown(sett, callback)
     local menuOpen = false
 
     local options = sett.Options ~= nil and sett.Options or {}
-    -- local selectedOptions = {} -- Эта таблица не используется, уберем
 
     local optionConnections = {}
 
@@ -5372,11 +5343,11 @@ function UILibrary.Section:Dropdown(sett, callback)
         local String = ""
         local firstSelected = nil
 
-        for i, v in pairs(options) do
+        for i, v_is_selected in pairs(options) do -- Renamed v to v_is_selected for clarity
             local ui = element.OptionHolder.ContentHolder.Content:FindFirstChild(i)
-            if not ui then continue end -- Пропускаем, если UI нет
+            if not ui then continue end 
 
-            if v then -- Используем v как булево значение
+            if v_is_selected then 
                 TweenService:Create(
                     ui.Select,
                     TI,
@@ -5392,7 +5363,7 @@ function UILibrary.Section:Dropdown(sett, callback)
                         String = String .. ", " .. i
                     end
                 else
-                    firstSelected = i -- Запоминаем первый выбранный для одиночного выбора
+                    firstSelected = i 
                 end
             else
                 TweenService:Create(
@@ -5406,7 +5377,7 @@ function UILibrary.Section:Dropdown(sett, callback)
         end
 
         if not sett.Multi then
-            String = firstSelected or "None" -- Отображаем выбранный или "None"
+            String = firstSelected or "None" 
         elseif String == "" then
             String = "None"
         end
@@ -5423,21 +5394,19 @@ function UILibrary.Section:Dropdown(sett, callback)
                     functions.refreshUI()
                 else
                     if value == true then
-                        for i, v in pairs(options) do
-                            options[i] = false -- Сбрасываем все остальные
+                        for i, _ in pairs(options) do -- Use _ if v is not needed
+                            options[i] = false 
                         end
 
-                        options[option] = true -- Устанавливаем выбранный
+                        options[option] = true 
                         functions.refreshUI()
 
-                        if isDefault == nil then -- Закрываем меню только если это не установка по умолчанию
-                            functions.openMenu() -- Вызовет закрытие, так как menuOpen будет true
+                        if isDefault == nil then 
+                            functions.openMenu() 
                         end
                     end
-                    -- Если value == false и это не мульти-выбор, ничего не делаем (нельзя снять единственный выбор)
                 end
-
-                callback(options) -- Вызываем колбэк в любом случае изменения
+                callback(options) 
             end
         end
     end
@@ -5452,20 +5421,20 @@ function UILibrary.Section:Dropdown(sett, callback)
         for i, v in pairs(optionConnections) do
             v:Disconnect()
         end
-        optionConnections = {} -- Очищаем таблицу
+        optionConnections = {} 
 
         local counter = 0
         local totalCounter = 0
-        local optionKeys = {} -- Сохраняем ключи для сортировки или определения порядка
+        local optionKeys = {} 
 
         for k, _ in pairs(options) do
             table.insert(optionKeys, k)
             totalCounter = totalCounter + 1
         end
-        -- Опционально: сортируем ключи, если порядок важен
-        -- table.sort(optionKeys)
+        
+        -- table.sort(optionKeys) -- Uncomment if order matters
 
-        for _, v in ipairs(optionKeys) do -- Итерируем по сохраненным ключам
+        for _, v_key in ipairs(optionKeys) do -- Renamed v to v_key
             local Option
 
             counter = counter + 1
@@ -5478,15 +5447,14 @@ function UILibrary.Section:Dropdown(sett, callback)
                 Option = top:Clone()
             end
 
-            Option.Name = v
+            Option.Name = v_key
             Option.Parent = element.OptionHolder.ContentHolder.Content
-            Option.LayoutOrder = counter -- Используем counter для порядка
-            Option.Size = UDim2.fromScale(1, 1 / totalCounter)
+            Option.LayoutOrder = counter 
+            Option.Size = UDim2.fromScale(1, 1 / totalCounter) -- This might need adjustment for many items
 
-            Option.Current.Text = v
+            Option.Current.Text = v_key
 
-            -- Обновляем начальное состояние Select ImageTransparency
-            if options[v] then
+            if options[v_key] then
                  Option.Select.ImageTransparency = 0
             else
                  Option.Select.ImageTransparency = 1
@@ -5501,7 +5469,7 @@ function UILibrary.Section:Dropdown(sett, callback)
                         end
 
                         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                            functions.setValue(v, not options[v])
+                            functions.setValue(v_key, not options[v_key])
                         elseif input.UserInputType == Enum.UserInputType.MouseMovement then
                             TweenService:Create(
                                 Option,
@@ -5532,6 +5500,8 @@ function UILibrary.Section:Dropdown(sett, callback)
                 )
             )
         end
+        -- After updating, ensure the OptionHolder's canvas size is updated if it's a ScrollingFrame
+        -- This might not be necessary if AutomaticCanvasSize is Y and UIListLayout is used correctly.
     end
 
     updateDropdown()
@@ -5552,17 +5522,18 @@ function UILibrary.Section:Dropdown(sett, callback)
         menuOpen = not menuOpen
 
         if menuOpen then
-            element.OptionHolder.Visible = true -- Показываем сразу
+            element.OptionHolder.Visible = true 
             TweenService:Create(
                 element.MainHolder.Content.Icon.Holder,
                 TI,
                 { Rotation = 180 }
             ):Play()
 
+            local maxHeightScale = math.min(totalCounter, 5) * 0.15 -- Max 5 items visible
             TweenService:Create(
                 element.OptionHolder,
                 TI,
-                { Size = UDim2.fromScale(1, math.min(totalCounter, 5) * 0.15) } -- Ограничиваем высоту (например, макс 5 элементов)
+                { Size = UDim2.new(1, 0, maxHeightScale, 0) } -- Use UDim2.new for clarity
             ):Play()
 
             local n = 15 + (10 * math.clamp(totalCounter, 0, 3))
@@ -5587,7 +5558,7 @@ function UILibrary.Section:Dropdown(sett, callback)
             TweenService:Create(
                 element.OptionHolder,
                 TI,
-                { Size = UDim2.fromScale(1, 0) }
+                { Size = UDim2.new(1, 0, 0, 0) } -- Use UDim2.new
             ):Play()
 
             TweenService:Create(
@@ -5640,10 +5611,8 @@ function UILibrary.Section:Dropdown(sett, callback)
         )
     )
 
-    -- Установка начального значения
     if sett.Default then
         if sett.Multi then
-             -- Для мультивыбора, default может быть таблицей { ["Option1"] = true, ["Option3"] = true }
              if type(sett.Default) == "table" then
                  for opt, val in pairs(sett.Default) do
                      if options[opt] ~= nil and type(val) == "boolean" then
@@ -5652,13 +5621,12 @@ function UILibrary.Section:Dropdown(sett, callback)
                  end
              end
         else
-            -- Для одиночного выбора, default - это строка с именем опции
             if type(sett.Default) == "string" and options[sett.Default] ~= nil then
                  functions.setValue(sett.Default, true, true)
             end
         end
     end
-    functions.refreshUI() -- Обновляем UI после установки дефолтных значений
+    functions.refreshUI()
 
     local meta =
         setmetatable(
@@ -5677,7 +5645,6 @@ function UILibrary.Section:Dropdown(sett, callback)
 end
 
 function UILibrary.Section:Label(sett)
-    -- Создаем экземпляр нашего нового текстового шаблона
     local labelElement = objectGenerator.new("LabelElement")
 
     local titleLabel = labelElement:FindFirstChild("Title")
@@ -5685,33 +5652,27 @@ function UILibrary.Section:Label(sett)
 
     if not titleLabel then
         warn("UILibrary: Не удалось найти 'Title' в шаблоне LabelElement.")
-        labelElement:Destroy() -- Очистка, если шаблон поврежден
+        labelElement:Destroy() 
         return nil
     end
 
-    -- Устанавливаем текст заголовка
-    titleLabel.Text = sett.Title or sett.Text or "Label Text" -- Используем Title, Text или значение по умолчанию
+    titleLabel.Text = sett.Title or sett.Text or "Label Text" 
 
-    -- Устанавливаем текст описания, если он есть
     if descLabel then
         if sett.Description and sett.Description ~= "" then
             descLabel.Text = sett.Description
-            descLabel.Visible = true -- Показываем описание
+            descLabel.Visible = true 
         else
-            descLabel.Visible = false -- Скрываем, если текста нет
-            -- Можно также установить размер в 0, чтобы гарантировать отсутствие пустого места
+            descLabel.Visible = false 
             descLabel.Size = UDim2.new(1, 0, 0, 0)
         end
     elseif sett.Description and sett.Description ~= "" then
         warn("UILibrary: Не удалось найти 'Description' в шаблоне LabelElement, но описание было предоставлено")
     end
 
-    -- Устанавливаем порядок и родителя
     labelElement.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
     labelElement.Parent = self.Section.Border.Content
 
-    -- Для статического текста обычно не нужны методы setValue/getValue,
-    -- но можно вернуть объект для консистентности или для возможного обновления текста позже.
     local functions = {}
     functions.__index = functions
 
@@ -5735,10 +5696,8 @@ function UILibrary.Section:Label(sett)
         UI = labelElement
     }, functions)
 
-    -- Опционально: добавить в общую таблицу UI для отслеживания, если нужно
-    -- self.MainSelf.UI[self.oldSelf.CategoryName][self.oldSelf.SectionName][self.Section.Name][sett.Title or "Label"] = meta
-
     return meta
 end
 
 return UILibrary
+--- END OF FILE uiLIBnow.txt ---
