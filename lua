@@ -1,4 +1,4 @@
---- START OF FILE uiLIB.txt 66 ---
+--- START OF FILE uiLIB.txt 611 ---
 
 local UILibrary = {}
 --// Modulesssss
@@ -4083,68 +4083,58 @@ end
 
 function UILibrary.Button:Section(name, side)
     local Section = objectGenerator.new("Section")
-    Section.Border.SectionTitle.Text = name
+    local Border = Section:FindFirstChild("Border")
+    local Content_8 = Border and Border:FindFirstChild("Content")
+    local SectionTitle = Border and Border:FindFirstChild("SectionTitle") 
 
-    -- Устанавливаем ФИКСИРОВАННЫЙ размер тени для единообразия
-    Section.DropShadow.Size = UDim2.new(1, 47, 1, 47) 
+    if not Border or not Content_8 or not SectionTitle then
+        warn("Ошибка структуры шаблона Section для секции:", name)
+        Section:Destroy()
+        return nil
+    end
+
     Section.Name = name
+    Section.Border.SectionTitle.Text = name
+    Section.DropShadow.Size = UDim2.new(1, 47, 1, 47) -- Фиксированная тень
 
     Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
     Section.LayoutOrder = getLayoutOrder(self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side])
 
     self.oldSelf.oldSelf.UI[self.oldSelf.categoryUI.Name][self.SectionName][name] = {}
 
-    -- --- ВОССТАНАВЛИВАЕМ ЛОГИКУ РАСЧЕТА ВЫСОТЫ С УЧЕТОМ UISCALE ---
--- --- ИСПРАВЛЕНИЕ ЗДЕСЬ: Поиск по классу и улучшенная проверка ---
-    local contentFrame = Section.Border.Content
-    local contentListLayout -- Объявляем заранее
-    local contentPadding    -- Объявляем заранее
+    -- --- УПРОЩЕННЫЙ РАСЧЕТ ВЫСОТЫ С ОЖИДАНИЕМ ЭЛЕМЕНТОВ ---
+    local contentFrame = Content_8 -- Используем найденный Content_8
+    local contentListLayout = contentFrame:WaitForChild("UIListLayout_22", 1) -- Ожидаем с таймаутом
+    local contentPadding = contentFrame:WaitForChild("UIPadding_12", 1)    -- Ожидаем с таймаутом
 
     local function updateSectionHeight()
-        -- Ищем по классу, а не по имени
-        contentListLayout = contentFrame:FindFirstChildOfClass("UIListLayout") 
-        contentPadding = contentFrame:FindFirstChildOfClass("UIPadding")    
-
         if not contentListLayout or not contentPadding then
-             -- Ошибка все еще возможна, если элементы не создались
-             warn("Не найден UIListLayout или UIPadding в Section.Border.Content для секции:", name, contentFrame:GetFullName())
-             -- Можно оставить текущий размер или установить минимальный
-             -- Section.Size = UDim2.new(1, 0, 0, 30) -- Пример минимальной высоты
+             -- Ошибка, если элементы так и не появились
+             warn("Не найден UIListLayout_22 или UIPadding_12 в Section.Border.Content после ожидания для секции:", name)
+             Section.Size = UDim2.new(1, 0, 0, 50) -- Минимальная высота по умолчанию
              return 
         end
         
         local topPaddingOffset = contentPadding.PaddingTop.Offset
         local bottomPaddingOffset = contentPadding.PaddingBottom.Offset
-        local contentHeightAbs = contentListLayout.AbsoluteContentSize.Y -- Берем абсолютную высоту контента
-
-        -- Устанавливаем высоту секции = высота контента + вертикальные отступы
-        -- Высота будет в Offset, и UIScale на MainUI ее отмасштабирует
+        local contentHeightAbs = contentListLayout.AbsoluteContentSize.Y -- Берем абсолютную (уже отмасштабированную) высоту
+        
+        -- Устанавливаем высоту секции напрямую в Offset. UIScale на MainUI ее отмасштабирует.
         Section.Size = UDim2.new(1, 0, 0, contentHeightAbs + topPaddingOffset + bottomPaddingOffset) 
     end
 
-    -- Используем task.defer для надежности первоначального расчета
-    task.defer(function()
+    -- Первоначальный расчет и подключение сигналов
+    if contentListLayout and contentPadding then
         updateSectionHeight() -- Первый расчет
-
-        -- Повторно получаем ссылки для подключения сигналов (на всякий случай)
-        contentListLayout = contentFrame:FindFirstChildOfClass("UIListLayout") 
-        contentPadding = contentFrame:FindFirstChildOfClass("UIPadding")  
-
-        if contentListLayout then 
-            contentListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
-        else
-             warn("Окончательно не найден UIListLayout в секции:", name, contentFrame:GetFullName())
-        end
-        
-        if contentPadding then 
-            -- Обновляем высоту и при изменении паддингов
-            contentPadding:GetPropertyChangedSignal("PaddingTop"):Connect(updateSectionHeight)
-            contentPadding:GetPropertyChangedSignal("PaddingBottom"):Connect(updateSectionHeight)
-        else
-            warn("Окончательно не найден UIPadding в секции:", name, contentFrame:GetFullName())
-        end
-    end)
-    -- --- КОНЕЦ ИСПРАВЛЕННОГО БЛОКА ВЫСОТЫ---
+        contentListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
+        contentPadding:GetPropertyChangedSignal("PaddingTop"):Connect(updateSectionHeight)
+        contentPadding:GetPropertyChangedSignal("PaddingBottom"):Connect(updateSectionHeight)
+    else
+        -- Если элементы не найдены даже после WaitForChild, выводим ошибку
+        warn("Не удалось инициализировать расчет высоты для секции:", name)
+        Section.Size = UDim2.new(1, 0, 0, 50) -- Устанавливаем минимальную высоту
+    end
+    -- --- КОНЕЦ БЛОКА РАСЧЕТА ВЫСОТЫ ---
 
     return setmetatable(
         {
