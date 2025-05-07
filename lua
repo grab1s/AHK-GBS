@@ -4161,26 +4161,42 @@ function UILibrary.Button:Section(name, side)
     Section.DropShadow.Size = UDim2.new(1, 47, 1, 47) -- Задан фиксированный размер (47)
     Section.Name = name
 
-    -- УДАЛЕН ИЛИ ЗАКОММЕНТИРОВАН БЛОК ChildAdded:
-    -- Section.Border.Content.ChildAdded:Connect(
-    --     function(c)
-    --         local n = 25 + (10 * math.clamp(#Section.Border.Content:GetChildren() - 2, 0, 3))
-    --         Section.DropShadow.Size = UDim2.new(1, n, 1, n)
-    --     end
-    -- )
+    -- УДАЛЕН ИЛИ ЗАКОММЕНТИРОВАН БЛОК ChildAdded (уже сделано ранее):
+    -- Section.Border.Content.ChildAdded:Connect(...)
 
     Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
     Section.LayoutOrder = getLayoutOrder(self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side])
 
     self.oldSelf.oldSelf.UI[self.oldSelf.categoryUI.Name][self.SectionName][name] = {}
 
-    -- Этот код отвечает за высоту самой секции, его оставляем
-    Section.Size = UDim2.new(1, 0, 0, Section.Border.Content.UIListLayout.AbsoluteContentSize.Y + 20)
-    Section.Border.Content.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(
-        function()
-            Section.Size = UDim2.new(1, 0, 0, Section.Border.Content.UIListLayout.AbsoluteContentSize.Y + 20)
+    -- --- ИЗМЕНЕНИЕ ЗДЕСЬ: Расчет высоты секции ---
+    local contentFrame = Section.Border.Content
+    local contentListLayout = contentFrame.UIListLayout -- Убедись, что имя UIListLayout правильное (UIListLayout_22 в оригинале?)
+    local contentPadding = contentFrame.UIPadding_12 -- Убедись, что имя UIPadding правильное
+
+    local function updateSectionHeight()
+        -- Проверяем наличие необходимых элементов
+        if not contentListLayout or not contentPadding then
+             warn("Не найден UIListLayout или UIPadding в секции:", name)
+             return
         end
-    )
+        local topPadding = contentPadding.PaddingTop.Offset
+        local bottomPadding = contentPadding.PaddingBottom.Offset
+        local contentHeight = contentListLayout.AbsoluteContentSize.Y
+        -- Высота секции = высота контента + верхний отступ + нижний отступ
+        Section.Size = UDim2.new(1, 0, 0, contentHeight + topPadding + bottomPadding)
+    end
+
+    -- Устанавливаем начальную высоту
+    task.wait() -- Даем время UIListLayout вычислить размер
+    updateSectionHeight()
+
+    -- Обновляем высоту при изменении размера контента
+    contentListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
+    -- Также можно добавить обновление при изменении самого Padding, если он может меняться
+    -- contentPadding:GetPropertyChangedSignal("PaddingTop"):Connect(updateSectionHeight)
+    -- contentPadding:GetPropertyChangedSignal("PaddingBottom"):Connect(updateSectionHeight)
+    -- --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
     return setmetatable(
         {
