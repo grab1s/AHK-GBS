@@ -1,4 +1,4 @@
---- START OF FILE uiLIB.txt 52 ---
+--- START OF FILE uiLIB.txt ---
 
 local UILibrary = {}
 --// Modulesssss
@@ -2125,8 +2125,8 @@ local function getObjGen()
             Gui.Content_8.BackgroundTransparency = 1.000
             Gui.Content_8.Size = UDim2.new(1, 0, 0, 0) -- Начальный размер Y=0
             Gui.Content_8.AutomaticSize = Enum.AutomaticSize.Y -- Используем авто-высоту
-            Gui.Content_8.ClipsDescendants = true -- Оставляем TRUE
-        
+            Gui.Content_8.ClipsDescendants = true -- ОСТАВЛЯЕМ TRUE
+
             Gui.UIPadding_12.Parent = Gui.Content_8
             Gui.UIPadding_12.PaddingBottom = UDim.new(0, 8)
             Gui.UIPadding_12.PaddingLeft = UDim.new(0, 8)
@@ -2139,7 +2139,7 @@ local function getObjGen()
             Gui.UIListLayout_22.Padding = UDim.new(0, 10) -- Вертикальный отступ между элементами секции
 
             Gui.DropShadow_16.Name = "DropShadow"
-            Gui.DropShadow_16.Parent = Gui.Section
+            Gui.DropShadow_16.Parent = Gui.Section -- Тень теперь у Section, а не у Border
             Gui.DropShadow_16.AnchorPoint = Vector2.new(0.5, 0.5)
             Gui.DropShadow_16.BackgroundTransparency = 1.000
             Gui.DropShadow_16.BorderSizePixel = 0
@@ -2156,14 +2156,12 @@ local function getObjGen()
             Gui.CheatBase.Parent = Gui.Objects
             Gui.CheatBase.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.CheatBase.LayoutOrder = 1
-            Gui.CheatBase.Size = UDim2.new(1, 0, 0, 0) -- Начальный размер Y=0
-            Gui.CheatBase.AutomaticSize = Enum.AutomaticSize.Y -- Используем авто-высоту
+            Gui.CheatBase.Size = UDim2.new(1, 0, 0, 30)
 
             Gui.Content_9.Name = "Content"
             Gui.Content_9.Parent = Gui.CheatBase
             Gui.Content_9.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Gui.Content_9.Size = UDim2.new(1, 0, 0, 0) -- Начальный размер Y=0
-            Gui.Content_9.AutomaticSize = Enum.AutomaticSize.Y -- Используем авто-высоту
+            Gui.Content_9.Size = UDim2.new(1, 0, 1, 0)
 
             Gui.UIListLayout_23.Parent = Gui.Content_9
             Gui.UIListLayout_23.FillDirection = Enum.FillDirection.Horizontal
@@ -2171,61 +2169,47 @@ local function getObjGen()
             Gui.UIListLayout_23.VerticalAlignment = Enum.VerticalAlignment.Center
             Gui.UIListLayout_23.Padding = UDim.new(0.05, 0) -- Горизонтальный отступ между текстом и элементом
 
-            Gui.Text_8.Name = "Text"
-            Gui.Text_8.Parent = Gui.Text_7
-            Gui.Text_8.AnchorPoint = Vector2.new(0, 0) 
-            Gui.Text_8.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Gui.Text_8.BackgroundTransparency = 1.000
-            Gui.Text_8.Position = UDim2.new(0, 0, 0, 0) 
-            Gui.Text_8.Size = UDim2.new(1, -10, 0, 0) -- Ширина 100% минус отступ, высота авто
-            Gui.Text_8.AutomaticSize = Enum.AutomaticSize.Y -- Используем авто-высоту
-            Gui.Text_8.Visible = false
-            Gui.Text_8.ZIndex = 111
-            Gui.Text_8.Font = Enum.Font.GothamSemibold
-            Gui.Text_8.Text = "Title"
-            Gui.Text_8.TextColor3 = Color3.fromRGB(181, 181, 181)
-            Gui.Text_8.TextSize = 14 -- Уменьшил размер шрифта, чтобы лучше помещался
-            Gui.Text_8.TextWrapped = true 
-            Gui.Text_8.TextXAlignment = Enum.TextXAlignment.Lef
+            Gui.Text_7.Name = "Text"
+            Gui.Text_7.Parent = Gui.Content_9
+            Gui.Text_7.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            Gui.Text_7.Size = UDim2.new(0.45, 0, 1, 0) -- Возвращаем Y Scale = 1
 
             Gui.Text_8.Name = "Text"
             Gui.Text_8.Parent = Gui.Text_7
-            Gui.Text_8.AnchorPoint = Vector2.new(0.5, 0.5) -- Можно вернуть 0.5, 0.5
+            Gui.Text_8.AnchorPoint = Vector2.new(0.5, 0.5) -- Возвращаем
             Gui.Text_8.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Text_8.BackgroundTransparency = 1.000
-            Gui.Text_8.Position = UDim2.new(0.5, 0, 0.25, 0) -- ВОЗВРАЩАЕМ (Позиция для заголовка)
-            Gui.Text_8.Size = UDim2.new(0.899999976, 0, 0.5, 0) -- ВОЗВРАЩАЕМ (Занимает верхнюю половину Text_7)
+            Gui.Text_8.Position = UDim2.new(0.5, 0, 0.25, 0) -- Возвращаем
+            Gui.Text_8.Size = UDim2.new(0.899999976, 0, 0.5, 0) -- Возвращаем
             Gui.Text_8.Visible = false
             Gui.Text_8.ZIndex = 111
             Gui.Text_8.Font = Enum.Font.GothamSemibold
             Gui.Text_8.Text = "Title"
             Gui.Text_8.TextColor3 = Color3.fromRGB(181, 181, 181)
-            Gui.Text_8.TextSize = 18.000 -- Можно уменьшить до 14-16, если 18 слишком большое
-            Gui.Text_8.TextWrapped = true
+            Gui.Text_8.TextSize = 18.000 
+            Gui.Text_8.TextWrapped = true -- ОСТАВЛЯЕМ
             Gui.Text_8.TextXAlignment = Enum.TextXAlignment.Left
 
             Gui.Desc.Name = "Desc"
             Gui.Desc.Parent = Gui.Text_8 
-            Gui.Desc.AnchorPoint = Vector2.new(0, 1) 
+            Gui.Desc.AnchorPoint = Vector2.new(0.5, 0) -- Возвращаем
             Gui.Desc.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Desc.BackgroundTransparency = 1.000
-            Gui.Desc.Position = UDim2.new(0, 0, 1, 2) 
-            Gui.Desc.Size = UDim2.new(1, 0, 0, 0) -- Ширина 100%, высота авто
-            Gui.Desc.AutomaticSize = Enum.AutomaticSize.Y -- Используем авто-высоту
+            Gui.Desc.Position = UDim2.new(0.5, 0, 1, 2) -- Возвращаем 
+            Gui.Desc.Size = UDim2.new(1, 0, 0.8, 0) -- Возвращаем (или 1.5, 0, 0.5, 0)
             Gui.Desc.Visible = false
             Gui.Desc.ZIndex = 111
             Gui.Desc.Font = Enum.Font.Gotham
             Gui.Desc.Text = "Short description"
             Gui.Desc.TextColor3 = Color3.fromRGB(60, 60, 60)
             Gui.Desc.TextSize = 12.000
-            Gui.Desc.TextWrapped = true 
+            Gui.Desc.TextWrapped = true -- ОСТАВЛЯЕМ
             Gui.Desc.TextXAlignment = Enum.TextXAlignment.Left
 
             Gui.ElementContent.Name = "ElementContent"
             Gui.ElementContent.Parent = Gui.Content_9
             Gui.ElementContent.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Gui.ElementContent.Size = UDim2.new(0.55, 0, 0, 0) -- Ширина Scale, высота авто
-            Gui.ElementContent.AutomaticSize = Enum.AutomaticSize.Y -- Используем авто-высоту
+            Gui.ElementContent.Size = UDim2.new(0.55, 0, 1, 0) -- Возвращаем Y Scale = 1
 
             Gui.UIListLayout_24.Parent = Gui.ElementContent
             Gui.UIListLayout_24.FillDirection = Enum.FillDirection.Horizontal
@@ -4103,16 +4087,17 @@ end
 function UILibrary.Button:Section(name, side)
     local Section = objectGenerator.new("Section")
     local Border = Section:FindFirstChild("Border")
+    local Content_8 = Border and Border:FindFirstChild("Content")
     local SectionTitle = Border and Border:FindFirstChild("SectionTitle") 
 
-    if not Border then
+    if not Border or not Content_8 or not SectionTitle then
         warn("Ошибка структуры шаблона Section для секции:", name)
         Section:Destroy()
         return nil 
     end
-    if SectionTitle then SectionTitle.Text = name end
 
     Section.Name = name
+    SectionTitle.Text = name -- Устанавливаем текст заголовка здесь
     Section.DropShadow.Size = UDim2.new(1, 47, 1, 47) -- Фиксированная тень
 
     Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
@@ -4120,13 +4105,62 @@ function UILibrary.Button:Section(name, side)
 
     self.oldSelf.oldSelf.UI[self.oldSelf.categoryUI.Name][self.SectionName][name] = {}
 
-    -- Ручной расчет высоты полностью удален
+    -- --- ВОССТАНАВЛИВАЕМ ЛОГИКУ РАСЧЕТА ВЫСОТЫ С УЧЕТОМ UISCALE ---
+    local contentFrame = Content_8 -- Используем найденный Content_8
+    local contentListLayout -- Объявляем заранее
+    local contentPadding    -- Объявляем заранее
+
+    local function updateSectionHeight()
+        -- Ищем по классу, а не по имени
+        contentListLayout = contentFrame:FindFirstChildOfClass("UIListLayout") 
+        contentPadding = contentFrame:FindFirstChildOfClass("UIPadding")    
+
+        if not contentListLayout or not contentPadding then
+             -- Ошибка все еще возможна, если элементы не создались
+             warn("Не найден UIListLayout или UIPadding в Section.Border.Content для секции:", name, contentFrame:GetFullName())
+             -- Можно оставить текущий размер или установить минимальный
+             -- Section.Size = UDim2.new(1, 0, 0, 30) -- Пример минимальной высоты
+             return 
+        end
+        
+        local topPaddingOffset = contentPadding.PaddingTop.Offset
+        local bottomPaddingOffset = contentPadding.PaddingBottom.Offset
+        local contentHeightAbs = contentListLayout.AbsoluteContentSize.Y -- Берем абсолютную (уже отмасштабированную) высоту
+        
+        -- Устанавливаем высоту секции = высота контента + вертикальные отступы
+        -- Высота будет в Offset, и UIScale на MainUI ее отмасштабирует.
+        Section.Size = UDim2.new(1, 0, 0, contentHeightAbs + topPaddingOffset + bottomPaddingOffset) 
+    end
+
+    -- Используем task.defer для надежности первоначального расчета
+    task.defer(function()
+        updateSectionHeight() -- Первый расчет
+
+        -- Повторно получаем ссылки для подключения сигналов (на всякий случай)
+        contentListLayout = contentFrame:FindFirstChildOfClass("UIListLayout") 
+        contentPadding = contentFrame:FindFirstChildOfClass("UIPadding")  
+
+        if contentListLayout then 
+            contentListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
+        else
+             warn("Окончательно не найден UIListLayout в секции:", name, contentFrame:GetFullName())
+        end
+        
+        if contentPadding then 
+            -- Обновляем высоту и при изменении паддингов
+            contentPadding:GetPropertyChangedSignal("PaddingTop"):Connect(updateSectionHeight)
+            contentPadding:GetPropertyChangedSignal("PaddingBottom"):Connect(updateSectionHeight)
+        else
+            warn("Окончательно не найден UIPadding в секции:", name, contentFrame:GetFullName())
+        end
+    end)
+    -- --- КОНЕЦ БЛОКА РАСЧЕТА ВЫСОТЫ ---
 
     return setmetatable(
         {
             MainSelf = self.oldSelf.oldSelf,
             oldSelf = self,
-            Section = Section
+            Section = Section -- Возвращаем сам объект Section
         },
         UILibrary.Section
     )
@@ -4188,15 +4222,15 @@ local function generateCheatBase(Cheat, sett)
         else
             cheatBase.Content.Text.Text.Desc.Visible = false
         end
-        cheatBase.Content.Text.Size = UDim2.fromScale(textBlockScaleX, 0) -- Высота будет автоматической
+        cheatBase.Content.Text.Size = UDim2.fromScale(textBlockScaleX, 1) -- Высота относительная
         cheatBase.Content.Text.Visible = true
     else
         cheatBase.Content.Text.Visible = false
-        cheatBase.Content.Text.Size = UDim2.fromScale(0,0) -- Схлопываем, если нет текста
+        cheatBase.Content.Text.Size = UDim2.fromScale(0, 1) -- Схлопываем ширину, если нет текста
         elementContentScaleX = 1 -- Элемент занимает всю ширину, если нет текста
     end
 
-    cheatBase.Content.ElementContent.Size = UDim2.fromScale(elementContentScaleX, 0) -- Высота будет автоматической
+    cheatBase.Content.ElementContent.Size = UDim2.fromScale(elementContentScaleX, 1) -- Высота относительная
     if elementContentScaleX == 0 then
         cheatBase.Content.ElementContent.Visible = false
     else
