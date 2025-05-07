@@ -2084,16 +2084,14 @@ local function getObjGen()
             Gui.Section.Name = "Section"
             Gui.Section.Parent = Gui.Objects
             Gui.Section.BackgroundTransparency = 1.000
-            -- Gui.Section.Size = UDim2.new(1, 0, 0, 0) -- УБРАНО/ЗАКОММЕНТИРОВАНО
-            Gui.Section.AutomaticSize = Enum.AutomaticSize.Y -- ДОБАВЛЕНО
+            Gui.Section.Size = UDim2.new(1, 0, 0, 0)
             Gui.Section.ZIndex = 101
 
             Gui.Border.Name = "Border"
             Gui.Border.Parent = Gui.Section
             Gui.Border.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
             Gui.Border.BorderSizePixel = 0
-            -- Gui.Border.Size = UDim2.new(1, 0, 1, 0) -- УБРАНО/ЗАКОММЕНТИРОВАНО
-            Gui.Border.AutomaticSize = Enum.AutomaticSize.Y -- ДОБАВЛЕНО
+            Gui.Border.Size = UDim2.new(1, 0, 1, 0)
             Gui.Border.ZIndex = 107
 
             Gui.SectionTitle.Name = "SectionTitle"
@@ -2123,9 +2121,8 @@ local function getObjGen()
             Gui.Content_8.Parent = Gui.Border
             Gui.Content_8.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Content_8.BackgroundTransparency = 1.000
-            -- Gui.Content_8.Size = UDim2.new(1, 0, 1, 0) -- УБРАНО/ЗАКОММЕНТИРОВАНО
-            Gui.Content_8.AutomaticSize = Enum.AutomaticSize.Y -- ДОБАВЛЕНО/ПРОВЕРЕНО
-            Gui.Content_8.ClipsDescendants = true -- УСТАНОВЛЕНО В TRUE
+            Gui.Content_8.Size = UDim2.new(1, 0, 1, 0)
+            Gui.Content_8.ClipsDescendants = true
 
             Gui.UIPadding_12.Parent = Gui.Content_8
             Gui.UIPadding_12.PaddingBottom = UDim.new(0, 8)
@@ -2156,16 +2153,12 @@ local function getObjGen()
             Gui.CheatBase.Parent = Gui.Objects
             Gui.CheatBase.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.CheatBase.LayoutOrder = 1
-            -- Gui.CheatBase.Size = UDim2.new(1, 0, 0, 30) -- УБРАНО/ЗАКОММЕНТИРОВАНО
-            Gui.CheatBase.AutomaticSize = Enum.AutomaticSize.Y -- ДОБАВЛЕНО
-            Gui.CheatBase.Size = UDim2.new(1, 0, 0, 0) -- Начальный Y Offset = 0
+            Gui.CheatBase.Size = UDim2.new(1, 0, 0, 30)
 
             Gui.Content_9.Name = "Content"
             Gui.Content_9.Parent = Gui.CheatBase
             Gui.Content_9.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            -- Gui.Content_9.Size = UDim2.new(1, 0, 1, 0) -- УБРАНО/ЗАКОММЕНТИРОВАНО
-            Gui.Content_9.AutomaticSize = Enum.AutomaticSize.Y -- ДОБАВЛЕНО
-            Gui.Content_9.Size = UDim2.new(1, 0, 0, 0) -- Начальный Y Offset = 0
+            Gui.Content_9.Size = UDim2.new(1, 0, 1, 0)
 
             Gui.UIListLayout_23.Parent = Gui.Content_9
             Gui.UIListLayout_23.FillDirection = Enum.FillDirection.Horizontal
@@ -2176,8 +2169,7 @@ local function getObjGen()
             Gui.Text_7.Name = "Text"
             Gui.Text_7.Parent = Gui.Content_9
             Gui.Text_7.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            -- Gui.Text_7.Size = UDim2.new(0.5, 0, 1, 0) -- УБРАНО/ЗАКОММЕНТИРОВАНО
-            Gui.Text_7.AutomaticSize = Enum.AutomaticSize.Y -- ДОБАВЛЕНО
+            Gui.Text_7.Size = UDim2.new(0.5, 0, 1, 0)
             Gui.Text_7.Size = UDim2.new(0.45, 0, 0, 0) -- Ширина 45% (подбирать), высота авто
 
             Gui.Text_8.Name = "Text"
@@ -2186,8 +2178,7 @@ local function getObjGen()
             Gui.Text_8.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Text_8.BackgroundTransparency = 1.000
             Gui.Text_8.Position = UDim2.new(0, 0, 0.5, 0) -- Изменено
-            -- Gui.Text_8.Size = UDim2.new(0.899999976, 0, 0.5, 0) -- УБРАНО/ЗАКОММЕНТИРОВАНО
-            Gui.Text_8.AutomaticSize = Enum.AutomaticSize.Y -- ДОБАВЛЕНО/ПРОВЕРЕНО
+            Gui.Text_8.Size = UDim2.new(0.899999976, 0, 0.5, 0)
             Gui.Text_8.Size = UDim2.new(1, -10, 0, 0) -- Ширина 100% минус отступ, высота авто
             Gui.Text_8.Visible = false
             Gui.Text_8.ZIndex = 111
@@ -2204,8 +2195,7 @@ local function getObjGen()
             Gui.Desc.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Desc.BackgroundTransparency = 1.000
             Gui.Desc.Position = UDim2.new(0, 0, 1, 2) -- Небольшой отступ под Title
-            -- Gui.Desc.Size = UDim2.new(1.5, 0, 0.5, 0) -- УБРАНО/ЗАКОММЕНТИРОВАНО
-            Gui.Desc.AutomaticSize = Enum.AutomaticSize.Y -- ДОБАВЛЕНО/ПРОВЕРЕНО
+            Gui.Desc.Size = UDim2.new(1.5, 0, 0.5, 0)
             Gui.Desc.Size = UDim2.new(1, 0, 0, 0) -- Ширина 100%, высота авто
             Gui.Desc.Visible = false
             Gui.Desc.ZIndex = 111
@@ -2219,9 +2209,8 @@ local function getObjGen()
             Gui.ElementContent.Name = "ElementContent"
             Gui.ElementContent.Parent = Gui.Content_9
             Gui.ElementContent.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            -- Gui.ElementContent.Size = UDim2.new(0.5, 0, 1, 0) -- УБРАНО/ЗАКОММЕНТИРОВАНО
-            Gui.ElementContent.AutomaticSize = Enum.AutomaticSize.Y -- ДОБАВЛЕНО
-            Gui.ElementContent.Size = UDim2.new(0.55, 0, 0, 0) -- Ширина 55% (подбирать), высота авто
+            Gui.ElementContent.Size = UDim2.new(0.5, 0, 1, 0)
+            Gui.ElementContent.Size = UDim2.new(0.50, 0, 0, 0) -- Ширина 55% (подбирать), высота авто
 
             Gui.UIListLayout_24.Parent = Gui.ElementContent
             Gui.UIListLayout_24.FillDirection = Enum.FillDirection.Horizontal
@@ -4100,8 +4089,7 @@ function UILibrary.Button:Section(name, side)
     local Section = objectGenerator.new("Section")
     Section.Border.SectionTitle.Text = name
 
-    -- Устанавливаем ФИКСИРОВАННЫЙ размер тени для единообразия
-    Section.DropShadow.Size = UDim2.new(1, 47, 1, 47) -- Задан фиксированный размер (47)
+    Section.DropShadow.Size = UDim2.new(1, 47, 1, 47) 
     Section.Name = name
 
     Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
@@ -4109,38 +4097,43 @@ function UILibrary.Button:Section(name, side)
 
     self.oldSelf.oldSelf.UI[self.oldSelf.categoryUI.Name][self.SectionName][name] = {}
 
-    -- Высота секции теперь будет управляться AutomaticSize, этот блок не нужен
-    -- local contentFrame = Section.Border.Content
-    -- local contentListLayout = contentFrame:FindFirstChild("UIListLayout_22")
-    -- local contentPadding = contentFrame:FindFirstChild("UIPadding_12")
+    -- --- ВОССТАНАВЛИВАЕМ ЭТОТ БЛОК С ЛОГИКОЙ МАСШТАБИРОВАНИЯ ---
+    local contentFrame = Section.Border.Content
+    local contentListLayout = contentFrame:FindFirstChild("UIListLayout_22") 
+    local contentPadding = contentFrame:FindFirstChild("UIPadding_12")    
 
-    -- local function updateSectionHeight()
-    --     if not contentListLayout or not contentPadding then
-    --          warn("Не найден UIListLayout_22 или UIPadding_12 в Section.Border.Content для секции:", name, contentFrame:GetFullName())
-    --          Section.Size = UDim2.new(1, 0, 0, 50) 
-    --          return
-    --     end
-    --     local topPadding = contentPadding.PaddingTop.Offset
-    --     local bottomPadding = contentPadding.PaddingBottom.Offset
+    local function updateSectionHeight()
+        if not contentListLayout or not contentPadding then
+             warn("Не найден UIListLayout_22 или UIPadding_12 в Section.Border.Content для секции:", name, contentFrame:GetFullName())
+             Section.Size = UDim2.new(1, 0, 0, 50) -- Минимальная высота по умолчанию
+             return
+        end
         
-    --     local mainUIScaler = self.oldSelf.oldSelf.MainUI:FindFirstChild("MainUIScaler")
-    --     local scaleFactor = (mainUIScaler and mainUIScaler.Scale) or 1
+        local topPadding = contentPadding.PaddingTop.Offset
+        local bottomPadding = contentPadding.PaddingBottom.Offset
         
-    --     local contentHeightOffset = contentListLayout.AbsoluteContentSize.Y / scaleFactor
-        
-    --     Section.Size = UDim2.new(1, 0, 0, contentHeightOffset + topPadding + bottomPadding)
-    -- end
+        -- Ищем UIScale на главном UI
+        local mainUIScaler = self.MainSelf.MainUI:FindFirstChild("MainUIScaler") 
+        local scaleFactor = (mainUIScaler and mainUIScaler.Scale) or 1 -- Получаем текущий масштаб или 1, если скейлера нет
+        if scaleFactor == 0 then scaleFactor = 1 end -- Предотвращаем деление на ноль
 
-    -- task.wait() 
-    -- updateSectionHeight()
+        local contentHeightOffset = contentListLayout.AbsoluteContentSize.Y / scaleFactor -- "Демасштабируем" высоту контента
+        
+        -- Устанавливаем немасштабированную высоту + отступы как Offset
+        Section.Size = UDim2.new(1, 0, 0, contentHeightOffset + topPadding + bottomPadding)
+    end
 
-    -- if contentListLayout then
-    --     contentListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
-    -- end
-    -- if contentPadding then 
-    --     contentPadding:GetPropertyChangedSignal("PaddingTop"):Connect(updateSectionHeight)
-    --     contentPadding:GetPropertyChangedSignal("PaddingBottom"):Connect(updateSectionHeight)
-    -- end
+    task.wait() 
+    updateSectionHeight()
+
+    if contentListLayout then 
+        contentListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
+    end
+    if contentPadding then 
+        contentPadding:GetPropertyChangedSignal("PaddingTop"):Connect(updateSectionHeight)
+        contentPadding:GetPropertyChangedSignal("PaddingBottom"):Connect(updateSectionHeight)
+    end
+    -- --- КОНЕЦ ВОССТАНОВЛЕННОГО БЛОКА ---
 
     return setmetatable(
         {
