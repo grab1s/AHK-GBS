@@ -4061,157 +4061,16 @@ function UILibrary.Category:Button(name, icon)
     )
 end
 
-function UILibrary.Button:Section(name, side)
-    local Section = objectGenerator.new("Section")
-    Section.Border.SectionTitle.Text = name
-
-    Section.DropShadow.Size = UDim2.new(1, 25, 1, 25)
-    Section.Name = name
-
-    Section.Border.Content.ChildAdded:Connect(
-        function(c)
-            local n = 25 + (10 * math.clamp(#Section.Border.Content:GetChildren() - 2, 0, 3))
-
-            Section.DropShadow.Size = UDim2.new(1, n, 1, n)
-        end
-    )
-
-    Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
-    Section.LayoutOrder = getLayoutOrder(self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side])
-
-    self.oldSelf.oldSelf.UI[self.oldSelf.categoryUI.Name][self.SectionName][name] = {}
-
-    Section.Size = UDim2.new(1, 0, 0, Section.Border.Content.UIListLayout.AbsoluteContentSize.Y + 20)
-
-    Section.Border.Content.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(
-        function()
-            Section.Size = UDim2.new(1, 0, 0, Section.Border.Content.UIListLayout.AbsoluteContentSize.Y + 20)
-        end
-    )
-
-    return setmetatable(
-        {
-            MainSelf = self.oldSelf.oldSelf,
-            oldSelf = self,
-            Section = Section
-        },
-        UILibrary.Section
-    )
-end
-
---// now it gets fun!!!
---// im jk this is where the pain begins
-
-local cheatInfo = {
-    ["Button"] = {
-        FullSize = true
-    },
-    ["Checkbox"] = {
-        TextSize = UDim2.fromScale(.2, 1)
-    },
-    ["Textbox"] = {
-        TextSize = UDim2.fromScale(.4, 1),
-        FullSize = true
-    },
-    ["Dropdown"] = {
-        FullSize = true
-    },
-    ["Slider"] = {
-        TextSize = UDim2.fromScale(.45, 1)
-    },
-    ["Toggle"] = {
-        TextSize = UDim2.fromScale(.5, 1)
-    }
-}
-
-local function generateCheatBase(Cheat, sett)
-    local cheatBase = objectGenerator.new("CheatBase")
-
-    local cheatinfo = cheatInfo[Cheat]
-    local supportsFullSize = cheatinfo ~= nil and cheatinfo.FullSize or false
-
-    local Size = supportsFullSize and UDim2.fromScale(1, 1) or UDim2.fromScale(.5, 1)
-
-    if sett.Title then
-        if sett.Description then
-            cheatBase.Content.Text.Text.Text = sett.Title
-            cheatBase.Content.Text.Text.Desc.Text = sett.Description
-
-            cheatBase.Content.Text.Text.Desc.Visible = true
-            cheatBase.Content.Text.Text.Visible = true
-        else
-            cheatBase.Content.Text.Text.Text = sett.Title
-            cheatBase.Content.Text.Text.Size = UDim2.fromScale(.9, 1)
-            cheatBase.Content.Text.Text.Position = UDim2.fromScale(.5, .5)
-            cheatBase.Content.Text.Text.Visible = true
-        end
-
-        if cheatinfo and cheatinfo.TextSize then
-            Size = cheatinfo.TextSize
-        else
-            Size = UDim2.fromScale(.5, 1)
-        end
+-- Обновление размера тени (логика из вашего кода)
+-- Считаем всех детей в Content, которые являются GuiObject, чтобы определить "заполненность" для тени
+local guiObjectChildrenCount = 0
+for _, child in ipairs(Section.Border.Content:GetChildren()) do
+    if child:IsA("GuiObject") then
+        guiObjectChildrenCount = guiObjectChildrenCount + 1
     end
-
-    local XSize = 1 - Size.X.Scale
-
-    cheatBase.Content.ElementContent.Size = Size
-    cheatBase.Content.Text.Size = UDim2.fromScale(XSize, 1)
-
-    local Content = objectGenerator.new("Cheat", Cheat)
-
-    if Content then
-        Content.Parent = cheatBase.Content.ElementContent
-    end
-
-    return cheatBase
 end
-
---// some effects because my lazy ass is too lazy to put it in the module
-local function setupEffects(ui, hover)
-    local ClickEvent = Instance.new("BindableEvent")
-
-    local uiTweenType =
-        (hover:IsA("ImageLabel") or hover:IsA("ImageButton")) and "ImageTransparency" or "BackgroundTransparency"
-
-    local function constructTweenInfo(value)
-        return {
-            [uiTweenType] = value
-        }
-    end
-
-    ui.InputBegan:Connect(
-        function(input, gp)
-            if gp then
-                return
-            end
-
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                TweenService:Create(hover, TI, constructTweenInfo(.5)):Play()
-            elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-                TweenService:Create(hover, TI, constructTweenInfo(.2)):Play()
-            end
-        end
-    )
-
-    ui.InputEnded:Connect(
-        function(input, gp)
-            if gp then
-                return
-            end
-
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                TweenService:Create(hover, TI, constructTweenInfo(1)):Play()
-            elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-                TweenService:Create(hover, TI, constructTweenInfo(.5)):Play()
-
-                ClickEvent:Fire()
-            end
-        end
-    )
-
-    return ClickEvent.Event
-end
+local n = 25 + (10 * math.clamp(guiObjectChildrenCount - 2, 0, 3)) -- -2, чтобы первые два элемента не сильно увеличивали тень
+Section.DropShadow.Size = UDim2.new(1, n, 1, n)
 
 function UILibrary.Section:Button(sett, callback)
     local functions = {}
