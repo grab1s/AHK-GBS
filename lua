@@ -5140,51 +5140,101 @@ function UILibrary.Section:Slider(sett, callback)
     functions.__index = functions
 
     local cheatBase = generateCheatBase("Slider", sett)
-    cheatBase.Parent = self.Section.Border.Content
-    cheatBase.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
+    -- Добавим проверку на успешное создание базы
+    if not cheatBase then
+        warn("UILibrary.Section:Slider - Не удалось создать cheatBase для слайдера: " .. tostring(sett.Title))
+        return
+    end
+    local contentParent = self.Section and self.Section:FindFirstChild("Border") and self.Section.Border:FindFirstChild("Content")
+    if not contentParent then
+         warn("UILibrary.Section:Slider - Не найден родительский контейнер (Section.Border.Content) для слайдера: " .. tostring(sett.Title))
+         cheatBase:Destroy()
+         return
+    end
+    cheatBase.Parent = contentParent
+    cheatBase.LayoutOrder = getLayoutOrder(contentParent)
 
-    local element = cheatBase.Content.ElementContent.Slider
-
-    if sett.Min == nil then
-        sett.Min = 0
+    -- Добавим проверку на ElementContent и Slider
+    local elementContent = cheatBase:FindFirstChild("Content") and cheatBase.Content:FindFirstChild("ElementContent")
+    if not elementContent then
+        warn("UILibrary.Section:Slider - Не найден ElementContent в cheatBase для слайдера: " .. tostring(sett.Title))
+        cheatBase:Destroy()
+        return
+    end
+    local element = elementContent:FindFirstChild("Slider")
+     if not element then
+        warn("UILibrary.Section:Slider - Не найден Slider в ElementContent для слайдера: " .. tostring(sett.Title))
+        cheatBase:Destroy()
+        return
     end
 
-    if sett.Max == nil then
-        sett.Max = 10
+    -- Проверки для KeyInput и Drag
+    local keyInputElement = element:FindFirstChild("KeyInput")
+    local dragElement = element:FindFirstChild("Drag")
+    local dragFrameGradient = dragElement and dragElement:FindFirstChild("Frame") and dragElement.Frame:FindFirstChild("UIGradient")
+    local keyInputText = keyInputElement and keyInputElement:FindFirstChild("Text")
+
+    if not keyInputElement or not dragElement or not dragFrameGradient or not keyInputText then
+         warn("UILibrary.Section:Slider - Неполная структура элемента Slider для: " .. tostring(sett.Title))
+         cheatBase:Destroy()
+         return
     end
 
-    local sliderValue = sett.Min
-    local scaleValue = 0
+    sett.Min = sett.Min or 0 -- Устанавливаем Min по умолчанию, если не задан
+    sett.Max = sett.Max or 10 -- Устанавливаем Max по умолчанию, если не задан
+    -- Убедимся, что Min < Max
+    if sett.Min >= sett.Max then
+        warn(string.format("UILibrary.Section:Slider - Min (%s) >= Max (%s) для слайдера '%s'. Устанавливаем Max = Min + 10.", tostring(sett.Min), tostring(sett.Max), tostring(sett.Title)))
+        sett.Max = sett.Min + 10
+    end
+
+    local sliderValue = sett.Default or sett.Min -- Используем Default или Min как начальное значение
+    local scaleValue = 0 -- Начальный масштаб
 
     functions.getData = function()
         return sett
     end
 
     functions.setValue = function(v, scale)
-        sliderValue = math.floor(v)
-        scaleValue = scale
+        -- Убедимся, что v и scale являются числами
+        local numV = tonumber(v)
+        local numScale = tonumber(scale)
+        if numV == nil or numScale == nil then
+            warn(string.format("UILibrary.Section:Slider.setValue - Некорректные значения v (%s) или scale (%s) для '%s'", tostring(v), tostring(scale), tostring(sett.Title)))
+            return
+        end
 
-        element.KeyInput.Text.Text = tostring(math.floor(v))
+        -- Ограничиваем значение и масштаб в пределах Min/Max и 0/1
+        numV = math.clamp(numV, sett.Min, sett.Max)
+        numScale = math.clamp(numScale, 0, 1)
 
+        sliderValue = numV -- Сохраняем точное значение
+        scaleValue = numScale
+
+        -- Форматируем текст с одним десятичным знаком
+        keyInputText.Text = string.format("%.1f", sliderValue)
+
+        -- Обновляем градиент
         TweenService:Create(
-            element.Drag.Frame.UIGradient,
+            dragFrameGradient,
             TI,
             {
                 Offset = Vector2.new(scaleValue, 0)
             }
         ):Play()
 
-        callback(v)
+        -- Вызываем колбэк с точным (ограниченным) значением
+        callback(sliderValue)
     end
 
     functions.getValue = function()
         return sliderValue
     end
 
-    element.KeyInput.Text.Focused:Connect(
+    keyInputText.Focused:Connect(
         function()
             TweenService:Create(
-                element.KeyInput,
+                keyInputElement,
                 TI,
                 {
                     BackgroundColor3 = Color3.fromRGB(17, 17, 17)
@@ -5193,95 +5243,129 @@ function UILibrary.Section:Slider(sett, callback)
         end
     )
 
-    element.KeyInput.Text.FocusLost:Connect(
+    keyInputText.FocusLost:Connect(
         function()
             TweenService:Create(
-                element.KeyInput,
+                keyInputElement,
                 TI,
                 {
                     BackgroundColor3 = Color3.fromRGB(25, 25, 25)
                 }
             ):Play()
 
-            if tonumber(element.KeyInput.Text.Text) then
-                element.KeyInput.Text.Text = math.clamp(tonumber(element.KeyInput.Text.Text), sett.Min, sett.Max)
-            end
-
-            if tonumber(element.KeyInput.Text.Text) then
-                local scale = math.clamp(tonumber(element.KeyInput.Text.Text) / sett.Max, 0, 1)
-
-                functions.setValue(tonumber(element.KeyInput.Text.Text), scale)
+            local numVal = tonumber(keyInputText.Text)
+            if numVal then
+                -- Ограничиваем введенное значение
+                local clampedVal = math.clamp(numVal, sett.Min, sett.Max)
+                -- Рассчитываем правильный масштаб на основе ограниченного значения
+                local scale = 0
+                if (sett.Max - sett.Min) > 0 then -- Избегаем деления на ноль
+                     scale = math.clamp((clampedVal - sett.Min) / (sett.Max - sett.Min), 0, 1)
+                end
+                -- Устанавливаем значение и обновляем UI
+                functions.setValue(clampedVal, scale)
             else
-                element.KeyInput.Text.Text = tostring(math.floor(sliderValue))
+                -- Если ввод некорректный, возвращаем отображение к последнему валидному значению
+                keyInputText.Text = string.format("%.1f", sliderValue)
             end
         end
     )
 
     local holding = false
 
-    RunService.RenderStepped:Connect(
-        function()
-            if holding then
+    -- Используем pcall для безопасности внутри RenderStepped
+    local dragRenderStepConnection
+    dragRenderStepConnection = RunService.RenderStepped:Connect(function()
+        if holding then
+            local success, err = pcall(function()
+                 if not dragElement or not dragElement.Parent then -- Проверка, если элемент удален
+                      if dragRenderStepConnection then dragRenderStepConnection:Disconnect() end
+                      return
+                 end
                 local mouseX = LocalPlayer:GetMouse().X
-                local sliderPos = element.Drag.AbsolutePosition.X
+                local sliderPos = dragElement.AbsolutePosition.X
+                local sliderWidth = dragElement.AbsoluteSize.X
 
-                local leftBoundary = element.Drag.AbsolutePosition.X - (element.Drag.AbsoluteSize.X)
+                if sliderWidth <= 0 then return end -- Избегаем деления на ноль
 
-                local rightBoundary = element.Drag.AbsolutePosition.X + (element.Drag.AbsoluteSize.X)
+                -- Рассчитываем позицию мыши относительно слайдера (0 до 1)
+                local maxPos = math.clamp((mouseX - sliderPos) / sliderWidth, 0, 1)
 
-                local maxPos = math.clamp((mouseX - sliderPos) / (rightBoundary - sliderPos), 0, 1)
+                -- Рассчитываем точное значение на основе позиции
+                local val = sett.Min + (sett.Max - sett.Min) * maxPos
 
-                local val = ((sett.Max - sett.Min) * maxPos) + sett.Min
-
+                -- Устанавливаем значение (оно будет отформатировано внутри setValue)
                 functions.setValue(val, maxPos)
+            end)
+            if not success then
+                warn("Ошибка в RenderStepped для слайдера:", err)
+                holding = false -- Прекращаем обработку при ошибке
+                if dragRenderStepConnection then dragRenderStepConnection:Disconnect() end -- Отключаем обработчик
             end
         end
-    )
+    end)
 
-    element.Drag.InputBegan:Connect(
+    dragElement.InputBegan:Connect(
         function(input, gp)
-            if gp == true then
-                return
-            end
-
+            if gp == true then return end
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 holding = true
             end
         end
     )
 
-    element.Drag.InputEnded:Connect(
+    dragElement.InputEnded:Connect(
         function(input, gp)
-            if gp == true then
-                return
-            end
-
+            if gp == true then return end
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 holding = false
             end
         end
     )
 
-    if sett.Default then
-        local scale = math.clamp(tonumber(sett.Default) / sett.Max, 0, 1)
-        functions.setValue(tonumber(sett.Default), scale)
-    else
-        local scale = math.clamp((((sett.Max - sett.Min) / 2) + sett.Min) / sett.Max, 0, 1)
-        functions.setValue(tonumber((((sett.Max - sett.Min) / 2) + sett.Min)), scale)
+    -- Установка начального значения
+    local initialValue = sett.Default or sett.Min
+    local initialScale = 0
+    if (sett.Max - sett.Min) > 0 then
+        initialScale = math.clamp((initialValue - sett.Min) / (sett.Max - sett.Min), 0, 1)
     end
+    functions.setValue(initialValue, initialScale)
 
     local meta =
         setmetatable(
         {
             element = element,
-            UI = cheatBase
+            UI = cheatBase,
+            -- Добавляем возможность отключить RenderStepped при уничтожении
+            Destroy = function(self)
+                 if dragRenderStepConnection then
+                      dragRenderStepConnection:Disconnect()
+                      dragRenderStepConnection = nil
+                 end
+                 if self.UI and self.UI.Parent then
+                     self.UI:Destroy()
+                 end
+                 -- Можно добавить здесь Disconnect для других событий, если нужно
+            end
         },
         functions
     )
 
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
+    -- Сохраняем метатаблицу
+    if self.oldSelf and self.oldSelf.oldSelf and self.oldSelf.oldSelf.UI and self.oldSelf.categoryUI then
+         local categoryName = self.oldSelf.categoryUI.Name
+         local sectionName = self.oldSelf.SectionName
+         local sectionTitle = self.Section.Name
+         local cheatTitle = sett.Title
+
+         if self.oldSelf.oldSelf.UI[categoryName] and
+            self.oldSelf.oldSelf.UI[categoryName][sectionName] and
+            self.oldSelf.oldSelf.UI[categoryName][sectionName][sectionTitle] then
+             self.oldSelf.oldSelf.UI[categoryName][sectionName][sectionTitle][cheatTitle] = meta
+         else
+             warn("Не удалось сохранить метатаблицу для слайдера: ", cheatTitle)
+         end
+    end
 
     return meta
 end
