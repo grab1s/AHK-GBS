@@ -4061,16 +4061,196 @@ function UILibrary.Category:Button(name, icon)
     )
 end
 
--- Обновление размера тени (логика из вашего кода)
--- Считаем всех детей в Content, которые являются GuiObject, чтобы определить "заполненность" для тени
-local guiObjectChildrenCount = 0
-for _, child in ipairs(Section.Border.Content:GetChildren()) do
-    if child:IsA("GuiObject") then
-        guiObjectChildrenCount = guiObjectChildrenCount + 1
+function UILibrary.Button:Section(name, side) -- МОЖНО ДОБАВИТЬ ЗДЕСЬ , minPixelHeight ЕСЛИ ХОТИТЕ ПЕРЕДАВАТЬ МИНИМАЛЬНУЮ ВЫСОТУ КАК ПАРАМЕТР
+    local Section = objectGenerator.new("Section")
+    Section.Border.SectionTitle.Text = name
+
+    -- Начальный размер тени. Он будет обновляться в updateSectionHeight.
+    Section.DropShadow.Size = UDim2.new(1, 25, 1, 25)
+    Section.Name = name
+
+    -- =========================================================== --
+    -- ========= НАЧАЛО ИЗМЕНЕНИЯ ДЛЯ МИНИМАЛЬНОЙ ВЫСОТЫ ========= --
+    -- =========================================================== --
+
+    -- Задайте желаемую минимальную высоту секции В ПИКСЕЛЯХ (до применения UIScale).
+    -- Это значение должно включать предполагаемую высоту контента + вертикальные отступы.
+    -- Например, если минимальный контент это 2 элемента по 30px + 10px отступ между ними + 20px (верхний/нижний паддинг секции)
+    -- Это будет примерно 2*30 + 10 + 20 = 90px. Подберите это значение экспериментально.
+    -- Если вы хотите передавать это как параметр: UILibrary.Button:Section(name, side, minPixelHeight)
+    -- local MIN_SECTION_PIXEL_HEIGHT = minPixelHeight or 90 -- Если передаете как параметр
+    local MIN_SECTION_PIXEL_HEIGHT = 90 -- ЗАДАЙТЕ ЗДЕСЬ ЖЕЛАЕМУЮ МИНИМАЛЬНУЮ ВЫСОТУ В "ДИЗАЙНЕРСКИХ" ПИКСЕЛЯХ
+
+    local sizeConstraint = Section:FindFirstChild("MinHeightConstraint")
+    if not sizeConstraint then
+        sizeConstraint = Instance.new("UISizeConstraint")
+        sizeConstraint.Name = "MinHeightConstraint"
+        sizeConstraint.Parent = Section
     end
+    sizeConstraint.MinSize = Vector2.new(0, MIN_SECTION_PIXEL_HEIGHT)
+
+    -- Текущая логика расчета высоты остается, UISizeConstraint просто не даст ей стать меньше MinSize.Y
+    local SECTION_VERTICAL_PADDING = 20 -- Это те "+ 20" из вашего оригинального кода
+
+    local function updateSectionHeight()
+        local contentHeight = Section.Border.Content.UIListLayout.AbsoluteContentSize.Y
+        -- UISizeConstraint позаботится о минимальной высоте.
+        -- Мы просто устанавливаем желаемую высоту на основе контента.
+        Section.Size = UDim2.new(1, 0, 0, contentHeight + SECTION_VERTICAL_PADDING)
+
+        -- Обновление размера тени (логика из вашего кода)
+        -- Убедимся, что UIListLayout существует, прежде чем пытаться получить его дочерние элементы
+        local childrenCount = 0
+        if Section.Border.Content.UIListLayout then
+            childrenCount = #Section.Border.Content:GetChildren() -- Считаем всех детей в Content, а не в UIListLayout напрямую, если там есть что-то еще
+        end
+        local n = 25 + (10 * math.clamp(childrenCount - 2, 0, 3)) -- -2, чтобы первые два элемента не сильно увеличивали тень
+        Section.DropShadow.Size = UDim2.new(1, n, 1, n)
+    end
+
+    Section.Border.Content.ChildAdded:Connect(updateSectionHeight) -- Обновляем при добавлении
+    Section.Border.Content.ChildRemoved:Connect(updateSectionHeight) -- Обновляем при удалении
+
+    -- Убедимся, что UIListLayout существует перед подключением
+    if Section.Border.Content.UIListLayout then
+        Section.Border.Content.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
+    else
+        warn("UILibrary.Button:Section - UIListLayout не найден в Section.Border.Content для секции: " .. name)
+    end
+
+    updateSectionHeight() -- Первоначальная установка высоты
+    -- =========================================================== --
+    -- ========= КОНЕЦ ИЗМЕНЕНИЯ ДЛЯ МИНИМАЛЬНОЙ ВЫСОТЫ ========== --
+    -- =========================================================== --
+
+    Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
+    Section.LayoutOrder = getLayoutOrder(self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side])
+
+    self.oldSelf.oldSelf.UI[self.oldSelf.categoryUI.Name][self.SectionName][name] = {}
+
+    return setmetatable(
+        {
+            MainSelf = self.oldSelf.oldSelf,
+            oldSelf = self,
+            Section = Section
+        },
+        UILibrary.Section
+    )
 end
-local n = 25 + (10 * math.clamp(guiObjectChildrenCount - 2, 0, 3)) -- -2, чтобы первые два элемента не сильно увеличивали тень
-Section.DropShadow.Size = UDim2.new(1, n, 1, n)
+
+--// now it gets fun!!!
+--// im jk this is where the pain begins
+
+local cheatInfo = {
+    ["Button"] = {
+        FullSize = true
+    },
+    ["Checkbox"] = {
+        TextSize = UDim2.fromScale(.2, 1)
+    },
+    ["Textbox"] = {
+        TextSize = UDim2.fromScale(.4, 1),
+        FullSize = true
+    },
+    ["Dropdown"] = {
+        FullSize = true
+    },
+    ["Slider"] = {
+        TextSize = UDim2.fromScale(.45, 1)
+    },
+    ["Toggle"] = {
+        TextSize = UDim2.fromScale(.5, 1)
+    }
+}
+
+local function generateCheatBase(Cheat, sett)
+    local cheatBase = objectGenerator.new("CheatBase")
+
+    local cheatinfo = cheatInfo[Cheat]
+    local supportsFullSize = cheatinfo ~= nil and cheatinfo.FullSize or false
+
+    local Size = supportsFullSize and UDim2.fromScale(1, 1) or UDim2.fromScale(.5, 1)
+
+    if sett.Title then
+        if sett.Description then
+            cheatBase.Content.Text.Text.Text = sett.Title
+            cheatBase.Content.Text.Text.Desc.Text = sett.Description
+
+            cheatBase.Content.Text.Text.Desc.Visible = true
+            cheatBase.Content.Text.Text.Visible = true
+        else
+            cheatBase.Content.Text.Text.Text = sett.Title
+            cheatBase.Content.Text.Text.Size = UDim2.fromScale(.9, 1)
+            cheatBase.Content.Text.Text.Position = UDim2.fromScale(.5, .5)
+            cheatBase.Content.Text.Text.Visible = true
+        end
+
+        if cheatinfo and cheatinfo.TextSize then
+            Size = cheatinfo.TextSize
+        else
+            Size = UDim2.fromScale(.5, 1)
+        end
+    end
+
+    local XSize = 1 - Size.X.Scale
+
+    cheatBase.Content.ElementContent.Size = Size
+    cheatBase.Content.Text.Size = UDim2.fromScale(XSize, 1)
+
+    local Content = objectGenerator.new("Cheat", Cheat)
+
+    if Content then
+        Content.Parent = cheatBase.Content.ElementContent
+    end
+
+    return cheatBase
+end
+
+--// some effects because my lazy ass is too lazy to put it in the module
+local function setupEffects(ui, hover)
+    local ClickEvent = Instance.new("BindableEvent")
+
+    local uiTweenType =
+        (hover:IsA("ImageLabel") or hover:IsA("ImageButton")) and "ImageTransparency" or "BackgroundTransparency"
+
+    local function constructTweenInfo(value)
+        return {
+            [uiTweenType] = value
+        }
+    end
+
+    ui.InputBegan:Connect(
+        function(input, gp)
+            if gp then
+                return
+            end
+
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                TweenService:Create(hover, TI, constructTweenInfo(.5)):Play()
+            elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+                TweenService:Create(hover, TI, constructTweenInfo(.2)):Play()
+            end
+        end
+    )
+
+    ui.InputEnded:Connect(
+        function(input, gp)
+            if gp then
+                return
+            end
+
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                TweenService:Create(hover, TI, constructTweenInfo(1)):Play()
+            elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+                TweenService:Create(hover, TI, constructTweenInfo(.5)):Play()
+
+                ClickEvent:Fire()
+            end
+        end
+    )
+
+    return ClickEvent.Event
+end
 
 function UILibrary.Section:Button(sett, callback)
     local functions = {}
