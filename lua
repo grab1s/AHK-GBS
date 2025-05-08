@@ -4066,7 +4066,10 @@ end
 -- Обновленная функция создания секции
 -- Вставьте этот обновленный блок в ваш файл БИБЛИОТЕКИ (uiLIB.txt), заменив старый блок --
 
-function UILibrary.Button:Section(name, side, options) -- Аргумент 'options' остается
+-- Вставьте этот обновленный блок в ваш файл uiLIB.txt, заменив старый блок --
+
+-- Обновленная функция создания секции
+function UILibrary.Button:Section(name, side, options) -- Добавлен третий аргумент 'options'
     local SectionInstance = objectGenerator.new("Section")
 
     if not SectionInstance then
@@ -4087,40 +4090,43 @@ function UILibrary.Button:Section(name, side, options) -- Аргумент 'opti
     Section.Name = name
 
     -- =========================================================== --
-    -- === НАЧАЛО ИЗМЕНЕНИЯ: Ручное ограничение высоты (БЕЗ UISizeConstraint) === --
+    -- === НАЧАЛО ИЗМЕНЕНИЯ: Опциональные Min/Max Height через UISizeConstraint === --
     -- =========================================================== --
 
-    -- Получаем опциональные значения MinHeight и MaxHeight из options
-    local minPixelHeight = options and options.MinHeight or 0 -- Мин. высота 0, если не задано
-    local maxPixelHeight = options and options.MaxHeight or math.huge -- Макс. высота "бесконечность", если не задано
+    -- Получаем опциональные значения MinHeight и MaxHeight
+    local minPixelHeight = options and options.MinHeight -- nil, если не передано
+    local maxPixelHeight = options and options.MaxHeight -- nil, если не передано
 
-    -- Удаляем UISizeConstraint, если он был создан в предыдущих версиях (на всякий случай)
-    local oldSizeConstraint = Section:FindFirstChild("HeightConstraint")
-    if oldSizeConstraint then
-        oldSizeConstraint:Destroy()
+    -- Находим или создаем ОДИН UISizeConstraint
+    local sizeConstraint = Section:FindFirstChild("HeightConstraint")
+    if not sizeConstraint then
+        sizeConstraint = Instance.new("UISizeConstraint")
+        sizeConstraint.Name = "HeightConstraint"
+        sizeConstraint.Parent = Section
     end
 
-    local SECTION_VERTICAL_PADDING = 20 -- Вертикальные отступы внутри секции
+    -- Устанавливаем MinSize и MaxSize
+    -- Если значение не передано (nil), используем дефолты, не ограничивающие размер
+    sizeConstraint.MinSize = Vector2.new(0, minPixelHeight or 0) -- Мин. высота 0, если не задано
+    sizeConstraint.MaxSize = Vector2.new(math.huge, maxPixelHeight or math.huge) -- Макс. высота "бесконечность", если не задано
+
+    -- Вертикальный паддинг секции (отступы сверху/снизу внутри Border)
+    local SECTION_VERTICAL_PADDING = 20 -- Из вашего кода (для расчета желаемой высоты)
 
     -- Функция для обновления ЖЕЛАЕМОЙ высоты секции и размера тени
     local function updateSectionAppearance()
         -- Проверяем необходимую структуру
         if not Section.Border or not Section.Border:FindFirstChild("Content") or not Section.Border.Content:FindFirstChild("UIListLayout") then
-             warn(string.format("UILibrary.Button:Section.updateSectionAppearance - Отсутствует необходимая структура (Border/Content/UIListLayout) для секции '%s'. Обновление пропущено.", tostring(name)))
+            warn(string.format("UILibrary.Button:Section.updateSectionAppearance - Отсутствует необходимая структура (Border/Content/UIListLayout) для секции '%s'. Обновление пропущено.", tostring(name)))
             return
         end
 
-        -- 1. Вычисляем желаемую высоту на основе контента
+        -- 1. Устанавливаем ЖЕЛАЕМЫЙ размер секции на основе контента
         local contentHeight = Section.Border.Content.UIListLayout.AbsoluteContentSize.Y
-        local desiredHeight = contentHeight + SECTION_VERTICAL_PADDING
+        -- UISizeConstraint автоматически ограничит это значение, если нужно
+        Section.Size = UDim2.new(1, 0, 0, contentHeight + SECTION_VERTICAL_PADDING)
 
-        -- 2. Ограничиваем высоту вручную с помощью math.clamp
-        local clampedHeight = math.clamp(desiredHeight, minPixelHeight, maxPixelHeight)
-
-        -- 3. Устанавливаем размер секции с ОГРАНИЧЕННОЙ высотой
-        Section.Size = UDim2.new(1, 0, 0, clampedHeight) -- Используем ограниченную высоту
-
-        -- 4. Обновляем размер тени на основе количества элементов
+        -- 2. Обновляем размер тени на основе количества элементов
         local guiObjectChildrenCount = 0
         for _, child in ipairs(Section.Border.Content:GetChildren()) do
             if child:IsA("GuiObject") then
@@ -4128,6 +4134,7 @@ function UILibrary.Button:Section(name, side, options) -- Аргумент 'opti
             end
         end
         local n = 25 + (10 * math.clamp(guiObjectChildrenCount - 2, 0, 3))
+        -- Убедимся, что DropShadow существует перед изменением размера
         if Section:FindFirstChild("DropShadow") then
              Section.DropShadow.Size = UDim2.new(1, n, 1, n)
         end
@@ -4150,7 +4157,7 @@ function UILibrary.Button:Section(name, side, options) -- Аргумент 'opti
     updateSectionAppearance() -- Первоначальная установка вида
 
     -- =========================================================== --
-    -- === КОНЕЦ ИЗМЕНЕНИЯ: Ручное ограничение высоты (БЕЗ UISizeConstraint) === --
+    -- === КОНЕЦ ИЗМЕНЕНИЯ: Опциональные Min/Max Height через UISizeConstraint === --
     -- =========================================================== --
 
     Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
@@ -4283,7 +4290,7 @@ local function setupEffects(ui, hover)
 end
 
 -- Конец обновленного блока --
--
+
 function UILibrary.Section:Button(sett, callback)
     local functions = {}
     functions.__index = functions
