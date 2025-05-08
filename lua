@@ -1,4 +1,4 @@
---- START OF FILE uiLIBnow.txt ---
+--- START OF COMPLETE uiLIB.txt CODE ---
 local UILibrary = {}
 --// Modulesssss
 
@@ -228,7 +228,6 @@ local function getObjGen()
                 UIPadding_11 = Instance.new("UIPadding"),
                 Section = Instance.new("Frame"),
                 Border = Instance.new("Frame"),
-                Border_Padding = Instance.new("UIPadding"), -- Added for SectionTitle padding
                 SectionTitle = Instance.new("TextLabel"),
                 UITextSizeConstraint_5 = Instance.new("UITextSizeConstraint"),
                 UICorner_19 = Instance.new("UICorner"),
@@ -398,7 +397,7 @@ local function getObjGen()
             Gui.HoverFrame_2.ZIndex = 111
 
             Gui.UICorner_4.CornerRadius = UDim.new(0.200000003, 0)
-            Gui.UICorner_4.Parent = Gui.Checkbox -- This was Gui.Checkbox, should be Gui.HoverFrame_2 or Gui.Checkbox itself, seems correct for Checkbox.
+            Gui.UICorner_4.Parent = Gui.Checkbox
 
             Gui.Toggle.Name = "Toggle"
             Gui.Toggle.Parent = Gui.Cheats
@@ -873,6 +872,7 @@ local function getObjGen()
 
             Gui.UITextSizeConstraint_2.Parent = Gui.Text_6
             Gui.UITextSizeConstraint_2.MaxTextSize = 13
+            Gui.UITextSizeConstraint_2.MinTextSize = 1 -- Added MinTextSize
 
             Gui.UIPadding_3.Parent = Gui.Content_2
             Gui.UIPadding_3.PaddingLeft = UDim.new(0, 4)
@@ -918,7 +918,7 @@ local function getObjGen()
             Gui.OptionHolder.Position = UDim2.new(0, 0, 1.5, 0)
             Gui.OptionHolder.Size = UDim2.new(1, 0, 0, 0)
             Gui.OptionHolder.ZIndex = 112
-            Gui.OptionHolder.Visible = false -- Initially hidden
+            Gui.OptionHolder.Visible = false
 
             Gui.Cover.Name = "Cover"
             Gui.Cover.Parent = Gui.OptionHolder
@@ -1236,7 +1236,7 @@ local function getObjGen()
             Gui.MainUI.AnchorPoint = Vector2.new(0.5, 0.5)
             Gui.MainUI.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
             Gui.MainUI.Position = UDim2.new(0.5, 0, 0.5, 0)
-            Gui.MainUI.Size = UDim2.new(0, 851, 0, 488) -- Base size
+            Gui.MainUI.Size = UDim2.new(0, 851, 0, 488)
             Gui.MainUI.ZIndex = 100
 
             Gui.DropShadowHolder_9.Name = "DropShadowHolder"
@@ -2034,11 +2034,12 @@ local function getObjGen()
             Gui.CategoryFrame.Active = true
             Gui.CategoryFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Gui.CategoryFrame.BackgroundTransparency = 1.000
-            Gui.CategoryFrame.Position = UDim2.new(0, 0, 1, 0)
+            Gui.CategoryFrame.Position = UDim2.new(0, 0, 0, 0) -- Changed Y position to 0
             Gui.CategoryFrame.Size = UDim2.new(1, 0, 1, 0)
             Gui.CategoryFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
             Gui.CategoryFrame.CanvasSize = UDim2.new(0, 0, 0.5, 0)
             Gui.CategoryFrame.ScrollBarThickness = 6
+            Gui.CategoryFrame.ClipsDescendants = true
 
             Gui.Left.Name = "Left"
             Gui.Left.Parent = Gui.CategoryFrame
@@ -2046,16 +2047,17 @@ local function getObjGen()
             Gui.Left.BackgroundTransparency = 1.000
             Gui.Left.Size = UDim2.new(0.5, 0, 1, 0)
             Gui.Left.AutomaticSize = Enum.AutomaticSize.Y
+            Gui.Left.ClipsDescendants = false
 
             Gui.UIPadding_9.Parent = Gui.Left
             Gui.UIPadding_9.PaddingBottom = UDim.new(0, 16)
-            Gui.UIPadding_9.PaddingLeft = UDim.new(0, 18) -- Changed from 16
-            Gui.UIPadding_9.PaddingRight = UDim.new(0, 18) -- Changed from 16
+            Gui.UIPadding_9.PaddingLeft = UDim.new(0, 18)
+            Gui.UIPadding_9.PaddingRight = UDim.new(0, 16)
             Gui.UIPadding_9.PaddingTop = UDim.new(0, 32)
 
             Gui.UIListLayout_20.Parent = Gui.Left
             Gui.UIListLayout_20.SortOrder = Enum.SortOrder.LayoutOrder
-            Gui.UIListLayout_20.Padding = UDim.new(0, 15) -- Changed from 35
+            Gui.UIListLayout_20.Padding = UDim.new(0.02, 0) -- Scale-based padding
 
             Gui.Right.Name = "Right"
             Gui.Right.Parent = Gui.CategoryFrame
@@ -2064,21 +2066,22 @@ local function getObjGen()
             Gui.Right.Position = UDim2.new(0.5, 0, 0, 0)
             Gui.Right.Size = UDim2.new(0.5, 0, 1, 0)
             Gui.Right.AutomaticSize = Enum.AutomaticSize.Y
+            Gui.Right.ClipsDescendants = false
 
             Gui.UIListLayout_21.Parent = Gui.Right
             Gui.UIListLayout_21.SortOrder = Enum.SortOrder.LayoutOrder
-            Gui.UIListLayout_21.Padding = UDim.new(0, 15) -- Changed from 35
+            Gui.UIListLayout_21.Padding = UDim.new(0.02, 0) -- Scale-based padding
 
             Gui.UIPadding_10.Parent = Gui.Right
             Gui.UIPadding_10.PaddingBottom = UDim.new(0, 16)
-            Gui.UIPadding_10.PaddingLeft = UDim.new(0, 18) -- Changed from 16
-            Gui.UIPadding_10.PaddingRight = UDim.new(0, 18) -- Changed from 16
+            Gui.UIPadding_10.PaddingLeft = UDim.new(0, 16)
+            Gui.UIPadding_10.PaddingRight = UDim.new(0, 18)
             Gui.UIPadding_10.PaddingTop = UDim.new(0, 32)
 
             Gui.UIPadding_11.Parent = Gui.CategoryFrame
             Gui.UIPadding_11.PaddingBottom = UDim.new(0, 8)
-            Gui.UIPadding_11.PaddingLeft = UDim.new(0, 10) -- Changed from 8
-            Gui.UIPadding_11.PaddingRight = UDim.new(0, 10) -- Changed from 8
+            Gui.UIPadding_11.PaddingLeft = UDim.new(0, 8)
+            Gui.UIPadding_11.PaddingRight = UDim.new(0, 8)
             Gui.UIPadding_11.PaddingTop = UDim.new(0, 8)
 
             Gui.Section.Name = "Section"
@@ -2087,6 +2090,7 @@ local function getObjGen()
             Gui.Section.Size = UDim2.new(1, 0, 0, 0)
             Gui.Section.AutomaticSize = Enum.AutomaticSize.Y
             Gui.Section.ZIndex = 101
+            Gui.Section.ClipsDescendants = false
 
             Gui.Border.Name = "Border"
             Gui.Border.Parent = Gui.Section
@@ -2095,13 +2099,7 @@ local function getObjGen()
             Gui.Border.Size = UDim2.new(1, 0, 0, 0)
             Gui.Border.AutomaticSize = Enum.AutomaticSize.Y
             Gui.Border.ZIndex = 107
-
-            Gui.Border_Padding.Name = "BorderPadding" -- Added UIPadding for Section.Border
-            Gui.Border_Padding.Parent = Gui.Border
-            Gui.Border_Padding.PaddingRight = UDim.new(0, 4)
-            Gui.Border_Padding.PaddingLeft = UDim.new(0, 0)
-            Gui.Border_Padding.PaddingTop = UDim.new(0, 0)
-            Gui.Border_Padding.PaddingBottom = UDim.new(0, 0)
+            -- Border_Padding Removed
 
             Gui.SectionTitle.Name = "SectionTitle"
             Gui.SectionTitle.Parent = Gui.Border
@@ -2150,8 +2148,8 @@ local function getObjGen()
             Gui.DropShadow_16.AnchorPoint = Vector2.new(0.5, 0.5)
             Gui.DropShadow_16.BackgroundTransparency = 1.000
             Gui.DropShadow_16.BorderSizePixel = 0
-            Gui.DropShadow_16.Position = UDim2.new(0.5, 0, 0.5, 0)
-            Gui.DropShadow_16.Size = UDim2.new(1, 12, 1, 12) -- Changed from 47
+            Gui.DropShadow_16.Position = UDim2.fromScale(0.5, 0.5)
+            Gui.DropShadow_16.Size = UDim2.new(1, 20, 1, 20) -- Adjusted shadow size
             Gui.DropShadow_16.ZIndex = 105
             Gui.DropShadow_16.Image = "rbxassetid://6014261993"
             Gui.DropShadow_16.ImageColor3 = Color3.fromRGB(0, 0, 0)
@@ -2949,15 +2947,15 @@ local function getDragIt()
                                                     {ChosenSnap.Size.X.Scale, ChosenSnap.Size.Y.Scale}
                                                 )
                                                 X = X + ChosenSnap.Size.X.Offset
-                                                Y = Y + ChosenSnap.Size.X.Offset -- Should be ChosenSnap.Size.Y.Offset
+                                                Y = Y + ChosenSnap.Size.Y.Offset
 
                                                 local Right =
                                                     (v.Object.AbsolutePosition -
-                                                    (ChosenSnap.AbsolutePosition + Vector2.new(X))).Magnitude *
+                                                    (ChosenSnap.AbsolutePosition + Vector2.new(X,0))).Magnitude *
                                                     0.0264583333
                                                 local Left =
                                                     (v.Object.AbsolutePosition -
-                                                    (ChosenSnap.AbsolutePosition - Vector2.new(X))).Magnitude *
+                                                    (ChosenSnap.AbsolutePosition - Vector2.new(X,0))).Magnitude *
                                                     0.0264583333
                                                 local Top =
                                                     (v.Object.AbsolutePosition -
@@ -2968,10 +2966,7 @@ local function getDragIt()
                                                     (ChosenSnap.AbsolutePosition - Vector2.new(0, Y))).Magnitude *
                                                     0.0264583333
 
-                                                if
-                                                    (Closest * 0.0264583333) <= 3.5 or Top <= 2.5 or Right <= 2.5 or
-                                                        Left <= 2.5 and Bottom <= 2.5 -- 'and' has higher precedence than 'or'
-                                                    then 
+                                                if (Closest * 0.0264583333) <= 3.5 or Top <= 2.5 or Right <= 2.5 or Left <= 2.5 or Bottom <= 2.5 then
                                                     v.Snap = ChosenSnap
                                                 else
                                                     v.Snap = nil
@@ -3145,7 +3140,7 @@ local function getEffect()
                 ui,
                 TI,
                 {
-                    BackgroundTransparency = .5 -- This was 0.5, assuming it's for main button bg
+                    BackgroundTransparency = .5 
                 }
             ):Play()
         end
@@ -3155,7 +3150,7 @@ local function getEffect()
                 ui,
                 TI,
                 {
-                    BackgroundTransparency = 1 -- This was 1, assuming it's for main button bg
+                    BackgroundTransparency = 1 
                 }
             ):Play()
         end
@@ -3333,7 +3328,7 @@ function UILibrary.new(gameName, userId, rank)
             local scaleY = viewportSize.Y / referenceHeight
             
             local targetScale = math.min(scaleX, scaleY)
-            targetScale = math.clamp(targetScale, 0.6, 1.2) -- Диапазон масштаба (60% - 120%)
+            targetScale = math.clamp(targetScale, 0.6, 1.2) 
 
             scaler.Scale = targetScale
         end
@@ -3342,7 +3337,6 @@ function UILibrary.new(gameName, userId, rank)
             camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
         end
         updateScale()
-        -- print("[UI Scaler] Адаптивное масштабирование применено к MainUI.") -- Можно раскомментировать для отладки
     else
         warn("[UI Scaler] Не удалось найти Window.MainUI для применения масштабирования!")
     end
@@ -3389,7 +3383,7 @@ function UILibrary.Window:Notification(sett)
 
     Notif.Parent.Parent = ui
 
-    wait(.02)
+    task.wait(.02) -- Use task.wait
 
     TweenService:Create(
         Notif.Parent,
@@ -3399,7 +3393,7 @@ function UILibrary.Window:Notification(sett)
         }
     ):Play()
 
-    wait(.2)
+    task.wait(.2) -- Use task.wait
 
     TweenService:Create(
         Notif.Notification,
@@ -3438,6 +3432,7 @@ function UILibrary.Window:Notification(sett)
         task.delay(
             .3,
             function()
+                 if not Notif.Parent then return end -- Add check if parent exists
                 TweenService:Create(
                     Notif.Parent,
                     TweenInfo.new(.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
@@ -3450,8 +3445,10 @@ function UILibrary.Window:Notification(sett)
 
                 Notif.Parent:ClearAllChildren()
 
-                wait(.3)
-                parent:Destroy()
+                task.wait(.3) -- Use task.wait
+                 if parent and parent.Parent then -- Add check if parent exists before destroying
+                     parent:Destroy()
+                 end
             end
         )
 
@@ -3552,7 +3549,7 @@ function UILibrary.Window:Prompt(sett)
 
     Notif.Parent.Parent = ui
 
-    wait(.02)
+    task.wait(.02) -- Use task.wait
 
     TweenService:Create(
         Notif.Parent,
@@ -3562,7 +3559,7 @@ function UILibrary.Window:Prompt(sett)
         }
     ):Play()
 
-    wait(.2)
+    task.wait(.2) -- Use task.wait
 
     TweenService:Create(
         Notif.Notification,
@@ -3606,6 +3603,7 @@ function UILibrary.Window:Prompt(sett)
         task.delay(
             .3,
             function()
+                 if not Notif.Parent then return end -- Add check
                 TweenService:Create(
                     Notif.Parent,
                     TweenInfo.new(.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
@@ -3618,8 +3616,10 @@ function UILibrary.Window:Prompt(sett)
 
                 Notif.Parent:ClearAllChildren()
 
-                wait(.3)
-                parent:Destroy()
+                task.wait(.3) -- Use task.wait
+                 if parent and parent.Parent then -- Add check
+                     parent:Destroy()
+                 end
             end
         )
 
@@ -3887,13 +3887,15 @@ function UILibrary.Window:ChangeCategorySelection(name)
                 }
             ):Play()
 
-            TweenService:Create(
-                self.currentTab,
-                TI,
-                {
-                    Position = UDim2.fromScale(0, 1)
-                }
-            ):Play()
+            if self.currentTab then -- Add check if currentTab exists
+                TweenService:Create(
+                    self.currentTab,
+                    TI,
+                    {
+                        Position = UDim2.fromScale(0, 1)
+                    }
+                ):Play()
+            end
         end
 
         TweenService:Create(
@@ -3978,7 +3980,7 @@ function UILibrary.Window:Category(name, icon)
 
     Click.Event:Connect(
         function()
-            CircleClick(category) -- Removed X, Y as CircleClick handles it
+            CircleClick(category) 
 
             self:ChangeCategory(name)
         end
@@ -4003,7 +4005,7 @@ function UILibrary.Window:Category(name, icon)
 end
 
 function UILibrary.Category:Button(name, icon)
-    local contentholder = self.ContentHolder -- Corrected typo: ContentHolder -> contentHolder
+    local contentholder = self.contentHolder
     local button = objectGenerator.new("CategoryButton")
 
     button.InnerContent.Image.Image = icon
@@ -4020,6 +4022,9 @@ function UILibrary.Category:Button(name, icon)
             totalCount = totalCount + 1
         end
     end
+
+    -- Ensure totalCount is at least 1 to avoid division by zero
+    totalCount = math.max(totalCount, 1) 
 
     for i, v in pairs(self.contentHolder.Bar2Holder:GetChildren()) do
         if v:IsA("GuiObject") then
@@ -4040,7 +4045,7 @@ function UILibrary.Category:Button(name, icon)
         EffectLib.ButtonHoverEffect(
         button,
         function()
-            if self.oldSelf.currentCategorySelection ~= button then -- Corrected: self.currentCategorySelection -> self.oldSelf.currentCategorySelection
+            if self.oldSelf.currentCategorySelection ~= button then 
                 return true
             else
                 return false
@@ -4051,7 +4056,7 @@ function UILibrary.Category:Button(name, icon)
 
     Click.Event:Connect(
         function()
-            CircleClick(button) -- Removed X, Y
+            CircleClick(button) 
 
             if self.oldSelf.currentSelection.Name == self.categoryUI.Name then
                 self.oldSelf:ChangeCategorySelection(name)
@@ -4092,10 +4097,23 @@ function UILibrary.Button:Section(name, side)
 
     Section.Name = name
     SectionTitle.Text = name
-    Section.DropShadow.Size = UDim2.new(1, 12, 1, 12) -- Updated shadow size
+    Section.DropShadow.Size = UDim2.new(1, 20, 1, 20) 
 
-    Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
-    Section.LayoutOrder = getLayoutOrder(self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side])
+    local parentFrame = self.oldSelf.oldSelf.MainUI.MainUI.Content:FindFirstChild(self.SectionName)
+    if not parentFrame then
+         warn("Parent frame for section not found:", self.SectionName)
+         Section:Destroy()
+         return nil
+    end
+    local sideFrame = parentFrame:FindFirstChild(side)
+     if not sideFrame then
+         warn("Side frame for section not found:", side, "within", self.SectionName)
+         Section:Destroy()
+         return nil
+    end
+
+    Section.Parent = sideFrame
+    Section.LayoutOrder = getLayoutOrder(sideFrame)
 
     self.oldSelf.oldSelf.UI[self.oldSelf.categoryUI.Name][self.SectionName][name] = {}
 
@@ -4114,24 +4132,37 @@ function UILibrary.Button:Section(name, side)
         
         local topPaddingOffset = contentPadding.PaddingTop.Offset
         local bottomPaddingOffset = contentPadding.PaddingBottom.Offset
-        local contentHeightAbs = contentListLayout.AbsoluteContentSize.Y
+        local contentHeightAbs = contentListLayout.AbsoluteContentSize.Y 
         
         Section.Size = UDim2.new(1, 0, 0, contentHeightAbs + topPaddingOffset + bottomPaddingOffset) 
     end
 
     task.defer(function()
+        if not Section or not Section.Parent then return end 
+        
         updateSectionHeight() 
 
         contentListLayout = contentFrame:FindFirstChildOfClass("UIListLayout") 
         contentPadding = contentFrame:FindFirstChildOfClass("UIPadding")  
 
         if contentListLayout then 
-            contentListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
+            contentListLayout.AncestryChanged:Connect(function(_, parent)
+                if parent then
+                    contentListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
+                end
+            end)
+             contentListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
         else
              warn("Окончательно не найден UIListLayout в секции:", name, contentFrame:GetFullName())
         end
         
         if contentPadding then 
+            contentPadding.AncestryChanged:Connect(function(_, parent)
+                 if parent then
+                    contentPadding:GetPropertyChangedSignal("PaddingTop"):Connect(updateSectionHeight)
+                    contentPadding:GetPropertyChangedSignal("PaddingBottom"):Connect(updateSectionHeight)
+                 end
+            end)
             contentPadding:GetPropertyChangedSignal("PaddingTop"):Connect(updateSectionHeight)
             contentPadding:GetPropertyChangedSignal("PaddingBottom"):Connect(updateSectionHeight)
         else
@@ -4155,7 +4186,7 @@ local cheatInfo = {
         FullSize = true
     },
     ["Checkbox"] = {
-        TextSize = UDim2.fromScale(.2, 1)
+        TextSize = UDim2.fromScale(.2, 1) -- Might need adjustment if still clipping
     },
     ["Textbox"] = {
         TextSize = UDim2.fromScale(.4, 1),
@@ -4169,31 +4200,46 @@ local cheatInfo = {
     },
     ["Toggle"] = {
         TextSize = UDim2.fromScale(.5, 1)
+    },
+    ["Keybind"] = { -- Added info for Keybind
+         TextSize = UDim2.fromScale(.4, 1) -- Example, adjust as needed
+    },
+     ["ColorPicker"] = { -- Added info for ColorPicker
+         TextSize = UDim2.fromScale(.4, 1) -- Example, adjust as needed
+    },
+      ["Label"] = { -- Added info for Label
+         FullSize = true -- Labels usually span the full width if no element
     }
 }
 
 local function generateCheatBase(Cheat, sett)
     local cheatBase = objectGenerator.new("CheatBase")
 
-    local cheatinfo = cheatInfo[Cheat]
-    local supportsFullSize = cheatinfo ~= nil and cheatinfo.FullSize or false
+    local cheatinfo = cheatInfo[Cheat] or {} -- Use empty table if not found
+    local supportsFullSize = cheatinfo.FullSize or false
 
-    local textBlockScaleX = 0.45 
-    if cheatinfo and cheatinfo.TextSize then
-        textBlockScaleX = cheatinfo.TextSize.X.Scale
-    elseif supportsFullSize and not sett.Title then
-        textBlockScaleX = 0
+    -- Determine default text block width, considering if a title exists
+    local defaultTextBlockScaleX = 0.45 
+    if not sett.Title then
+         defaultTextBlockScaleX = 0 -- No title, no space for text block by default
     end
     
+    -- Use specific TextSize if defined, otherwise use default based on title presence
+    local textBlockScaleX = (cheatinfo.TextSize and sett.Title) and cheatinfo.TextSize.X.Scale or defaultTextBlockScaleX
+
+    -- Calculate element width
     local elementContentScaleX = 1 - textBlockScaleX
-    if textBlockScaleX == 0 then 
-        elementContentScaleX = 1
-    elseif cheatinfo and cheatinfo.FullSize and sett.Title then
-        elementContentScaleX = 0.55 
+
+    -- Adjust if the element should take full size (and there's no title overriding it)
+    if supportsFullSize and textBlockScaleX == 0 then
+         elementContentScaleX = 1
     end
+    -- Special case: If it supports full size but HAS a title, maybe allocate slightly more to element?
+    -- elseif supportsFullSize and textBlockScaleX > 0 then
+    --     elementContentScaleX = 0.55 -- Or some other value if 0.45/0.55 split looks better
 
-
-    if sett.Title then
+    -- Set Text Block properties
+    if textBlockScaleX > 0 and sett.Title then
         cheatBase.Content.Text.Text.Text = sett.Title
         cheatBase.Content.Text.Text.Visible = true
         if sett.Description then
@@ -4206,16 +4252,13 @@ local function generateCheatBase(Cheat, sett)
         cheatBase.Content.Text.Visible = true
     else
         cheatBase.Content.Text.Visible = false
-        cheatBase.Content.Text.Size = UDim2.fromScale(0, 1)
-        elementContentScaleX = 1 
+        cheatBase.Content.Text.Size = UDim2.fromScale(0, 1) 
+        elementContentScaleX = 1 -- Ensure element takes full width if no text block
     end
 
+    -- Set Element Content properties
     cheatBase.Content.ElementContent.Size = UDim2.fromScale(elementContentScaleX, 1)
-    if elementContentScaleX == 0 then
-        cheatBase.Content.ElementContent.Visible = false
-    else
-        cheatBase.Content.ElementContent.Visible = true
-    end
+    cheatBase.Content.ElementContent.Visible = (elementContentScaleX > 0)
 
 
     local Content = objectGenerator.new("Cheat", Cheat)
@@ -4226,6 +4269,7 @@ local function generateCheatBase(Cheat, sett)
 
     return cheatBase
 end
+
 
 local function setupEffects(ui, hover)
     local ClickEvent = Instance.new("BindableEvent")
@@ -4467,20 +4511,20 @@ function UILibrary.Section:Textbox(sett, callback)
     local element = cheatBase.Content.ElementContent.Textbox
 
     local function updateSize()
-        local textBounds = math.clamp(element.Text.TextBounds.X, 10, element.Parent.AbsoluteSize.X) + 20
-
+        -- No size update needed for full-width textbox
+        --[[ local textBounds = math.clamp(element.Text.TextBounds.X, 10, element.Parent.AbsoluteSize.X) + 20
         TweenService:Create(
             element,
             TI,
             {
                 Size = UDim2.fromScale(textBounds / element.Parent.AbsoluteSize.X, 1)
             }
-        ):Play()
+        ):Play() ]]
     end
 
     functions.setValue = function(new)
         element.Text.Text = new
-        updateSize()
+        -- updateSize() -- Not needed
         callback(element.Text.Text)
     end
 
@@ -4488,7 +4532,7 @@ function UILibrary.Section:Textbox(sett, callback)
         return element.Text.Text
     end
 
-    updateSize()
+    -- updateSize() -- Not needed
 
     element.Text.Focused:Connect(
         function()
@@ -4499,14 +4543,14 @@ function UILibrary.Section:Textbox(sett, callback)
                     BackgroundColor3 = Color3.fromRGB(17, 17, 17)
                 }
             ):Play()
-
-            TweenService:Create(
+             -- Don't tween size for full-width
+            --[[ TweenService:Create(
                 element,
                 TI,
                 {
-                    Size = UDim2.fromScale(1, 1)
+                    Size = UDim2.fromScale(1, 1) 
                 }
-            ):Play()
+            ):Play() ]]
         end
     )
 
@@ -4557,15 +4601,15 @@ function UILibrary.Section:Keybind(sett, callback)
     local element = cheatBase.Content.ElementContent.Keybind
 
     local function updateSize()
-        local textBounds = math.clamp(element.Text.TextBounds.X, 10, element.Parent.AbsoluteSize.X) + 20
-
+        -- No size update needed for fixed-size keybind
+        --[[ local textBounds = math.clamp(element.Text.TextBounds.X, 10, element.Parent.AbsoluteSize.X) + 20
         TweenService:Create(
             element,
             TI,
             {
                 Size = UDim2.fromScale(textBounds / element.Parent.AbsoluteSize.X, 1)
             }
-        ):Play()
+        ):Play() ]]
     end
 
     local currentKb = nil
@@ -4573,7 +4617,7 @@ function UILibrary.Section:Keybind(sett, callback)
 
     functions.setValue = function(new)
         element.Text.Text = new.Name
-        updateSize()
+        -- updateSize() -- Not needed
 
         currentKb = new
 
@@ -4603,7 +4647,7 @@ function UILibrary.Section:Keybind(sett, callback)
         return currentKb
     end
 
-    updateSize()
+    -- updateSize() -- Not needed
 
     local rebinding = false
     local conn
@@ -4621,7 +4665,7 @@ function UILibrary.Section:Keybind(sett, callback)
             rebinding = true
 
             element.Text.Text = "..."
-            updateSize()
+            -- updateSize() -- Not needed
 
             local old = functions.getValue()
 
@@ -4677,7 +4721,7 @@ function UILibrary.Section:Keybind(sett, callback)
 end
 
 function toInteger(color)
-    return math.floor(color.r * 255) * 256 ^ 2 + math.floor(color.g * 255) * 256 + math.floor(color.b * 255)
+    return math.floor(color.R * 255) * 256 ^ 2 + math.floor(color.G * 255) * 256 + math.floor(color.B * 255) -- Corrected color components
 end
 
 function toHex(color)
@@ -4704,10 +4748,15 @@ function toHex(color)
         end
 
         current = math.floor(current / 16)
-        final = final .. char
+        final = char .. final -- Prepend char for correct order
     until current <= 0
 
-    return "#" .. string.reverse(final)
+    -- Pad with leading zeros if necessary
+    while #final < 6 do
+         final = "0" .. final
+    end
+
+    return "#" .. final
 end
 
 function UILibrary.Section:ColorPicker(sett, callback)
@@ -4750,8 +4799,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
 
         menuIsOpen = true
 
-        local oldColor
-        -- local oldPos -- oldPos не используется, можно убрать
+        local oldColor -- Keep track of color for updates
 
         self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Visible = true
 
@@ -4877,6 +4925,8 @@ function UILibrary.Section:ColorPicker(sett, callback)
             connections,
             RunService.RenderStepped:Connect(
                 function()
+                    if not menuIsOpen then return end -- Stop updating if menu closed
+
                     local mousePos =
                         game:GetService("UserInputService"):GetMouseLocation() -
                         Vector2.new(0, game:GetService("GuiService"):GetGuiInset().Y)
@@ -4910,14 +4960,18 @@ function UILibrary.Section:ColorPicker(sett, callback)
                             math.clamp(
                                 mousePos.Y - darknessPicker.AbsolutePosition.Y,
                                 0,
-                                darknessPicker.AbsoluteSize.Y
+                                darknessPicker.AbsoluteSize.
+                                    math.clamp(
+                                mousePos.Y - darknessPicker.AbsolutePosition.Y,
+                                0,
+                                darknessPicker.AbsoluteSize.Y -- Finish the clamp here
                             )
                         )
                     end
 
-                    local clr, new = updateWheel()
+                    local clr, baseClr = updateWheel() -- Renamed 'new' to 'baseClr' for clarity
 
-                    darknessPicker.ImageColor3 = new
+                    darknessPicker.ImageColor3 = baseClr -- Update the saturation slider color
 
                     if clr ~= oldColor then
                         oldColor = clr
@@ -4932,9 +4986,11 @@ function UILibrary.Section:ColorPicker(sett, callback)
         )
 
         local function closeMenu()
+            menuIsOpen = false -- Set flag immediately
             for i, v in pairs(connections) do
                 v:Disconnect()
             end
+            connections = {} -- Clear connections table
 
             TweenService:Create(
                 self.MainSelf.MainUI.MainUI.ColorPickerOverlay,
@@ -4952,9 +5008,12 @@ function UILibrary.Section:ColorPicker(sett, callback)
                 }
             ):Play()
 
-            task.wait(.5) -- Используем task.wait вместо wait
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Visible = false
-            menuIsOpen = false
+            -- Use task.delay for better timing control than wait()
+            task.delay(.4, function()
+                 if self.MainSelf.MainUI.MainUI.ColorPickerOverlay then -- Check if it still exists
+                    self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Visible = false
+                 end
+            end)
         end
 
         table.insert(
@@ -5012,7 +5071,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
                     if input.UserInputType == Enum.UserInputType.MouseButton1 then
                         local actual, clr = updateWheel()
 
-                        functions.setValue(actual)
+                        functions.setValue(actual) -- Set the final color
 
                         closeMenu()
                     elseif input.UserInputType == Enum.UserInputType.MouseMovement then
@@ -5020,7 +5079,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
                             Content.Buttons.Confirm.OtherFill,
                             TI,
                             {
-                                ImageColor3 = Color3.fromRGB(60, 150, 107) -- Было (60,150,107), исправлено на (85, 170, 127) в InputEnded, но здесь оставим как было для эффекта
+                                ImageColor3 = Color3.fromRGB(60, 150, 107) 
                             }
                         ):Play()
                     end
@@ -5048,7 +5107,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
                 end
             )
         )
-    end
+    end -- End of openMenu function
 
     element.Text.Label.Focused:Connect(
         function()
@@ -5073,12 +5132,12 @@ function UILibrary.Section:ColorPicker(sett, callback)
             ):Play()
 
             local split = element.Text.Label.Text:split(",")
+            local nums = {}
+            local validNumbers = true
 
             if #split == 3 then
-                local validNumbers = true
-                local nums = {}
-                for i, v in pairs(split) do
-                    local num = tonumber(v)
+                for i, v in ipairs(split) do -- Use ipairs for ordered array
+                    local num = tonumber(string.match(v, "%d+")) -- Extract number
                     if num == nil or num < 0 or num > 255 then
                         validNumbers = false
                         break
@@ -5088,14 +5147,16 @@ function UILibrary.Section:ColorPicker(sett, callback)
 
                 if validNumbers then
                      local clr3 = Color3.fromRGB(nums[1], nums[2], nums[3])
-                     functions.setValue(clr3)
+                     functions.setValue(clr3) -- Update the color picker
                 else
+                    -- Revert to current color if input invalid
                     element.Text.Label.Text =
                         math.floor(currentclr.R * 255) ..
                         ", " .. math.floor(currentclr.G * 255) .. ", " .. math.floor(currentclr.B * 255)
                 end
             else
-                element.Text.Label.Text =
+                 -- Revert to current color if format invalid
+                 element.Text.Label.Text =
                     math.floor(currentclr.R * 255) ..
                     ", " .. math.floor(currentclr.G * 255) .. ", " .. math.floor(currentclr.B * 255)
             end
@@ -5111,7 +5172,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
     if sett.Default then
         functions.setValue(sett.Default)
     else
-        functions.setValue(Color3.fromRGB(255, 255, 255)) -- Убедимся, что начальное значение установлено, если нет Default
+        functions.setValue(Color3.fromRGB(255, 255, 255)) 
     end
 
     local meta =
@@ -5188,7 +5249,7 @@ function UILibrary.Section:Slider(sett, callback)
                  displayText = tostring(sliderValue)
              end
         else
-            displayText = tostring(sliderValue)
+            displayText = tostring(math.floor(sliderValue + 0.5)) -- Ensure integer display if not precise
         end
         element.KeyInput.Text.Text = displayText
 
@@ -5323,14 +5384,20 @@ function UILibrary.Section:Dropdown(sett, callback)
 
     local element = cheatBase.Content.ElementContent.Dropdown
 
-    local slot = element.Slot:Clone()
-    element.Slot:Destroy()
+    local slot = element:FindFirstChild("Slot", true) and element.Slot:Clone() -- Use FindFirstChild with recursive flag
+    if element:FindFirstChild("Slot", true) then element.Slot:Destroy() end
 
-    local bottom = element.Bottom:Clone()
-    element.Bottom:Destroy()
+    local bottom = element:FindFirstChild("Bottom", true) and element.Bottom:Clone()
+    if element:FindFirstChild("Bottom", true) then element.Bottom:Destroy() end
 
-    local top = element.Top:Clone()
-    element.Top:Destroy()
+    local top = element:FindFirstChild("Top", true) and element.Top:Clone()
+    if element:FindFirstChild("Top", true) then element.Top:Destroy() end
+
+    if not slot or not bottom or not top then
+         warn("Dropdown template elements (Slot, Bottom, Top) not found or failed to clone.")
+         cheatBase:Destroy()
+         return nil
+    end
 
     local conns = {}
     local menuOpen = false
@@ -5342,12 +5409,14 @@ function UILibrary.Section:Dropdown(sett, callback)
     functions.refreshUI = function()
         local String = ""
         local firstSelected = nil
+        local countSelected = 0
 
-        for i, v_is_selected in pairs(options) do -- Renamed v to v_is_selected for clarity
+        for i, v_is_selected in pairs(options) do 
             local ui = element.OptionHolder.ContentHolder.Content:FindFirstChild(i)
             if not ui then continue end 
 
             if v_is_selected then 
+                countSelected = countSelected + 1
                 TweenService:Create(
                     ui.Select,
                     TI,
@@ -5360,7 +5429,7 @@ function UILibrary.Section:Dropdown(sett, callback)
                     if String == "" then
                         String = i
                     else
-                        String = String .. ", " .. i
+                        -- String = String .. ", " .. i -- Limit display if too many selected
                     end
                 else
                     firstSelected = i 
@@ -5378,6 +5447,10 @@ function UILibrary.Section:Dropdown(sett, callback)
 
         if not sett.Multi then
             String = firstSelected or "None" 
+        elseif countSelected > 1 then
+             String = countSelected .. " Selected" -- Show count if multiple selected
+        elseif countSelected == 1 then
+             String = firstSelected -- Show the single selected item name
         elseif String == "" then
             String = "None"
         end
@@ -5394,7 +5467,7 @@ function UILibrary.Section:Dropdown(sett, callback)
                     functions.refreshUI()
                 else
                     if value == true then
-                        for i, _ in pairs(options) do -- Use _ if v is not needed
+                        for i, _ in pairs(options) do 
                             options[i] = false 
                         end
 
@@ -5412,11 +5485,8 @@ function UILibrary.Section:Dropdown(sett, callback)
     end
 
     local function updateDropdown()
-        for i, v in pairs(element.OptionHolder.ContentHolder.Content:GetChildren()) do
-            if v:IsA("GuiObject") then
-                v:Destroy()
-            end
-        end
+        local content = element.OptionHolder.ContentHolder.Content
+        content:ClearAllChildren() -- Clear previous options
 
         for i, v in pairs(optionConnections) do
             v:Disconnect()
@@ -5432,25 +5502,31 @@ function UILibrary.Section:Dropdown(sett, callback)
             totalCounter = totalCounter + 1
         end
         
-        -- table.sort(optionKeys) -- Uncomment if order matters
+        -- table.sort(optionKeys) -- Optional sorting
 
-        for _, v_key in ipairs(optionKeys) do -- Renamed v to v_key
+        local itemHeight = 25 -- Approximate height of one dropdown item (adjust if needed)
+        local maxVisibleItems = 5 
+        
+        for index, v_key in ipairs(optionKeys) do 
             local Option
 
             counter = counter + 1
 
-            if counter == totalCounter then
+            if counter == totalCounter and totalCounter > 1 then -- Use Bottom only if more than 1 item
                 Option = bottom:Clone()
-            elseif counter ~= 1 then
+            elseif counter > 1 then
                 Option = slot:Clone()
-            else
+            else -- First item or only item
                 Option = top:Clone()
+                if totalCounter == 1 then -- If only one item, make it look like bottom too
+                     Option = bottom:Clone()
+                end
             end
 
             Option.Name = v_key
-            Option.Parent = element.OptionHolder.ContentHolder.Content
+            Option.Parent = content
             Option.LayoutOrder = counter 
-            Option.Size = UDim2.fromScale(1, 1 / totalCounter) -- This might need adjustment for many items
+            Option.Size = UDim2.new(1, 0, 0, itemHeight) -- Use fixed height
 
             Option.Current.Text = v_key
 
@@ -5500,8 +5576,8 @@ function UILibrary.Section:Dropdown(sett, callback)
                 )
             )
         end
-        -- After updating, ensure the OptionHolder's canvas size is updated if it's a ScrollingFrame
-        -- This might not be necessary if AutomaticCanvasSize is Y and UIListLayout is used correctly.
+        -- Explicitly set CanvasSize after adding items
+        content.CanvasSize = UDim2.new(0, 0, 0, totalCounter * itemHeight) 
     end
 
     updateDropdown()
@@ -5529,11 +5605,14 @@ function UILibrary.Section:Dropdown(sett, callback)
                 { Rotation = 180 }
             ):Play()
 
-            local maxHeightScale = math.min(totalCounter, 5) * 0.15 -- Max 5 items visible
+            local itemHeight = 25 -- Must match height used in updateDropdown
+            local maxVisibleItems = 5
+            local targetHeight = math.min(totalCounter, maxVisibleItems) * itemHeight
+            
             TweenService:Create(
                 element.OptionHolder,
                 TI,
-                { Size = UDim2.new(1, 0, maxHeightScale, 0) } -- Use UDim2.new for clarity
+                { Size = UDim2.new(1, 0, 0, targetHeight) } -- Use Offset for height
             ):Play()
 
             local n = 15 + (10 * math.clamp(totalCounter, 0, 3))
@@ -5544,7 +5623,7 @@ function UILibrary.Section:Dropdown(sett, callback)
             ):Play()
 
             task.delay(.4, function()
-                if menuOpen then
+                if menuOpen and element.OptionHolder then -- Add check
                     TweenService:Create(element.OptionHolder.Cover, TI, { BackgroundTransparency = 1 }):Play()
                 end
             end)
@@ -5558,7 +5637,7 @@ function UILibrary.Section:Dropdown(sett, callback)
             TweenService:Create(
                 element.OptionHolder,
                 TI,
-                { Size = UDim2.new(1, 0, 0, 0) } -- Use UDim2.new
+                { Size = UDim2.new(1, 0, 0, 0) } 
             ):Play()
 
             TweenService:Create(
@@ -5574,7 +5653,7 @@ function UILibrary.Section:Dropdown(sett, callback)
             ):Play()
 
             task.delay(.4, function()
-                if not menuOpen then
+                if not menuOpen and element.OptionHolder then -- Add check
                      element.OptionHolder.Visible = false
                 end
             end)
@@ -5587,13 +5666,23 @@ function UILibrary.Section:Dropdown(sett, callback)
 
     table.insert(
         conns,
+        element.MainHolder.InputBegan:Connect( -- Listen on MainHolder instead of just Icon
+            function(input, gp)
+                if gp then return end
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    functions.openMenu()
+                end
+            end
+        )
+    )
+     -- Keep Icon hover effect separate if desired
+     table.insert(
+        conns,
         element.MainHolder.Content.Icon.InputBegan:Connect(
             function(input, gp)
                 if gp then return end
                 if input.UserInputType == Enum.UserInputType.MouseMovement then
                     TweenService:Create(element.MainHolder.Content.Icon.Holder.Icon, TI, { Position = UDim2.fromScale(0, .2), ImageColor3 = Color3.fromRGB(50, 50, 50) }):Play()
-                elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    functions.openMenu()
                 end
             end
         )
@@ -5645,59 +5734,90 @@ function UILibrary.Section:Dropdown(sett, callback)
 end
 
 function UILibrary.Section:Label(sett)
-    local labelElement = objectGenerator.new("LabelElement")
+    -- Use generateCheatBase for consistent layout if a title/desc is provided
+    local useCheatBase = sett.Title or sett.Description 
+    local labelContainer
+    local titleLabel
+    local descLabel
 
-    local titleLabel = labelElement:FindFirstChild("Title")
-    local descLabel = labelElement:FindFirstChild("Description")
+    if useCheatBase then
+         labelContainer = generateCheatBase("Label", sett) -- Assuming "Label" is defined in cheatInfo or handled by default
+         labelContainer.Parent = self.Section.Border.Content
+         labelContainer.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
+         -- The actual label text goes into the Text block of CheatBase
+         titleLabel = labelContainer.Content.Text.Text
+         descLabel = labelContainer.Content.Text.Text.Desc -- Description is nested
+         -- Hide the (empty) ElementContent part of CheatBase
+         labelContainer.Content.ElementContent.Visible = false
+         labelContainer.Content.ElementContent.Size = UDim2.fromScale(0, 1)
+         -- Make Text block take full width
+         labelContainer.Content.Text.Size = UDim2.fromScale(1, 1)
+         titleLabel.TextXAlignment = Enum.TextXAlignment.Left -- Ensure left alignment
+         titleLabel.Text = sett.Text or "Label Text" -- Use Text field for main content
+         titleLabel.Visible = true -- Make sure title is visible
+         titleLabel.TextColor3 = Color3.fromRGB(181, 181, 181) -- Standard text color
+         titleLabel.Font = Enum.Font.GothamSemibold -- Standard font
+         titleLabel.TextSize = 14 -- Standard size
 
-    if not titleLabel then
-        warn("UILibrary: Не удалось найти 'Title' в шаблоне LabelElement.")
-        labelElement:Destroy() 
-        return nil
-    end
+         if descLabel then
+             if sett.Description and sett.Description ~= "" then
+                  descLabel.Text = sett.Description
+                  descLabel.Visible = true
+                  descLabel.TextColor3 = Color3.fromRGB(60, 60, 60)
+                  descLabel.Font = Enum.Font.Gotham
+                  descLabel.TextSize = 12
+             else
+                 descLabel.Visible = false
+             end
+         end
+    else
+        -- Fallback to the old LabelElement template if no Title/Desc provided
+        labelContainer = objectGenerator.new("LabelElement")
+        labelContainer.Parent = self.Section.Border.Content
+        labelContainer.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
 
-    titleLabel.Text = sett.Title or sett.Text or "Label Text" 
+        titleLabel = labelContainer:FindFirstChild("Title")
+        descLabel = labelContainer:FindFirstChild("Description") -- Description might not exist or be needed here
 
-    if descLabel then
-        if sett.Description and sett.Description ~= "" then
-            descLabel.Text = sett.Description
-            descLabel.Visible = true 
+        if titleLabel then
+            titleLabel.Text = sett.Text or "Label Text"
         else
-            descLabel.Visible = false 
-            descLabel.Size = UDim2.new(1, 0, 0, 0)
+            warn("UILibrary: Не удалось найти 'Title' в шаблоне LabelElement.")
+            labelContainer:Destroy() 
+            return nil
         end
-    elseif sett.Description and sett.Description ~= "" then
-        warn("UILibrary: Не удалось найти 'Description' в шаблоне LabelElement, но описание было предоставлено")
+        if descLabel then descLabel.Visible = false end -- Hide description in this simpler case
     end
 
-    labelElement.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
-    labelElement.Parent = self.Section.Border.Content
 
     local functions = {}
     functions.__index = functions
 
-    function functions:SetTitle(newTitle)
-        if titleLabel then titleLabel.Text = newTitle end
+    function functions:SetText(newText) -- Renamed from SetTitle for clarity
+        if titleLabel then titleLabel.Text = newText end
     end
 
     function functions:SetDescription(newDescription)
-        if descLabel then
+        if descLabel then -- Only works if using CheatBase layout
              if newDescription and newDescription ~= "" then
                 descLabel.Text = newDescription
                 descLabel.Visible = true
              else
                  descLabel.Visible = false
-                 descLabel.Size = UDim2.new(1, 0, 0, 0)
              end
         end
     end
 
     local meta = setmetatable({
-        UI = labelElement
+        UI = labelContainer -- Return the main container (either CheatBase or LabelElement)
     }, functions)
+
+    -- Optional: Add to UI tracking table
+    -- self.MainSelf.UI[self.oldSelf.CategoryName][self.oldSelf.SectionName][self.Section.Name][sett.Title or sett.Text or "Label"] = meta
 
     return meta
 end
 
+
 return UILibrary
---- END OF FILE uiLIBnow.txt ---
+--- END OF COMPLETE uiLIB.txt CODE ---
