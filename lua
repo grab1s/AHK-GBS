@@ -4062,7 +4062,23 @@ function UILibrary.Category:Button(name, icon)
 end
 
 function UILibrary.Button:Section(name, side) -- МОЖНО ДОБАВИТЬ ЗДЕСЬ , minPixelHeight ЕСЛИ ХОТИТЕ ПЕРЕДАВАТЬ МИНИМАЛЬНУЮ ВЫСОТУ КАК ПАРАМЕТР
-    local Section = objectGenerator.new("Section")
+    local SectionInstance = objectGenerator.new("Section")
+
+    -- Добавим проверку №1: Действительно ли objectGenerator вернул что-то?
+    if not SectionInstance then
+        error(string.format("UILibrary.Button:Section - КРИТИЧЕСКАЯ ОШИБКА: objectGenerator.new(\"Section\") вернул nil. Невозможно создать секцию '%s'.", tostring(name)))
+        return -- Прекращаем выполнение функции, так как Section не создан
+    end
+    
+    local Section = SectionInstance -- Используем переменную Section, как и раньше
+
+    -- Добавим проверку №2: Есть ли у созданного Section дочерний элемент 'Border'?
+    if not Section:FindFirstChild("Border") then
+        error(string.format("UILibrary.Button:Section - КРИТИЧЕСКАЯ ОШИБКА: У созданного экземпляра Section отсутствует дочерний элемент 'Border'. Секция '%s'.", tostring(name)))
+        Section:Destroy() -- Очищаем созданный, но некорректный Section
+        return
+    end
+    -- Если предыдущие проверки пройдены, Section и Section.Border должны существовать
     Section.Border.SectionTitle.Text = name
 
     -- Начальный размер тени. Он будет обновляться в updateSectionHeight.
@@ -4073,14 +4089,7 @@ function UILibrary.Button:Section(name, side) -- МОЖНО ДОБАВИТЬ З�
     -- ========= НАЧАЛО ИЗМЕНЕНИЯ ДЛЯ МИНИМАЛЬНОЙ ВЫСОТЫ ========= --
     -- =========================================================== --
 
-    -- Задайте желаемую минимальную высоту секции В ПИКСЕЛЯХ (до применения UIScale).
-    -- Это значение должно включать предполагаемую высоту контента + вертикальные отступы.
-    -- Например, если минимальный контент это 2 элемента по 30px + 10px отступ между ними + 20px (верхний/нижний паддинг секции)
-    -- Это будет примерно 2*30 + 10 + 20 = 90px. Подберите это значение экспериментально.
-    -- Если вы хотите передавать это как параметр: UILibrary.Button:Section(name, side, minPixelHeight)
-    -- local MIN_SECTION_PIXEL_HEIGHT = minPixelHeight or 90 -- Если передаете как параметр
-    local MIN_SECTION_PIXEL_HEIGHT = 90 -- ЗАДАЙТЕ ЗДЕСЬ ЖЕЛАЕМУЮ МИНИМАЛЬНУЮ ВЫСОТУ В "ДИЗАЙНЕРСКИХ" ПИКСЕЛЯХ
-
+    local MIN_SECTION_PIXEL_HEIGHT = 90
     local sizeConstraint = Section:FindFirstChild("MinHeightConstraint")
     if not sizeConstraint then
         sizeConstraint = Instance.new("UISizeConstraint")
@@ -4089,36 +4098,43 @@ function UILibrary.Button:Section(name, side) -- МОЖНО ДОБАВИТЬ З�
     end
     sizeConstraint.MinSize = Vector2.new(0, MIN_SECTION_PIXEL_HEIGHT)
 
-    -- Текущая логика расчета высоты остается, UISizeConstraint просто не даст ей стать меньше MinSize.Y
-    local SECTION_VERTICAL_PADDING = 20 -- Это те "+ 20" из вашего оригинального кода
+    local SECTION_VERTICAL_PADDING = 20
 
     local function updateSectionHeight()
+        -- Добавим проверку на существование Border и Content перед доступом
+        if not Section.Border or not Section.Border:FindFirstChild("Content") or not Section.Border.Content:FindFirstChild("UIListLayout") then
+            warn(string.format("UILibrary.Button:Section.updateSectionHeight - Отсутствует необходимая структура (Border/Content/UIListLayout) для секции '%s'. Обновление высоты пропущено.", tostring(name)))
+            return
+        end
+
         local contentHeight = Section.Border.Content.UIListLayout.AbsoluteContentSize.Y
-        -- UISizeConstraint позаботится о минимальной высоте.
-        -- Мы просто устанавливаем желаемую высоту на основе контента.
         Section.Size = UDim2.new(1, 0, 0, contentHeight + SECTION_VERTICAL_PADDING)
 
-        -- Обновление размера тени (логика из вашего кода)
-        -- Убедимся, что UIListLayout существует, прежде чем пытаться получить его дочерние элементы
-        local childrenCount = 0
-        if Section.Border.Content.UIListLayout then
-            childrenCount = #Section.Border.Content:GetChildren() -- Считаем всех детей в Content, а не в UIListLayout напрямую, если там есть что-то еще
+        local guiObjectChildrenCount = 0
+        for _, child in ipairs(Section.Border.Content:GetChildren()) do
+            if child:IsA("GuiObject") then
+                guiObjectChildrenCount = guiObjectChildrenCount + 1
+            end
         end
-        local n = 25 + (10 * math.clamp(childrenCount - 2, 0, 3)) -- -2, чтобы первые два элемента не сильно увеличивали тень
+        local n = 25 + (10 * math.clamp(guiObjectChildrenCount - 2, 0, 3))
         Section.DropShadow.Size = UDim2.new(1, n, 1, n)
     end
 
-    Section.Border.Content.ChildAdded:Connect(updateSectionHeight) -- Обновляем при добавлении
-    Section.Border.Content.ChildRemoved:Connect(updateSectionHeight) -- Обновляем при удалении
+    -- Проверяем существование Content перед подключением сигналов
+    if Section.Border and Section.Border:FindFirstChild("Content") then
+        Section.Border.Content.ChildAdded:Connect(updateSectionHeight)
+        Section.Border.Content.ChildRemoved:Connect(updateSectionHeight)
 
-    -- Убедимся, что UIListLayout существует перед подключением
-    if Section.Border.Content.UIListLayout then
-        Section.Border.Content.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
+        if Section.Border.Content:FindFirstChild("UIListLayout") then
+            Section.Border.Content.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
+        else
+            warn("UILibrary.Button:Section - UIListLayout не найден в Section.Border.Content для секции: " .. name .. " при подключении сигнала AbsoluteContentSize.")
+        end
     else
-        warn("UILibrary.Button:Section - UIListLayout не найден в Section.Border.Content для секции: " .. name)
+         warn("UILibrary.Button:Section - Border.Content не найден для секции: " .. name .. " при подключении сигналов ChildAdded/Removed.")
     end
 
-    updateSectionHeight() -- Первоначальная установка высоты
+    updateSectionHeight()
     -- =========================================================== --
     -- ========= КОНЕЦ ИЗМЕНЕНИЯ ДЛЯ МИНИМАЛЬНОЙ ВЫСОТЫ ========== --
     -- =========================================================== --
