@@ -4064,11 +4064,6 @@ end
 -- Вставьте этот обновленный блок в ваш файл uiLIB.txt, заменив старый блок --
 
 -- Обновленная функция создания секции
--- Вставьте этот обновленный блок в ваш файл БИБЛИОТЕКИ (uiLIB.txt), заменив старый блок --
-
--- Вставьте этот обновленный блок в ваш файл uiLIB.txt, заменив старый блок --
-
--- Обновленная функция создания секции
 function UILibrary.Button:Section(name, side, options) -- Добавлен третий аргумент 'options'
     local SectionInstance = objectGenerator.new("Section")
 
@@ -4290,7 +4285,6 @@ local function setupEffects(ui, hover)
 end
 
 -- Конец обновленного блока --
-
 function UILibrary.Section:Button(sett, callback)
     local functions = {}
     functions.__index = functions
