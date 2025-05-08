@@ -4923,9 +4923,9 @@ function UILibrary.Section:ColorPicker(sett, callback)
 
         table.insert(
             connections,
-            RunService.RenderStepped:Connect(
+            RunService.RenderStepped:Connect( -- This is the '(' at line ~4956
                 function()
-                    if not menuIsOpen then return end -- Stop updating if menu closed
+                    if not menuIsOpen then return end 
 
                     local mousePos =
                         game:GetService("UserInputService"):GetMouseLocation() -
@@ -4957,21 +4957,19 @@ function UILibrary.Section:ColorPicker(sett, callback)
                             darknessSlider.Position.X.Scale,
                             0,
                             0,
+                            -- CORRECTED BLOCK: Removed the duplicated/nested clamp
                             math.clamp(
                                 mousePos.Y - darknessPicker.AbsolutePosition.Y,
                                 0,
-                                darknessPicker.AbsoluteSize.
-                                    math.clamp(
-                                mousePos.Y - darknessPicker.AbsolutePosition.Y,
-                                0,
-                                darknessPicker.AbsoluteSize.Y -- Finish the clamp here
+                                darknessPicker.AbsoluteSize.Y -- This should be the end of the clamp arguments
                             )
-                        )
-                    end
+                            -- End of CORRECTED BLOCK
+                        ) -- This parenthesis closes UDim2.new
+                    end -- This 'end' closes 'if holdingSaturation then'
 
-                    local clr, baseClr = updateWheel() -- Renamed 'new' to 'baseClr' for clarity
+                    local clr, baseClr = updateWheel() 
 
-                    darknessPicker.ImageColor3 = baseClr -- Update the saturation slider color
+                    darknessPicker.ImageColor3 = baseClr 
 
                     if clr ~= oldColor then
                         oldColor = clr
@@ -4981,16 +4979,16 @@ function UILibrary.Section:ColorPicker(sett, callback)
                             ", " .. math.floor(clr.G * 255) .. ", " .. math.floor(clr.B * 255)
                         Content.ClrDisplay.Hex.Textbox.Text = toHex(clr)
                     end
-                end
-            )
-        )
+                end -- This 'end' closes the function() for RenderStepped
+            ) -- This ')' closes the RunService.RenderStepped:Connect call (Expected at line ~4970)
+        ) -- This ')' closes the table.insert call
 
         local function closeMenu()
-            menuIsOpen = false -- Set flag immediately
+            menuIsOpen = false 
             for i, v in pairs(connections) do
                 v:Disconnect()
             end
-            connections = {} -- Clear connections table
+            connections = {} 
 
             TweenService:Create(
                 self.MainSelf.MainUI.MainUI.ColorPickerOverlay,
@@ -5008,9 +5006,8 @@ function UILibrary.Section:ColorPicker(sett, callback)
                 }
             ):Play()
 
-            -- Use task.delay for better timing control than wait()
             task.delay(.4, function()
-                 if self.MainSelf.MainUI.MainUI.ColorPickerOverlay then -- Check if it still exists
+                 if self.MainSelf.MainUI.MainUI.ColorPickerOverlay then 
                     self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Visible = false
                  end
             end)
@@ -5071,7 +5068,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
                     if input.UserInputType == Enum.UserInputType.MouseButton1 then
                         local actual, clr = updateWheel()
 
-                        functions.setValue(actual) -- Set the final color
+                        functions.setValue(actual) 
 
                         closeMenu()
                     elseif input.UserInputType == Enum.UserInputType.MouseMovement then
