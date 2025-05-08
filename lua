@@ -2137,16 +2137,14 @@ local function getObjGen()
             Gui.UIListLayout_22.SortOrder = Enum.SortOrder.LayoutOrder
             Gui.UIListLayout_22.Padding = UDim.new(0, 10)
 
-            -- НОВЫЕ/ИЗМЕНЕННЫЕ СВОЙСТВА ДЛЯ Gui.DropShadow_16:
             Gui.DropShadow_16.Name = "DropShadow"
-            Gui.DropShadow_16.Parent = Gui.Border -- <<< РОДИТЕЛЬ ТЕПЕРЬ Gui.Border
+            Gui.DropShadow_16.Parent = Gui.Section
             Gui.DropShadow_16.AnchorPoint = Vector2.new(0.5, 0.5)
             Gui.DropShadow_16.BackgroundTransparency = 1.000
             Gui.DropShadow_16.BorderSizePixel = 0
-            Gui.DropShadow_16.Position = UDim2.new(0.5, 0, 0.5, 0) -- Центрируем относительно Border
-            -- ЗАДАЕМ ФИКСИРОВАННЫЙ ОТСТУП ТЕНИ (например, 15 пикселей)
-            Gui.DropShadow_16.Size = UDim2.new(1, 15, 1, 15) -- <<< НОВЫЙ РАЗМЕР (100% + 15px)
-            Gui.DropShadow_16.ZIndex = 106 -- <<< НОВЫЙ ZIndex (чуть ниже Border.ZIndex = 107)
+            Gui.DropShadow_16.Position = UDim2.new(0.5, 0, 0.5, 0)
+            Gui.DropShadow_16.Size = UDim2.new(1, 47, 1, 47)
+            Gui.DropShadow_16.ZIndex = 105
             Gui.DropShadow_16.Image = "rbxassetid://6014261993"
             Gui.DropShadow_16.ImageColor3 = Color3.fromRGB(0, 0, 0)
             Gui.DropShadow_16.ImageTransparency = 0.500
@@ -4063,7 +4061,7 @@ function UILibrary.Category:Button(name, icon)
     )
 end
 
--- Вставьте этот ОБНОВЛЕННЫЙ и УПРОЩЕННЫЙ блок в ваш файл БИБЛИОТЕКИ (uiLIB.txt) --
+-- Вставьте этот ИСПРАВЛЕННЫЙ блок в ваш файл БИБЛИОТЕКИ (uiLIB.txt) --
 
 function UILibrary.Button:Section(name, side, options)
     local SectionInstance = objectGenerator.new("Section")
@@ -4074,19 +4072,21 @@ function UILibrary.Button:Section(name, side, options)
     end
 
     local Section = SectionInstance
+    Section.Name = name -- Устанавливаем имя раньше для логов
 
-    if not Section:FindFirstChild("Border") then
-        error(string.format("UILibrary.Button:Section - КРИТИЧЕСКАЯ ОШИБКА: У созданного экземпляра Section отсутствует дочерний элемент 'Border'. Секция '%s'.", tostring(name)))
+    -- Проверка на Border остается важной
+    local BorderFrame = Section:FindFirstChild("Border")
+    if not BorderFrame then
+        error(string.format("UILibrary.Button:Section - КРИТИЧЕСКАЯ ОШИБКА: У созданного экземпляра Section ('%s') отсутствует дочерний элемент 'Border'.", name))
         Section:Destroy()
         return
     end
 
-    Section.Border.SectionTitle.Text = name
-    -- Удаляем начальную установку размера тени здесь, т.к. она задается в initObj
-    Section.Name = name
+    BorderFrame.SectionTitle.Text = name
+    -- Размер тени задается в initObj и не меняется здесь
 
     -- =========================================================== --
-    -- === НАЧАЛО БЛОКА: Ручное ограничение высоты (БЕЗ UISizeConstraint) === --
+    -- === НАЧАЛО БЛОКА: Ручное ограничение высоты (БЕЗ UISizeConstraint) + Отложенная инициализация === --
     -- =========================================================== --
 
     local minPixelHeight = options and options.MinHeight or 0
@@ -4099,40 +4099,55 @@ function UILibrary.Button:Section(name, side, options)
 
     local SECTION_VERTICAL_PADDING = 20
 
-    -- Функция для обновления ТОЛЬКО высоты секции
     local function updateSectionHeight()
-        if not Section.Border or not Section.Border:FindFirstChild("Content") or not Section.Border.Content:FindFirstChild("UIListLayout") then
-             warn(string.format("UILibrary.Button:Section.updateSectionHeight - Отсутствует необходимая структура (Border/Content/UIListLayout) для секции '%s'. Обновление высоты пропущено.", tostring(name)))
-            return
-        end
+        -- Добавляем больше проверок перед доступом
+        local border = Section:FindFirstChild("Border")
+        if not border then return end -- Если Border пропал, ничего не делаем
+        local content = border:FindFirstChild("Content")
+        if not content then return end
+        local listLayout = content:FindFirstChild("UIListLayout")
+        if not listLayout then return end
 
-        local contentHeight = Section.Border.Content.UIListLayout.AbsoluteContentSize.Y
+        local contentHeight = listLayout.AbsoluteContentSize.Y
         local desiredHeight = contentHeight + SECTION_VERTICAL_PADDING
         local clampedHeight = math.clamp(desiredHeight, minPixelHeight, maxPixelHeight)
 
-        Section.Size = UDim2.new(1, 0, 0, clampedHeight) -- Устанавливаем ограниченную высоту
-        -- ЛОГИКА ОБНОВЛЕНИЯ ТЕНИ УДАЛЕНА ОТСЮДА
-    end
-
-    -- Подключаем сигналы к функции обновления ВЫСОТЫ
-    if Section.Border and Section.Border:FindFirstChild("Content") then
-        -- Обновляем высоту при добавлении/удалении, т.к. AbsoluteContentSize может не сразу обновиться
-        Section.Border.Content.ChildAdded:Connect(updateSectionHeight)
-        Section.Border.Content.ChildRemoved:Connect(updateSectionHeight)
-
-        if Section.Border.Content:FindFirstChild("UIListLayout") then
-            Section.Border.Content.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
-        else
-            warn("UILibrary.Button:Section - UIListLayout не найден в Section.Border.Content для секции: " .. name .. " при подключении сигнала AbsoluteContentSize.")
+        -- Используем pcall для большей безопасности при изменении размера
+        local success, err = pcall(function()
+            Section.Size = UDim2.new(1, 0, 0, clampedHeight)
+        end)
+        if not success then
+            warn(string.format("UILibrary.Button:Section.updateSectionHeight - Ошибка при установке Section.Size для '%s': %s", name, tostring(err)))
         end
-    else
-         warn("UILibrary.Button:Section - Border.Content не найден для секции: " .. name .. " при подключении сигналов ChildAdded/Removed.")
     end
 
-    updateSectionHeight() -- Первоначальная установка высоты
+    -- Используем task.defer для подключения сигналов и первого вызова
+    task.defer(function()
+        if not Section or not Section.Parent then return end -- Доп. проверка, если секция была удалена очень быстро
+
+        local border = Section:FindFirstChild("Border")
+        if not border then return end
+        local content = border:FindFirstChild("Content")
+        if not content then return end
+        local listLayout = content:FindFirstChild("UIListLayout")
+
+        if content then
+            content.ChildAdded:Connect(updateSectionHeight)
+            content.ChildRemoved:Connect(updateSectionHeight)
+        end
+
+        if listLayout then
+             listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
+        else
+             warn("UILibrary.Button:Section (defer) - UIListLayout не найден в Section.Border.Content для секции: " .. name)
+        end
+
+        -- Вызываем первый раз после небольшой задержки
+        updateSectionHeight()
+    end)
 
     -- =========================================================== --
-    -- === КОНЕЦ БЛОКА: Ручное ограничение высоты (БЕЗ UISizeConstraint) === --
+    -- === КОНЕЦ БЛОКА: Ручное ограничение высоты (БЕЗ UISizeConstraint) + Отложенная инициализация === --
     -- =========================================================== --
 
     Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
@@ -4263,8 +4278,8 @@ local function setupEffects(ui, hover)
 
     return ClickEvent.Event
 end
-
 -- Конец обновленного блока --
+
 function UILibrary.Section:Button(sett, callback)
     local functions = {}
     functions.__index = functions
