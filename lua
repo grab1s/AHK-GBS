@@ -4061,18 +4061,19 @@ function UILibrary.Category:Button(name, icon)
     )
 end
 
-function UILibrary.Button:Section(name, side) -- МОЖНО ДОБАВИТЬ ЗДЕСЬ , minPixelHeight ЕСЛИ ХОТИТЕ ПЕРЕДАВАТЬ МИНИМАЛЬНУЮ ВЫСОТУ КАК ПАРАМЕТР
+
+function UILibrary.Button:Section(name, side)
     local SectionInstance = objectGenerator.new("Section")
 
-    -- Добавим проверку №1: Действительно ли objectGenerator вернул что-то?
+    -- Проверка №1: Действительно ли objectGenerator вернул что-то?
     if not SectionInstance then
         error(string.format("UILibrary.Button:Section - КРИТИЧЕСКАЯ ОШИБКА: objectGenerator.new(\"Section\") вернул nil. Невозможно создать секцию '%s'.", tostring(name)))
         return -- Прекращаем выполнение функции, так как Section не создан
     end
-    
+
     local Section = SectionInstance -- Используем переменную Section, как и раньше
 
-    -- Добавим проверку №2: Есть ли у созданного Section дочерний элемент 'Border'?
+    -- Проверка №2: Есть ли у созданного Section дочерний элемент 'Border'?
     if not Section:FindFirstChild("Border") then
         error(string.format("UILibrary.Button:Section - КРИТИЧЕСКАЯ ОШИБКА: У созданного экземпляра Section отсутствует дочерний элемент 'Border'. Секция '%s'.", tostring(name)))
         Section:Destroy() -- Очищаем созданный, но некорректный Section
@@ -4081,35 +4082,30 @@ function UILibrary.Button:Section(name, side) -- МОЖНО ДОБАВИТЬ З�
     -- Если предыдущие проверки пройдены, Section и Section.Border должны существовать
     Section.Border.SectionTitle.Text = name
 
-    -- Начальный размер тени. Он будет обновляться в updateSectionHeight.
+    -- Начальный размер тени. Он будет обновляться при добавлении/удалении детей.
     Section.DropShadow.Size = UDim2.new(1, 25, 1, 25)
     Section.Name = name
 
     -- =========================================================== --
-    -- ========= НАЧАЛО ИЗМЕНЕНИЯ ДЛЯ МИНИМАЛЬНОЙ ВЫСОТЫ ========= --
+    -- ========= НАЧАЛО ИЗМЕНЕНИЯ: ФИКСИРОВАННАЯ ВЫСОТА ========== --
     -- =========================================================== --
 
-    local MIN_SECTION_PIXEL_HEIGHT = 90
-    local sizeConstraint = Section:FindFirstChild("MinHeightConstraint")
-    if not sizeConstraint then
-        sizeConstraint = Instance.new("UISizeConstraint")
-        sizeConstraint.Name = "MinHeightConstraint"
-        sizeConstraint.Parent = Section
-    end
-    sizeConstraint.MinSize = Vector2.new(0, MIN_SECTION_PIXEL_HEIGHT)
+    -- УБИРАЕМ ВСЮ ЛОГИКУ ДИНАМИЧЕСКОЙ ВЫСОТЫ И UISizeConstraint
 
-    local SECTION_VERTICAL_PADDING = 20
+    -- ЗАДАЕМ ФИКСИРОВАННУЮ ВЫСОТУ СЕКЦИИ В ПИКСЕЛЯХ (Offset).
+    -- Подберите это значение так, чтобы оно вмещало ожидаемое количество контента.
+    -- Это значение НЕ будет меняться при изменении контента или масштабировании UIScale по вертикали.
+    -- Ширина (первый параметр Scale = 1) останется адаптивной.
+    local FIXED_SECTION_PIXEL_HEIGHT = 200 -- <<<< НАСТРОЙТЕ ЭТО ЗНАЧЕНИЕ ПО НЕОБХОДИМОСТИ
+    Section.Size = UDim2.new(1, 0, 0, FIXED_SECTION_PIXEL_HEIGHT)
 
-    local function updateSectionHeight()
-        -- Добавим проверку на существование Border и Content перед доступом
-        if not Section.Border or not Section.Border:FindFirstChild("Content") or not Section.Border.Content:FindFirstChild("UIListLayout") then
-            warn(string.format("UILibrary.Button:Section.updateSectionHeight - Отсутствует необходимая структура (Border/Content/UIListLayout) для секции '%s'. Обновление высоты пропущено.", tostring(name)))
+    -- Логика для обновления размера ТЕНИ остается, т.к. она зависит от КОЛИЧЕСТВА элементов, а не их размера.
+    local function updateShadowSize()
+         -- Добавим проверку на существование Border и Content перед доступом
+        if not Section.Border or not Section.Border:FindFirstChild("Content") then
+            warn(string.format("UILibrary.Button:Section.updateShadowSize - Отсутствует Border.Content для секции '%s'. Обновление тени пропущено.", tostring(name)))
             return
         end
-
-        local contentHeight = Section.Border.Content.UIListLayout.AbsoluteContentSize.Y
-        Section.Size = UDim2.new(1, 0, 0, contentHeight + SECTION_VERTICAL_PADDING)
-
         local guiObjectChildrenCount = 0
         for _, child in ipairs(Section.Border.Content:GetChildren()) do
             if child:IsA("GuiObject") then
@@ -4120,23 +4116,18 @@ function UILibrary.Button:Section(name, side) -- МОЖНО ДОБАВИТЬ З�
         Section.DropShadow.Size = UDim2.new(1, n, 1, n)
     end
 
-    -- Проверяем существование Content перед подключением сигналов
+    -- Подключаем обновление тени к добавлению/удалению элементов
     if Section.Border and Section.Border:FindFirstChild("Content") then
-        Section.Border.Content.ChildAdded:Connect(updateSectionHeight)
-        Section.Border.Content.ChildRemoved:Connect(updateSectionHeight)
-
-        if Section.Border.Content:FindFirstChild("UIListLayout") then
-            Section.Border.Content.UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateSectionHeight)
-        else
-            warn("UILibrary.Button:Section - UIListLayout не найден в Section.Border.Content для секции: " .. name .. " при подключении сигнала AbsoluteContentSize.")
-        end
+        Section.Border.Content.ChildAdded:Connect(updateShadowSize)
+        Section.Border.Content.ChildRemoved:Connect(updateShadowSize)
     else
-         warn("UILibrary.Button:Section - Border.Content не найден для секции: " .. name .. " при подключении сигналов ChildAdded/Removed.")
+         warn("UILibrary.Button:Section - Border.Content не найден для секции: " .. name .. " при подключении сигналов ChildAdded/Removed для тени.")
     end
 
-    updateSectionHeight()
+    updateShadowSize() -- Устанавливаем начальный размер тени
+
     -- =========================================================== --
-    -- ========= КОНЕЦ ИЗМЕНЕНИЯ ДЛЯ МИНИМАЛЬНОЙ ВЫСОТЫ ========== --
+    -- ========= КОНЕЦ ИЗМЕНЕНИЯ: ФИКСИРОВАННАЯ ВЫСОТА =========== --
     -- =========================================================== --
 
     Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
@@ -4267,6 +4258,8 @@ local function setupEffects(ui, hover)
 
     return ClickEvent.Event
 end
+
+-- Конец обновленного блока --
 
 function UILibrary.Section:Button(sett, callback)
     local functions = {}
