@@ -2619,17 +2619,23 @@ local function initUtils()
     end
 
     utils.CheckBoundary = function(Boundary,Object,Change)
-        if Boundary then
+        if Boundary and Object then -- Добавлена проверка на Object
             local Size = Boundary.AbsoluteSize
             local Position = Boundary.AbsolutePosition
+            local ObjAbsSize = Object.AbsoluteSize -- Получаем AbsoluteSize один раз
+
             local Min = -(Size-Position) + Size
-            local Max = (Size+Position) - Object.AbsoluteSize
+            local Max = (Size+Position) - ObjAbsSize
+
             local ObjPos = Object.Position
-            local X , Y = utils.ScaleToOffset({ObjPos.X.Scale,ObjPos.Y.Scale})
-            local GuiVector = Vector2.new(ObjPos.X.Offset+Change.X+X,ObjPos.Y.Offset+Change.Y+Y)
-            X = math.clamp(GuiVector.X,Min.X,Max.X)
-            Y = math.clamp(GuiVector.Y,Min.Y,Max.Y)
-            return X , Y
+            local X_ScaleOffset , Y_ScaleOffset = utils.ScaleToOffset({ObjPos.X.Scale,ObjPos.Y.Scale}) -- Переименовал X, Y
+
+            local GuiVector = Vector2.new(ObjPos.X.Offset+Change.X+X_ScaleOffset,ObjPos.Y.Offset+Change.Y+Y_ScaleOffset)
+
+            X_ScaleOffset = math.clamp(GuiVector.X,Min.X,Max.X)
+            Y_ScaleOffset = math.clamp(GuiVector.Y,Min.Y,Max.Y)
+
+            return X_ScaleOffset , Y_ScaleOffset
         end
         return Change.X, Change.Y 
     end
@@ -2639,10 +2645,11 @@ local function initUtils()
         Current = Current or {}
         local Suitable
         local CurrentDist
+
         pcall(function()
-            if Object then
+            if Object and Object.Parent then -- Добавлена проверка на Object.Parent
                 for _ , v in ipairs(Current) do
-                    if table.find(Clippings,v) and v.ZIndex <= Object.ZIndex then
+                    if v and v.Parent and table.find(Clippings,v) and v.ZIndex <= Object.ZIndex then
                         if not CurrentDist then
                             CurrentDist = (Object.AbsolutePosition-v.AbsolutePosition).Magnitude
                             Suitable = v
@@ -2668,6 +2675,8 @@ local function initUtils()
     end
 
     utils.Snap = function(B,C,Target)
+        if not B or not C or not B.Parent or not C.Parent then return C and C.Position or UDim2.new() end -- Добавлена проверка
+
         local vpSize = utils.getViewportSize()
         if vpSize.X == 0 or vpSize.Y == 0 then return C.Position end 
         local centre = Vector2.new(vpSize.X/2, vpSize.Y/2)
@@ -2760,11 +2769,11 @@ local function getDragIt()
                     self._mouseInputCheck:Disconnect()
                     self._mouseInputCheck = nil
                 end
-                if self._touchStartedConn then
+                if self._touchStartedConn then -- Этот обработчик больше не создается в drag.Drag
                     self._touchStartedConn:Disconnect()
                     self._touchStartedConn = nil
                 end
-                if self._touchEndedConn then
+                if self._touchEndedConn then -- Этот обработчик больше не создается в drag.Drag
                     self._touchEndedConn:Disconnect()
                     self._touchEndedConn = nil
                 end
@@ -2857,9 +2866,9 @@ local function getDragIt()
             self.ResponseTime = (ResponseTime and math.abs(ResponseTime))
             self.Snappings = Snappings
             self.Snapped = nil
-
-            -- _mouseInputCheck будет создан ниже
-            -- _touchStartedConn и _touchEndedConn не нужны здесь, т.к. обработка Touch идет через глобальный UIS.InputBegan
+            
+            -- _mouseInputCheck будет создан ниже, но он не нужен для TouchStarted/Ended на Frame
+            -- self._touchStartedConn и self._touchEndedConn удалены, так как Frame их не поддерживает
 
             local DragStart = Instance.new("BindableEvent")
             local DragEnd = Instance.new("BindableEvent")
@@ -2873,7 +2882,7 @@ local function getDragIt()
         -- Глобальный InputBegan: Определяет, нужно ли начинать перетаскивание и запускает RenderStepped
         drag.InputBegan = UIS.InputBegan:Connect(function(Input, gp)
             if gp then return end
-            if Holding then return end -- Если уже что-то перетаскивается, игнорируем новые InputBegan для начала
+            if Holding then return end 
 
             local targetObject = nil
             local isMouseInput = Input.UserInputType == Enum.UserInputType.MouseButton1
@@ -2885,13 +2894,13 @@ local function getDragIt()
             elseif isTouchInput then
                 inputPosition = Input.Position
             else
-                return -- Необрабатываемый тип ввода
+                return 
             end
             
             local guisUnderInput = Player.PlayerGui:GetGuiObjectsAtPosition(inputPosition.X, inputPosition.Y)
             for _, guiInstance in ipairs(guisUnderInput) do
                 for _, draggableObj in ipairs(Objects) do
-                    if guiInstance == draggableObj._setToElement then
+                    if draggableObj._setToElement and guiInstance == draggableObj._setToElement then
                         targetObject = draggableObj
                         break
                     end
@@ -2907,7 +2916,7 @@ local function getDragIt()
                 targetObject.OldPosition = inputPosition
                 
                 if Events[targetObject] and Events[targetObject][1] then
-                    Events[targetObject][1]:Fire() -- DragStart
+                    Events[targetObject][1]:Fire() 
                 end
 
                 if not RenderConnection then
@@ -2919,7 +2928,7 @@ local function getDragIt()
                         end
 
                         local v = currentDraggingGuiObject
-                        local currentFrameInputPos -- Переименовано для ясности, что это позиция для текущего кадра
+                        local currentFrameInputPos 
                         local inputType = currentDragInputObject.UserInputType
 
                         if inputType == Enum.UserInputType.MouseButton1 then
@@ -3061,54 +3070,6 @@ local function getDragIt()
             end
         end)
 
-        drag.InputEnd = UIS.InputEnded:Connect(function(Input)
-            if Holding and currentDragInputObject and 
-               (Input.UserInputType == currentDragInputObject.UserInputType and 
-                (Input.UserInputType ~= Enum.UserInputType.Touch or Input.TouchId == currentDragInputObject.TouchId)) then
-
-                if RenderConnection then
-                    RenderConnection:Disconnect()
-                    RenderConnection = nil
-                end
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Hovering and Settings.DraggingIcon then
-                    Mouse.Icon = ""
-                end
-
-                local v = currentDraggingGuiObject
-                if v and v.Object and v.Object.Parent then 
-                    coroutine.wrap(function()
-                        if v.Clipped and (not v.Snap or Settings.Priority == "Clipping") then
-                            if v.ResponseTime and v.ResponseTime > 0 then
-                                for i = 1, 10 do RS.RenderStepped:Wait(); if not v.Object or not v.Object.Parent then return end; v.Object.Position = v.Object.Position:Lerp(v.Clipped.Position, i / 10) end
-                            else
-                               if v.Object and v.Object.Parent then v.Object.Position = v.Clipped.Position end
-                            end
-                            if v.Object and v.Object.Parent then v.Object.Rotation = v.Clipped.Rotation end
-                        end
-                        if v.Snap and (not v.Clipped or Settings.Priority == "Snapping") then
-                            if v.Object and v.Object.Parent then -- Добавлена проверка перед вызовом Utils.Snap
-                                local Target = Utils.Snap(v.Snap, v.Object, v._Target)
-                                if v.ResponseTime and v.ResponseTime > 0 then
-                                    for i = 1, 10 do RS.RenderStepped:Wait(); if not v.Object or not v.Object.Parent then return end; v.Object.Position = v.Object.Position:Lerp(Target, i / 10) end
-                                else
-                                    if v.Object and v.Object.Parent then v.Object.Position = Target end
-                                end
-                                v.Snap = nil
-                            end
-                        end
-                    end)()
-                    
-                    if Events[v] and Events[v][2] then Events[v][2]:Fire() end 
-                    v.CanDrag = false
-                    v.OldPosition = nil
-                end
-                
-                Holding = false
-                currentDragInputObject = nil
-                currentDraggingGuiObject = nil
-            end
-        end)
-
         return drag
     end
     return nil 
@@ -3194,13 +3155,16 @@ local function getEffect()
             end
         end))
         
-        table.insert(conns, ui.TouchEnded:Connect(function(touch, gp)
-            if gp then return end
-            if isPressed then
-                isPressed = false
-                EndEffect()
-            end
-        end))
+        -- Только если элемент поддерживает прямые Touch-события (GuiButton и наследники)
+        if ui:IsA("GuiButton") then
+            table.insert(conns, ui.TouchEnded:Connect(function(touch, gp)
+                if gp then return end
+                if isPressed then
+                    isPressed = false
+                    EndEffect()
+                end
+            end))
+        end
         
         table.insert(conns, ui.MouseLeave:Connect(function()
             if isPressed and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
@@ -3255,7 +3219,7 @@ local function getLayoutOrder(UI)
             end
         end
     end
-    if #layoutTable == 0 then return 1 end -- Если таблица пуста (нет GuiObject'ов), вернуть 1
+    if #layoutTable == 0 then return 1 end 
     return math.max(unpack(layoutTable)) + 1
 end
 
@@ -3283,26 +3247,25 @@ function UILibrary.new(gameName, userId, rank)
     if not window then error("UILib.new: Не удалось создать 'Window' из objectGenerator") return nil end
     window.Parent = GUI
 
-    local mainUiFrame = window:FindFirstChild("MainUI") -- Это внешний Window.MainUI
-    if not mainUiFrame then error("UILib.new: Не найден 'MainUI' (внешний) в шаблоне 'Window'") return nil end
+    local mainUiFrameForDrag = window:FindFirstChild("MainUI") 
+    if not mainUiFrameForDrag then error("UILib.new: Не найден 'MainUI' (внутренний) в шаблоне 'Window' для Draggable") return nil end
 
-    local actualMainUIForDrag = mainUiFrame -- Перетаскиваем внешний MainUI (Window.MainUI)
-    local logoElement = actualMainUIForDrag:FindFirstChild("Sidebar", true) and
-                        actualMainUIForDrag.Sidebar:FindFirstChild("ContentHolder", true) and
-                        actualMainUIForDrag.Sidebar.ContentHolder:FindFirstChild("Cheats", true) and
-                        actualMainUIForDrag.Sidebar.ContentHolder.Cheats:FindFirstChild("Logo", true)
+    local logoElement = mainUiFrameForDrag:FindFirstChild("Sidebar", true) and
+                        mainUiFrameForDrag.Sidebar:FindFirstChild("ContentHolder", true) and
+                        mainUiFrameForDrag.Sidebar.ContentHolder:FindFirstChild("Cheats", true) and
+                        mainUiFrameForDrag.Sidebar.ContentHolder.Cheats:FindFirstChild("Logo", true)
 
     if logoElement then
-        local Frame = Instance.new("Frame")
-        Frame.BackgroundTransparency = 1
-        Frame.Size = UDim2.fromScale(2, 2)
-        Frame.AnchorPoint = Vector2.new(0.5, 0.5)
-        Frame.Position = UDim2.fromScale(.5, .5)
-        local AspectRatio = Instance.new("UIAspectRatioConstraint", Frame)
+        local FrameForDragHitbox = Instance.new("Frame") 
+        FrameForDragHitbox.BackgroundTransparency = 1
+        FrameForDragHitbox.Size = UDim2.fromScale(2, 2)
+        FrameForDragHitbox.AnchorPoint = Vector2.new(0.5, 0.5)
+        FrameForDragHitbox.Position = UDim2.fromScale(.5, .5)
+        local AspectRatio = Instance.new("UIAspectRatioConstraint", FrameForDragHitbox)
         AspectRatio.AspectRatio = 1.2
-        Frame.Parent = logoElement
-        Frame.ZIndex = 300
-        if Draggable and Draggable.Drag then Draggable.Drag(actualMainUIForDrag, Frame) end
+        FrameForDragHitbox.Parent = logoElement
+        FrameForDragHitbox.ZIndex = 300
+        if Draggable and Draggable.Drag then Draggable.Drag(mainUiFrameForDrag, FrameForDragHitbox) end 
     else
         warn("[UILib.new] Не удалось найти Logo для привязки Draggable.")
     end
@@ -3311,10 +3274,10 @@ function UILibrary.new(gameName, userId, rank)
         window.Watermark.Text = ("visuals | %s | %s"):format(userId, gameName)
     end
     
-    local userInfoContent = actualMainUIForDrag:FindFirstChild("Sidebar", true) and
-                            actualMainUIForDrag.Sidebar:FindFirstChild("ContentHolder", true) and
-                            actualMainUIForDrag.Sidebar.ContentHolder:FindFirstChild("UserInfo", true) and
-                            actualMainUIForDrag.Sidebar.ContentHolder.UserInfo:FindFirstChild("Content", true)
+    local userInfoContent = mainUiFrameForDrag:FindFirstChild("Sidebar", true) and
+                            mainUiFrameForDrag.Sidebar:FindFirstChild("ContentHolder", true) and
+                            mainUiFrameForDrag.Sidebar.ContentHolder:FindFirstChild("UserInfo", true) and
+                            mainUiFrameForDrag.Sidebar.ContentHolder.UserInfo:FindFirstChild("Content", true)
     if userInfoContent then
         if userInfoContent:FindFirstChild("Rank") then userInfoContent.Rank.Text = rank end
         if userInfoContent:FindFirstChild("Title") then userInfoContent.Title.Text = userId end
@@ -3322,7 +3285,7 @@ function UILibrary.new(gameName, userId, rank)
          warn("[UILib.new] Не удалось найти UserInfo.Content для настройки.")
     end
 
-    local actualMainUIScalerTarget = mainUiFrame -- Масштабируем сам внешний MainUI
+    local actualMainUIScalerTarget = mainUiFrameForDrag 
     if actualMainUIScalerTarget and actualMainUIScalerTarget:IsA("Frame") then
         if actualMainUIScalerTarget.AnchorPoint ~= Vector2.new(0.5, 0.5) then
            actualMainUIScalerTarget.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -3687,11 +3650,16 @@ function UILibrary.Window:ChangeCategorySelection(name)
         if self.currentCategorySelection then
             local innerContentOld = self.currentCategorySelection:FindFirstChild("InnerContent")
             if innerContentOld then
-                TweenService:Create(innerContentOld.Image, TI, {ImageColor3 = Color3.fromRGB(90, 90, 90)}):Play()
-                TweenService:Create(innerContentOld.Title, TI, {TextColor3 = Color3.fromRGB(90, 90, 90)}):Play()
+                local img = innerContentOld:FindFirstChild("Image")
+                local title = innerContentOld:FindFirstChild("Title")
+                if img then TweenService:Create(img, TI, {ImageColor3 = Color3.fromRGB(90, 90, 90)}):Play() end
+                if title then TweenService:Create(title, TI, {TextColor3 = Color3.fromRGB(90, 90, 90)}):Play() end
             end
-            TweenService:Create(self.currentCategorySelection.HoverFrame, TI, {BackgroundTransparency = 1}):Play()
-            TweenService:Create(self.currentCategorySelection.SelectionShadow, TI, {BackgroundTransparency = 1}):Play()
+            local hf = self.currentCategorySelection:FindFirstChild("HoverFrame")
+            if hf then TweenService:Create(hf, TI, {BackgroundTransparency = 1}):Play() end
+            local ss = self.currentCategorySelection:FindFirstChild("SelectionShadow")
+            if ss then TweenService:Create(ss, TI, {BackgroundTransparency = 1}):Play() end
+            
             if self.currentTab and self.currentTab.Parent then
                 TweenService:Create(self.currentTab, TI, {Position = UDim2.fromScale(0, 1)}):Play()
             end
@@ -3699,11 +3667,15 @@ function UILibrary.Window:ChangeCategorySelection(name)
         
         local innerContentNew = Object:FindFirstChild("InnerContent")
         if innerContentNew then
-            TweenService:Create(innerContentNew.Image, TI, {ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-            TweenService:Create(innerContentNew.Title, TI, {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+            local imgNew = innerContentNew:FindFirstChild("Image")
+            local titleNew = innerContentNew:FindFirstChild("Title")
+            if imgNew then TweenService:Create(imgNew, TI, {ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play() end
+            if titleNew then TweenService:Create(titleNew, TI, {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play() end
         end
-        TweenService:Create(Object.HoverFrame, TI, {BackgroundTransparency = .3}):Play()
-        TweenService:Create(Object.SelectionShadow, TI, {BackgroundTransparency = .6}):Play()
+        local hfNew = Object:FindFirstChild("HoverFrame")
+        if hfNew then TweenService:Create(hfNew, TI, {BackgroundTransparency = .3}):Play() end
+        local ssNew = Object:FindFirstChild("SelectionShadow")
+        if ssNew then TweenService:Create(ssNew, TI, {BackgroundTransparency = .6}):Play() end
 
         local mainContent = mainUI:FindFirstChild("Content")
         if not mainContent then return end
@@ -3720,7 +3692,9 @@ end
 function UILibrary.Window:Category(name, icon)
     local mainUI = self.MainUI:FindFirstChild("MainUI")
     if not mainUI then warn("UILib.Window:Category - MainUI не найден"); return end
-    local catFolder = mainUI.Sidebar.ContentHolder.Cheats.CheatHolder
+    local catFolder = mainUI.Sidebar:FindFirstChild("ContentHolder", true) and mainUI.Sidebar.ContentHolder:FindFirstChild("Cheats", true) and mainUI.Sidebar.ContentHolder.Cheats:FindFirstChild("CheatHolder")
+    if not catFolder then warn("UILib.Window:Category - CheatHolder не найден"); return end
+
     local category = objectGenerator.new("Category")
     if not category then warn("UILib: Не удалось создать шаблон Category"); return end
 
@@ -3742,7 +3716,9 @@ function UILibrary.Window:Category(name, icon)
     contentHolder.Name = name
     contentHolder.Visible = true 
     contentHolder.Position = UDim2.fromScale(1,0) 
-    contentHolder.Parent = mainUI.Sidebar.Sidebar2
+    local sidebar2 = mainUI.Sidebar:FindFirstChild("Sidebar2")
+    if sidebar2 then contentHolder.Parent = sidebar2 else warn("UILib.Window:Category - Sidebar2 не найден"); category:Destroy(); contentHolder:Destroy(); return end
+
 
     local Hover = EffectLib.ButtonHoverEffect(category, function() return self.currentSelection ~= category end)
     local Click = EffectLib.ButtonClickEffect(category)
@@ -4000,7 +3976,6 @@ local function generateCheatBase(Cheat, sett)
     return cheatBase
 end
 
---// some effects because my lazy ass is too lazy to put it in the module
 local function setupEffects(ui, hover)
     local ClickEvent = Instance.new("BindableEvent")
     local uiTweenType = (hover and hover:IsA("ImageLabel") or hover:IsA("ImageButton")) and "ImageTransparency" or "BackgroundTransparency"
@@ -4011,28 +3986,31 @@ local function setupEffects(ui, hover)
 
     local isPressed = false 
     local isHovering = false 
-    local conns = {} -- Таблица для хранения соединений, чтобы их можно было отключить
+    local conns = {} 
 
-    -- Проверяем, является ли ui элементом, поддерживающим Touch события напрямую
-    local supportsDirectTouchEvents = ui:IsA("GuiButton") -- Включает ImageButton, TextButton и т.д.
+    local supportsDirectTouchEvents = ui:IsA("GuiButton") 
 
     table.insert(conns, ui.InputBegan:Connect(function(input, gp)
         if gp then return end
         
-        -- Ховер-эффект (только для мыши и если есть hover-элемент)
         if input.UserInputType == Enum.UserInputType.MouseMovement then
             if hover and hover.Parent and not isPressed then 
                 isHovering = true
                 TweenService:Create(hover, TI, constructTweenInfo(.5)):Play()
             end
-        -- Нажатие/Касание
         elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             isPressed = true
             isHovering = false 
             if hover and hover.Parent then
                 TweenService:Create(hover, TI, constructTweenInfo(.2)):Play() 
-            elseif ui and ui.Parent then -- Если нет hover-элемента, применяем эффект к самому ui
-                 TweenService:Create(ui, TI, {BackgroundTransparency = ui.BackgroundTransparency * 0.5 + 0.1}):Play() -- Пример эффекта для Frame
+            elseif ui and ui.Parent then 
+                 if not ui:FindFirstChild("OriginalTransparencyValue") then -- Сохраняем только если еще не сохранено
+                    local originalTrans = Instance.new("NumberValue")
+                    originalTrans.Name = "OriginalTransparencyValue"
+                    originalTrans.Value = ui.BackgroundTransparency
+                    originalTrans.Parent = ui
+                 end
+                 TweenService:Create(ui, TI, {BackgroundTransparency = ui.BackgroundTransparency * 0.5 + 0.1}):Play() 
             end
         end
     end))
@@ -4040,13 +4018,11 @@ local function setupEffects(ui, hover)
     table.insert(conns, ui.InputEnded:Connect(function(input, gp)
         if gp then return end
         
-        -- Завершение ховера (только для мыши)
         if input.UserInputType == Enum.UserInputType.MouseMovement then
             isHovering = false
             if hover and hover.Parent and not isPressed then 
                  TweenService:Create(hover, TI, constructTweenInfo(1)):Play()
             end
-        -- Отпускание кнопки/касания
         elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             if isPressed then 
                 isPressed = false
@@ -4057,7 +4033,8 @@ local function setupEffects(ui, hover)
                                                      mouseLocation.Y >= topLeft.Y and mouseLocation.Y <= bottomRight.Y)
                 
                 local targetForEndEffect = hover and hover.Parent and hover or ui
-                local originalTransparency = hover and 1 or (ui:FindFirstChild("OriginalTransparencyValue") and ui.OriginalTransparencyValue.Value or ui.BackgroundTransparency)
+                local originalTransparencyValueHolder = ui:FindFirstChild("OriginalTransparencyValue")
+                local originalTransparency = (hover and 1) or (originalTransparencyValueHolder and originalTransparencyValueHolder.Value) or ui.BackgroundTransparency
 
 
                 if input.UserInputType == Enum.UserInputType.MouseButton1 and mouseOverElementAfterRelease and hover and hover.Parent then
@@ -4072,7 +4049,6 @@ local function setupEffects(ui, hover)
         end
     end))
 
-    -- Только если элемент поддерживает прямые Touch-события
     if supportsDirectTouchEvents then
         table.insert(conns, ui.TouchEnded:Connect(function(touch, gp) 
             if gp then return end
@@ -4080,7 +4056,8 @@ local function setupEffects(ui, hover)
                 isPressed = false
                 isHovering = false
                 local targetForEndEffect = hover and hover.Parent and hover or ui
-                local originalTransparency = hover and 1 or (ui:FindFirstChild("OriginalTransparencyValue") and ui.OriginalTransparencyValue.Value or ui.BackgroundTransparency)
+                local originalTransparencyValueHolder = ui:FindFirstChild("OriginalTransparencyValue")
+                local originalTransparency = (hover and 1) or (originalTransparencyValueHolder and originalTransparencyValueHolder.Value) or ui.BackgroundTransparency
                 TweenService:Create(targetForEndEffect, TI, constructTweenInfo(originalTransparency)):Play() 
             end
         end))
@@ -4091,74 +4068,72 @@ local function setupEffects(ui, hover)
         if hover and hover.Parent and not isPressed then 
              TweenService:Create(hover, TI, constructTweenInfo(1)):Play()
         end
-        -- Если мышь ушла во время нажатия, эффект нажатия остается до InputEnded или TouchEnded (если применимо)
-        -- Но если это был MouseButton1 и он все еще нажат, а мышь ушла, сбрасываем isPressed
         if isPressed and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-             isPressed = false -- Считаем, что нажатие мышью прервано для этого элемента
+             isPressed = false 
              local targetForEndEffect = hover and hover.Parent and hover or ui
-             local originalTransparency = hover and 1 or (ui:FindFirstChild("OriginalTransparencyValue") and ui.OriginalTransparencyValue.Value or ui.BackgroundTransparency)
+             local originalTransparencyValueHolder = ui:FindFirstChild("OriginalTransparencyValue")
+             local originalTransparency = (hover and 1) or (originalTransparencyValueHolder and originalTransparencyValueHolder.Value) or ui.BackgroundTransparency
              TweenService:Create(targetForEndEffect, TI, constructTweenInfo(originalTransparency)):Play()
         end
     end))
     
-    -- Сохраняем оригинальную прозрачность для Frame, если нет hover элемента
-    if not hover and ui:IsA("Frame") then
-        local originalTrans = Instance.new("NumberValue")
-        originalTrans.Name = "OriginalTransparencyValue"
-        originalTrans.Value = ui.BackgroundTransparency
-        originalTrans.Parent = ui
-    end
-
-    -- Добавляем метод Disconnect к возвращаемой таблице
     local returnTable = {Event = ClickEvent.Event}
     function returnTable:Disconnect()
         for _, v_conn in ipairs(conns) do
             v_conn:Disconnect()
         end
-        conns = {} -- Очищаем таблицу соединений
-        -- Попытка сбросить эффект, если он был активен
+        conns = {} 
         if isPressed or isHovering then
             local targetForEndEffect = hover and hover.Parent and hover or ui
-            local originalTransparency = hover and 1 or (ui:FindFirstChild("OriginalTransparencyValue") and ui.OriginalTransparencyValue.Value or ui.BackgroundTransparency)
+            local originalTransparencyValueHolder = ui:FindFirstChild("OriginalTransparencyValue")
+            local originalTransparency = (hover and 1) or (originalTransparencyValueHolder and originalTransparencyValueHolder.Value) or ui.BackgroundTransparency
             if targetForEndEffect and targetForEndEffect.Parent then
                  TweenService:Create(targetForEndEffect, TI, constructTweenInfo(originalTransparency)):Play()
             end
         end
+        local originalTransVal = ui:FindFirstChild("OriginalTransparencyValue")
+        if originalTransVal then originalTransVal:Destroy() end
     end
     return returnTable
 end
--- Конец обновленного блока --
 
 function UILibrary.Section:Button(sett, callback)
     local functions = {}
     functions.__index = functions
 
     local cheatBase = generateCheatBase("Button", sett)
-    cheatBase.Parent = self.Section.Border.Content
-    cheatBase.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
+    if not cheatBase then return nil end
+    local borderContent = self.Section and self.Section:FindFirstChild("Border") and self.Section.Border:FindFirstChild("Content")
+    if not borderContent then warn("UILib.Section:Button - Не найден Border.Content"); cheatBase:Destroy(); return nil end
+    
+    cheatBase.Parent = borderContent
+    cheatBase.LayoutOrder = getLayoutOrder(borderContent)
 
-    local element = cheatBase.Content.ElementContent.Button
+    local elementContent = cheatBase:FindFirstChild("Content", true) and cheatBase.Content:FindFirstChild("ElementContent")
+    local element = elementContent and elementContent:FindFirstChild("Button")
 
-    setupEffects(element, element.HoverFrame):Connect(
-        function()
-            callback()
-        end
-    )
+    if not element then warn("UILib.Section:Button - Элемент Button не найден в шаблоне"); cheatBase:Destroy(); return nil end
+    local hoverFrame = element:FindFirstChild("HoverFrame")
+    if not hoverFrame then warn("UILib.Section:Button - HoverFrame не найден в элементе Button"); end
 
-    element.Text.Text = sett.ButtonName
 
-    local meta =
-        setmetatable(
-        {
-            element = element,
-            UI = cheatBase
-        },
-        functions
-    )
+    setupEffects(element, hoverFrame):Connect(function()
+        if callback then callback() end
+    end)
 
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
+    local textLabel = element:FindFirstChild("Text")
+    if textLabel then textLabel.Text = sett.ButtonName or "Button" end
+
+    local meta = setmetatable({element = element, UI = cheatBase}, functions)
+    
+    local categoryUIName = self.oldSelf.oldSelf.categoryUI and self.oldSelf.oldSelf.categoryUI.Name or "UnknownCategory"
+    local sectionTabName = self.oldSelf.SectionName or "UnknownSectionTab"
+    local sectionName = self.Section.Name or "UnknownSection"
+    
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName][sett.Title or "Button"] = meta
 
     return meta
 end
@@ -4168,66 +4143,67 @@ function UILibrary.Section:Checkbox(sett, callback)
     functions.__index = functions
 
     local cheatBase = generateCheatBase("Checkbox", sett)
-    cheatBase.Parent = self.Section.Border.Content
-    cheatBase.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
+    if not cheatBase then return nil end
+    local borderContent = self.Section and self.Section:FindFirstChild("Border") and self.Section.Border:FindFirstChild("Content")
+    if not borderContent then warn("UILib.Section:Checkbox - Не найден Border.Content"); cheatBase:Destroy(); return nil end
 
-    local element = cheatBase.Content.ElementContent.Checkbox
+    cheatBase.Parent = borderContent
+    cheatBase.LayoutOrder = getLayoutOrder(borderContent)
+
+    local elementContent = cheatBase:FindFirstChild("Content", true) and cheatBase.Content:FindFirstChild("ElementContent")
+    local element = elementContent and elementContent:FindFirstChild("Checkbox")
+
+    if not element then warn("UILib.Section:Checkbox - Элемент Checkbox не найден"); cheatBase:Destroy(); return nil end
+    local selectionFrame = element:FindFirstChild("Selection")
+    local hoverFrame = element:FindFirstChild("HoverFrame")
+    if not selectionFrame then warn("UILib.Section:Checkbox - SelectionFrame не найден") end
+    if not hoverFrame then warn("UILib.Section:Checkbox - HoverFrame не найден") end
+
 
     local toggleEnabled = false
 
     functions.setValue = function(new)
         toggleEnabled = new
-
-        if new then
-            TweenService:Create(
-                element.Selection,
-                TI,
-                {
-                    Size = UDim2.fromScale(.85, .85),
-                    BackgroundTransparency = 0
-                }
-            ):Play()
-        else
-            TweenService:Create(
-                element.Selection,
-                TI,
-                {
-                    Size = UDim2.fromScale(0.5, 0.5),
-                    BackgroundTransparency = 1.1
-                }
-            ):Play()
+        if selectionFrame then
+            if new then
+                TweenService:Create(selectionFrame, TI, {Size = UDim2.fromScale(.85, .85), BackgroundTransparency = 0}):Play()
+            else
+                TweenService:Create(selectionFrame, TI, {Size = UDim2.fromScale(0.5, 0.5), BackgroundTransparency = 1.1}):Play()
+            end
         end
-
-        callback(toggleEnabled)
+        if callback then callback(toggleEnabled) end
     end
 
-    functions.getValue = function()
-        return toggleEnabled
-    end
+    functions.getValue = function() return toggleEnabled end
 
-    setupEffects(element, element.HoverFrame):Connect(
-        function()
+    if hoverFrame then
+        setupEffects(element, hoverFrame):Connect(function()
             functions.setValue(not toggleEnabled)
-        end
-    )
+        end)
+    else 
+        setupEffects(element, element):Connect(function()
+            functions.setValue(not toggleEnabled)
+        end)
+    end
+
 
     if sett.Default then
         functions.setValue(sett.Default)
+    else
+        functions.setValue(false) 
     end
 
-    local meta =
-        setmetatable(
-        {
-            element = element,
-            UI = cheatBase
-        },
-        functions
-    )
+    local meta = setmetatable({element = element, UI = cheatBase}, functions)
 
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
-
+    local categoryUIName = self.oldSelf.oldSelf.categoryUI and self.oldSelf.oldSelf.categoryUI.Name or "UnknownCategory"
+    local sectionTabName = self.oldSelf.SectionName or "UnknownSectionTab"
+    local sectionName = self.Section.Name or "UnknownSection"
+    
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName][sett.Title or "Checkbox"] = meta
+    
     return meta
 end
 
@@ -4236,79 +4212,66 @@ function UILibrary.Section:Toggle(sett, callback)
     functions.__index = functions
 
     local cheatBase = generateCheatBase("Toggle", sett)
-    cheatBase.Parent = self.Section.Border.Content
-    cheatBase.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
+    if not cheatBase then return nil end
+    local borderContent = self.Section and self.Section:FindFirstChild("Border") and self.Section.Border:FindFirstChild("Content")
+    if not borderContent then warn("UILib.Section:Toggle - Не найден Border.Content"); cheatBase:Destroy(); return nil end
 
-    local element = cheatBase.Content.ElementContent.Toggle
+    cheatBase.Parent = borderContent
+    cheatBase.LayoutOrder = getLayoutOrder(borderContent)
+
+    local elementContent = cheatBase:FindFirstChild("Content", true) and cheatBase.Content:FindFirstChild("ElementContent")
+    local element = elementContent and elementContent:FindFirstChild("Toggle")
+
+    if not element then warn("UILib.Section:Toggle - Элемент Toggle не найден"); cheatBase:Destroy(); return nil end
+    local frameInContent = element:FindFirstChild("Content", true) and element.Content:FindFirstChild("Frame")
+    local hoverFrame = element:FindFirstChild("HoverFrame")
+    if not frameInContent then warn("UILib.Section:Toggle - Frame в Content не найден") end
+    if not hoverFrame then warn("UILib.Section:Toggle - HoverFrame не найден") end
 
     local toggleEnabled = false
 
     functions.setValue = function(new)
         toggleEnabled = new
-
-        if new then
-            TweenService:Create(
-                element.Content.Frame,
-                TI,
-                {
-                    Position = UDim2.fromScale(.8, .5)
-                }
-            ):Play()
-
-            TweenService:Create(
-                element,
-                TI,
-                {
-                    BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                }
-            ):Play()
-        else
-            TweenService:Create(
-                element.Content.Frame,
-                TI,
-                {
-                    Position = UDim2.fromScale(.2, .5)
-                }
-            ):Play()
-
-            TweenService:Create(
-                element,
-                TI,
-                {
-                    BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-                }
-            ):Play()
+        if frameInContent then
+            if new then
+                TweenService:Create(frameInContent, TI, {Position = UDim2.fromScale(.8, .5)}):Play()
+                TweenService:Create(element, TI, {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+            else
+                TweenService:Create(frameInContent, TI, {Position = UDim2.fromScale(.2, .5)}):Play()
+                TweenService:Create(element, TI, {BackgroundColor3 = Color3.fromRGB(25, 25, 25)}):Play()
+            end
         end
-
-        callback(toggleEnabled)
+        if callback then callback(toggleEnabled) end
     end
 
-    functions.getValue = function()
-        return toggleEnabled
-    end
+    functions.getValue = function() return toggleEnabled end
 
-    setupEffects(element, element.HoverFrame):Connect(
-        function()
+    if hoverFrame then
+        setupEffects(element, hoverFrame):Connect(function()
             functions.setValue(not toggleEnabled)
-        end
-    )
+        end)
+    else
+        setupEffects(element, element):Connect(function()
+             functions.setValue(not toggleEnabled)
+        end)
+    end
 
     if sett.Default then
         functions.setValue(sett.Default)
+    else
+        functions.setValue(false)
     end
 
-    local meta =
-        setmetatable(
-        {
-            element = element,
-            UI = cheatBase
-        },
-        functions
-    )
+    local meta = setmetatable({element = element, UI = cheatBase}, functions)
 
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
+    local categoryUIName = self.oldSelf.oldSelf.categoryUI and self.oldSelf.oldSelf.categoryUI.Name or "UnknownCategory"
+    local sectionTabName = self.oldSelf.SectionName or "UnknownSectionTab"
+    local sectionName = self.Section.Name or "UnknownSection"
+    
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName][sett.Title or "Toggle"] = meta
 
     return meta
 end
@@ -4318,89 +4281,62 @@ function UILibrary.Section:Textbox(sett, callback)
     functions.__index = functions
 
     local cheatBase = generateCheatBase("Textbox", sett)
-    cheatBase.Parent = self.Section.Border.Content
-    cheatBase.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
+    if not cheatBase then return nil end
+    local borderContent = self.Section and self.Section:FindFirstChild("Border") and self.Section.Border:FindFirstChild("Content")
+    if not borderContent then warn("UILib.Section:Textbox - Не найден Border.Content"); cheatBase:Destroy(); return nil end
 
-    local element = cheatBase.Content.ElementContent.Textbox
+    cheatBase.Parent = borderContent
+    cheatBase.LayoutOrder = getLayoutOrder(borderContent)
+
+    local elementContent = cheatBase:FindFirstChild("Content", true) and cheatBase.Content:FindFirstChild("ElementContent")
+    local element = elementContent and elementContent:FindFirstChild("Textbox")
+    
+    if not element then warn("UILib.Section:Textbox - Элемент Textbox не найден"); cheatBase:Destroy(); return nil end
+    local textElement = element:FindFirstChild("Text")
+    if not textElement then warn("UILib.Section:Textbox - Text элемент в Textbox не найден"); cheatBase:Destroy(); return nil end
+
 
     local function updateSize()
-        local textBounds = math.clamp(element.Text.TextBounds.X, 10, element.Parent.AbsoluteSize.X) + 20
-
-        TweenService:Create(
-            element,
-            TI,
-            {
-                Size = UDim2.fromScale(textBounds / element.Parent.AbsoluteSize.X, 1)
-            }
-        ):Play()
+        if not element or not element.Parent or not textElement then return end
+        local textBounds = math.clamp(textElement.TextBounds.X, 10, element.Parent.AbsoluteSize.X) + 20
+        TweenService:Create(element, TI, {Size = UDim2.fromScale(textBounds / element.Parent.AbsoluteSize.X, 1)}):Play()
     end
 
     functions.setValue = function(new)
-        --/// anims
-        element.Text.Text = new
+        textElement.Text = new
         updateSize()
-        callback(element.Text.Text)
+        if callback then callback(textElement.Text) end
     end
 
-    functions.getValue = function()
-        return element.Text.Text
-    end
+    functions.getValue = function() return textElement.Text end
 
     updateSize()
 
-    element.Text.Focused:Connect(
-        function()
-            -- handle as hover
-            TweenService:Create(
-                element,
-                TI,
-                {
-                    BackgroundColor3 = Color3.fromRGB(17, 17, 17)
-                }
-            ):Play()
+    textElement.Focused:Connect(function()
+        TweenService:Create(element, TI, {BackgroundColor3 = Color3.fromRGB(17, 17, 17)}):Play()
+        TweenService:Create(element, TI, {Size = UDim2.fromScale(1, 1)}):Play()
+    end)
 
-            TweenService:Create(
-                element,
-                TI,
-                {
-                    Size = UDim2.fromScale(1, 1)
-                }
-            ):Play()
-        end
-    )
-
-    element.Text.FocusLost:Connect(
-        function()
-            -- set it here
-            TweenService:Create(
-                element,
-                TI,
-                {
-                    BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-                }
-            ):Play()
-
-            functions.setValue(element.Text.Text)
-        end
-    )
+    textElement.FocusLost:Connect(function()
+        TweenService:Create(element, TI, {BackgroundColor3 = Color3.fromRGB(25, 25, 25)}):Play()
+        functions.setValue(textElement.Text)
+    end)
 
     if sett.Default then
         functions.setValue(sett.Default)
     end
 
-    local meta =
-        setmetatable(
-        {
-            element = element,
-            UI = cheatBase
-        },
-        functions
-    )
+    local meta = setmetatable({element = element, UI = cheatBase}, functions)
 
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
-
+    local categoryUIName = self.oldSelf.oldSelf.categoryUI and self.oldSelf.oldSelf.categoryUI.Name or "UnknownCategory"
+    local sectionTabName = self.oldSelf.SectionName or "UnknownSectionTab"
+    local sectionName = self.Section.Name or "UnknownSection"
+    
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName][sett.Title or "Textbox"] = meta
+    
     return meta
 end
 
@@ -4411,578 +4347,108 @@ function UILibrary.Section:Keybind(sett, callback)
     functions.__index = functions
 
     local cheatBase = generateCheatBase("Keybind", sett)
-    cheatBase.Parent = self.Section.Border.Content
-    cheatBase.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
+    if not cheatBase then return nil end
+    local borderContent = self.Section and self.Section:FindFirstChild("Border") and self.Section.Border:FindFirstChild("Content")
+    if not borderContent then warn("UILib.Section:Keybind - Не найден Border.Content"); cheatBase:Destroy(); return nil end
+    
+    cheatBase.Parent = borderContent
+    cheatBase.LayoutOrder = getLayoutOrder(borderContent)
 
-    local element = cheatBase.Content.ElementContent.Keybind
+    local elementContent = cheatBase:FindFirstChild("Content", true) and cheatBase.Content:FindFirstChild("ElementContent")
+    local element = elementContent and elementContent:FindFirstChild("Keybind")
+
+    if not element then warn("UILib.Section:Keybind - Элемент Keybind не найден"); cheatBase:Destroy(); return nil end
+    local textLabel = element:FindFirstChild("Text")
+    local hoverFrame = element:FindFirstChild("HoverFrame")
+    if not textLabel then warn("UILib.Section:Keybind - TextLabel не найден") end
+    if not hoverFrame then warn("UILib.Section:Keybind - HoverFrame не найден") end
+
 
     local function updateSize()
-        local textBounds = math.clamp(element.Text.TextBounds.X, 10, element.Parent.AbsoluteSize.X) + 20
-
-        TweenService:Create(
-            element,
-            TI,
-            {
-                Size = UDim2.fromScale(textBounds / element.Parent.AbsoluteSize.X, 1)
-            }
-        ):Play()
+        if not element or not element.Parent or not textLabel then return end
+        local textBounds = math.clamp(textLabel.TextBounds.X, 10, element.Parent.AbsoluteSize.X) + 20
+        TweenService:Create(element, TI, {Size = UDim2.fromScale(textBounds / element.Parent.AbsoluteSize.X, 1)}):Play()
     end
 
     local currentKb = nil
     local keyPressConn = nil
 
     functions.setValue = function(new)
-        --/// anims
-        element.Text.Text = new.Name
+        if not textLabel then return end
+        textLabel.Text = new.Name
         updateSize()
-
         currentKb = new
-
-        if keyPressConn then
-            keyPressConn:Disconnect()
-        end
-
+        if keyPressConn then keyPressConn:Disconnect() end
         currentKBInfo = {}
-
-        keyPressConn =
-            game:GetService("UserInputService").InputBegan:Connect(
-            function(input, gp)
-                if gp then
-                    return
-                end
-
-                if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == currentKb then
-                    callback()
-                elseif input.UserInputType.Name == currentKb.Name then
-                    callback()
-                end
+        keyPressConn = UserInputService.InputBegan:Connect(function(input, gp)
+            if gp then return end
+            if (input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == currentKb) or 
+               (currentKb and input.UserInputType.Name == currentKb.Name) then -- Добавлена проверка на currentKb
+                if callback then callback() end
             end
-        )
+        end)
     end
 
-    functions.getValue = function()
-        return currentKb
-    end
-
+    functions.getValue = function() return currentKb end
     updateSize()
-
     local rebinding = false
     local conn
 
-    setupEffects(element, element.HoverFrame):Connect(
-        function()
-            if rebinding then
-                return
-            end
-
-            if currentKBInfo.old and currentKBInfo.set ~= functions.setValue then
-                return
-            end
-
+    if hoverFrame then
+        setupEffects(element, hoverFrame):Connect(function()
+            if rebinding then return end
+            if currentKBInfo.old and currentKBInfo.set ~= functions.setValue then return end
             rebinding = true
-
-            element.Text.Text = "..."
+            if textLabel then textLabel.Text = "..." end
             updateSize()
-
             local old = functions.getValue()
-
-            conn =
-                game:GetService("UserInputService").InputBegan:Connect(
-                function(input, gp)
-                    --if gp then return end
-
-                    if input.UserInputType == Enum.UserInputType.Keyboard then
-                        currentKb = input.KeyCode
-
-                        rebinding = false
-
-                        functions.setValue(currentKb)
-                        conn:Disconnect()
-                    elseif
-                        input.UserInputType == Enum.UserInputType.MouseButton2 or
-                            input.UserInputType == Enum.UserInputType.MouseButton1
-                        then
-                        currentKb = input.UserInputType
-
-                        rebinding = false
-
-                        functions.setValue(currentKb)
-                        conn:Disconnect()
-                    end
+            conn = UserInputService.InputBegan:Connect(function(input, gp)
+                if input.UserInputType == Enum.UserInputType.Keyboard then
+                    currentKb = input.KeyCode; rebinding = false; functions.setValue(currentKb); conn:Disconnect()
+                elseif input.UserInputType == Enum.UserInputType.MouseButton2 or input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    currentKb = input.UserInputType; rebinding = false; functions.setValue(currentKb); conn:Disconnect()
                 end
-            )
-
-            currentKBInfo.old = old
-            currentKBInfo.conn = conn
-            currentKBInfo.set = functions.setValue
-        end
-    )
+            end)
+            currentKBInfo.old = old; currentKBInfo.conn = conn; currentKBInfo.set = functions.setValue
+        end)
+    end
 
     if sett.Default then
         functions.setValue(sett.Default)
+    else
+        if textLabel then textLabel.Text = "..." end 
+        updateSize()
     end
 
-    local meta =
-        setmetatable(
-        {
-            element = element,
-            UI = cheatBase
-        },
-        functions
-    )
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
+    local meta = setmetatable({element = element, UI = cheatBase}, functions)
+
+    local categoryUIName = self.oldSelf.oldSelf.categoryUI and self.oldSelf.oldSelf.categoryUI.Name or "UnknownCategory"
+    local sectionTabName = self.oldSelf.SectionName or "UnknownSectionTab"
+    local sectionName = self.Section.Name or "UnknownSection"
+    
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName] = self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName] or {}
+    self.oldSelf.oldSelf.MainSelf.UI[categoryUIName][sectionTabName][sectionName][sett.Title or "Keybind"] = meta
 
     return meta
 end
 
 function toInteger(color)
-    return math.floor(color.r * 255) * 256 ^ 2 + math.floor(color.g * 255) * 256 + math.floor(color.b * 255)
+    return math.floor(color.R * 255) * 65536 + math.floor(color.G * 255) * 256 + math.floor(color.B * 255)
 end
 
 function toHex(color)
     local int = toInteger(color)
-
-    local current = int
-    local final = ""
-
-    local hexChar = {
-        "A",
-        "B",
-        "C",
-        "D",
-        "E",
-        "F"
-    }
-
+    local hex = ""
+    local hexChars = "0123456789ABCDEF"
     repeat
-        local remainder = current % 16
-        local char = tostring(remainder)
-
-        if remainder >= 10 then
-            char = hexChar[1 + remainder - 10]
-        end
-
-        current = math.floor(current / 16)
-        final = final .. char
-    until current <= 0
-
-    return "#" .. string.reverse(final)
-end
-
-function UILibrary.Section:ColorPicker(sett, callback)
-    local functions = {}
-    functions.__index = functions
-
-    local cheatBase = generateCheatBase("ColorPicker", sett)
-    cheatBase.Parent = self.Section.Border.Content
-    cheatBase.LayoutOrder = getLayoutOrder(self.Section.Border.Content)
-
-    local element = cheatBase.Content.ElementContent.ColorPicker
-
-    local menuIsOpen = false
-    local currentclr = Color3.fromRGB(255, 255, 255)
-
-    functions.setValue = function(clr)
-        TweenService:Create(
-            element.Preview,
-            TI,
-            {
-                ImageColor3 = clr
-            }
-        ):Play()
-
-        currentclr = clr
-
-        callback(clr)
-        element.Text.Label.Text =
-            math.floor(clr.R * 255) .. ", " .. math.floor(clr.G * 255) .. ", " .. math.floor(clr.B * 255)
-    end
-
-    functions.getValue = function()
-        return currentclr
-    end
-
-    functions.openMenu = function()
-        if menuIsOpen == true then
-            return
-        end
-
-        menuIsOpen = true
-
-        local oldColor
-        local oldPos
-
-        self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Visible = true
-
-        TweenService:Create(
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay,
-            TI,
-            {
-                ImageTransparency = .07
-            }
-        ):Play()
-
-        TweenService:Create(
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content,
-            TI,
-            {
-                Position = UDim2.fromScale(.5, 0.5)
-            }
-        ):Play()
-
-        local Content = self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content
-        local colourWheel = Content.MainWindow.Wheel
-        local darknessSlider = Content.MainWindow.Saturation.Pointer
-        local darknessPicker = Content.MainWindow.Saturation
-
-        local function updateWheel()
-            local centreOfWheel =
-                Vector2.new(
-                colourWheel.AbsolutePosition.X + (colourWheel.AbsoluteSize.X / 2),
-                colourWheel.AbsolutePosition.Y + (colourWheel.AbsoluteSize.Y / 2)
-            )
-
-            local colourPickerCentre =
-                Vector2.new(
-                colourWheel.Pointer.AbsolutePosition.X + (colourWheel.Pointer.AbsoluteSize.X / 2),
-                colourWheel.Pointer.AbsolutePosition.Y + (colourWheel.Pointer.AbsoluteSize.Y / 2)
-            )
-
-            local h =
-                (math.pi -
-                math.atan2(colourPickerCentre.Y - centreOfWheel.Y, colourPickerCentre.X - centreOfWheel.X)) /
-                (math.pi * 2)
-
-            local s = (centreOfWheel - colourPickerCentre).Magnitude / (colourWheel.AbsoluteSize.X / 2)
-
-            local v =
-                math.abs(
-                (darknessSlider.AbsolutePosition.Y - darknessPicker.AbsolutePosition.Y) /
-                    darknessPicker.AbsoluteSize.Y -
-                    1
-            )
-
-            local hsv = Color3.fromHSV(math.clamp(h, 0, 1), math.clamp(s, 0, 1), math.clamp(v, 0, 1))
-
-            return hsv, Color3.fromHSV(math.clamp(h, 0, 1), math.clamp(s, 0, 1), 1)
-        end
-
-        local holdingHsv = false
-        local holdingSaturation = false
-
-        local connections = {}
-
-        table.insert(
-            connections,
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content.MainWindow.Wheel.Hitbox.InputBegan:Connect(
-                function(input, gp)
-                    if gp == true then
-                        return
-                    end
-
-                    -- Добавляем проверку на Touch
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                        holdingHsv = true
-                    end
-                end
-            )
-        )
-
-        table.insert(
-            connections,
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content.MainWindow.Wheel.Hitbox.InputEnded:Connect(
-                function(input, gp)
-                    if gp == true then
-                        return
-                    end
-
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        holdingHsv = false
-                    end
-                end
-            )
-        )
-
-        table.insert(
-            connections,
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content.MainWindow.Saturation.Hitbox.InputBegan:Connect(
-                function(input, gp)
-                    if gp == true then
-                        return
-                    end
-
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        holdingSaturation = true
-                    end
-                end
-            )
-        )
-
-        table.insert(
-            connections,
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content.MainWindow.Saturation.Hitbox.InputEnded:Connect(
-                function(input, gp)
-                    if gp == true then
-                        return
-                    end
-
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        holdingSaturation = false
-                    end
-                end
-            )
-        )
-
-        table.insert(
-            connections,
-            RunService.RenderStepped:Connect(
-                function()
-                    local mousePos =
-                        game:GetService("UserInputService"):GetMouseLocation() -
-                        Vector2.new(0, game:GetService("GuiService"):GetGuiInset().Y)
-
-                    local centreOfWheel =
-                        Vector2.new(
-                        colourWheel.AbsolutePosition.X + (colourWheel.AbsoluteSize.X / 2),
-                        colourWheel.AbsolutePosition.Y + (colourWheel.AbsoluteSize.Y / 2)
-                    )
-
-                    local distanceFromWheel = (mousePos - centreOfWheel).Magnitude
-
-                    if holdingHsv then
-                        if distanceFromWheel <= colourWheel.AbsoluteSize.X / 2 then
-                            colourWheel.Pointer.Position =
-                                UDim2.new(
-                                0,
-                                mousePos.X - colourWheel.AbsolutePosition.X,
-                                0,
-                                mousePos.Y - colourWheel.AbsolutePosition.Y
-                            )
-                        end
-                    end
-
-                    if holdingSaturation then
-                        darknessSlider.Position =
-                            UDim2.new(
-                            darknessSlider.Position.X.Scale,
-                            0,
-                            0,
-                            math.clamp(
-                                mousePos.Y - darknessPicker.AbsolutePosition.Y,
-                                0,
-                                darknessPicker.AbsoluteSize.Y
-                            )
-                        )
-                    end
-
-                    local clr, new = updateWheel()
-
-                    darknessPicker.ImageColor3 = new
-
-                    if clr ~= oldColor then
-                        oldColor = clr
-
-                        Content.ClrDisplay.RGB.Textbox.Text =
-                            math.floor(clr.R * 255) ..
-                            ", " .. math.floor(clr.G * 255) .. ", " .. math.floor(clr.B * 255)
-                        Content.ClrDisplay.Hex.Textbox.Text = toHex(clr)
-                    end
-                end
-            )
-        )
-
-        local function closeMenu()
-            for i, v in pairs(connections) do
-                v:Disconnect()
-            end
-
-            TweenService:Create(
-                self.MainSelf.MainUI.MainUI.ColorPickerOverlay,
-                TI,
-                {
-                    ImageTransparency = 1
-                }
-            ):Play()
-
-            TweenService:Create(
-                self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Content,
-                TI,
-                {
-                    Position = UDim2.fromScale(.5, 1.5)
-                }
-            ):Play()
-
-            wait(.5)
-            self.MainSelf.MainUI.MainUI.ColorPickerOverlay.Visible = false
-            menuIsOpen = false
-        end
-
-        table.insert(
-            connections,
-            Content.Buttons.Cancel.InputBegan:Connect(
-                function(input, gp)
-                    if gp == true then
-                        return
-                    end
-
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        closeMenu()
-                    elseif input.UserInputType == Enum.UserInputType.MouseMovement then
-                        TweenService:Create(
-                            Content.Buttons.Cancel.OtherFill,
-                            TI,
-                            {
-                                ImageColor3 = Color3.fromRGB(150, 69, 71)
-                            }
-                        ):Play()
-                    end
-                end
-            )
-        )
-
-        table.insert(
-            connections,
-            Content.Buttons.Cancel.InputEnded:Connect(
-                function(input, gp)
-                    if gp == true then
-                        return
-                    end
-
-                    if input.UserInputType == Enum.UserInputType.MouseMovement then
-                        TweenService:Create(
-                            Content.Buttons.Cancel.OtherFill,
-                            TI,
-                            {
-                                ImageColor3 = Color3.fromRGB(170, 89, 91)
-                            }
-                        ):Play()
-                    end
-                end
-            )
-        )
-
-        table.insert(
-            connections,
-            Content.Buttons.Confirm.InputBegan:Connect(
-                function(input, gp)
-                    if gp == true then
-                        return
-                    end
-
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        local actual, clr = updateWheel()
-
-                        functions.setValue(actual)
-
-                        closeMenu()
-                    elseif input.UserInputType == Enum.UserInputType.MouseMovement then
-                        TweenService:Create(
-                            Content.Buttons.Confirm.OtherFill,
-                            TI,
-                            {
-                                ImageColor3 = Color3.fromRGB(60, 150, 107)
-                            }
-                        ):Play()
-                    end
-                end
-            )
-        )
-
-        table.insert(
-            connections,
-            Content.Buttons.Confirm.InputEnded:Connect(
-                function(input, gp)
-                    if gp == true then
-                        return
-                    end
-
-                    if input.UserInputType == Enum.UserInputType.MouseMovement then
-                        TweenService:Create(
-                            Content.Buttons.Confirm.OtherFill,
-                            TI,
-                            {
-                                ImageColor3 = Color3.fromRGB(85, 170, 127)
-                            }
-                        ):Play()
-                    end
-                end
-            )
-        )
-    end
-
-    element.Text.Label.Focused:Connect(
-        function()
-            TweenService:Create(
-                element.Text,
-                TI,
-                {
-                    ImageColor3 = Color3.fromRGB(20, 20, 20)
-                }
-            ):Play()
-        end
-    )
-
-    element.Text.Label.FocusLost:Connect(
-        function()
-            TweenService:Create(
-                element.Text,
-                TI,
-                {
-                    ImageColor3 = Color3.fromRGB(25, 25, 25)
-                }
-            ):Play()
-
-            local split = element.Text.Label.Text:split(",")
-
-            if #split == 3 then
-                for i, v in pairs(split) do
-                    if tonumber(v) == nil then
-                        element.Text.Label.Text =
-                            math.floor(currentclr.R * 255) ..
-                            ", " .. math.floor(currentclr.G * 255) .. ", " .. math.floor(currentclr.B * 255)
-                        return
-                    end
-                end
-
-                local clr3 = Color3.fromRGB(split[1], split[2], split[3])
-
-                functions.setValue(clr3)
-            else
-                element.Text.Label.Text =
-                    math.floor(currentclr.R * 255) ..
-                    ", " .. math.floor(currentclr.G * 255) .. ", " .. math.floor(currentclr.B * 255)
-            end
-        end
-    )
-
-    setupEffects(element.Preview, element.Preview.Hover):Connect(
-        function()
-            functions.openMenu()
-        end
-    )
-
-    if sett.Default then
-        functions.setValue(sett.Default)
-    else
-        functions.setValue(Color3.fromRGB(255, 255, 255))
-    end
-
-    local meta =
-        setmetatable(
-        {
-            element = element,
-            UI = cheatBase
-        },
-        functions
-    )
-
-    self.oldSelf.oldSelf.oldSelf.UI[self.oldSelf.oldSelf.categoryUI.Name][self.oldSelf.SectionName][
-            self.Section.Name
-        ][sett.Title] = meta
-
-    return meta
+        local remainder = int % 16
+        hex = string.sub(hexChars, remainder + 1, remainder + 1) .. hex
+        int = math.floor(int / 16)
+    until int == 0
+    while #hex < 6 do hex = "0" .. hex end 
+    return "#" .. hex
 end
 
 function UILibrary.Section:Slider(sett, callback)
