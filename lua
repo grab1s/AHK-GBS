@@ -2545,17 +2545,19 @@ local function getObjGen()
             Gui.Desc_Label.Name = "Description"
             Gui.Desc_Label.Parent = Gui.LabelElement
             Gui.Desc_Label.BackgroundTransparency = 1.000
-            Gui.Desc_Label.Size = UDim2.new(1, 0, 0, 0) 
-            Gui.Desc_Label.AutomaticSize = Enum.AutomaticSize.Y 
-            Gui.Desc_Label.TextWrapped = true 
-            Gui.Desc_Label.TextScaled = false 
-            Gui.Desc_Label.Font = Enum.Font.Gotham 
-            Gui.Desc_Label.TextColor3 = Color3.fromRGB(60, 60, 60) 
-            Gui.Desc_Label.TextSize = 12 
+            Gui.Desc_Label.Size = UDim2.new(1, 0, 0, 0) -- Начальная высота 0
+            Gui.Desc_Label.AutomaticSize = Enum.AutomaticSize.Y -- Автоматическая высота
+            Gui.Desc_Label.TextWrapped = true -- <<< ВАЖНО: Перенос строк
+            Gui.Desc_Label.TextScaled = false -- Не использовать TextScaled с AutomaticSize
+            Gui.Desc_Label.Font = Enum.Font.Gotham -- Стиль как у других Desc
+            Gui.Desc_Label.TextColor3 = Color3.fromRGB(60, 60, 60) -- Стиль как у других Desc
+            Gui.Desc_Label.TextSize = 12 -- Размер как у других Desc
             Gui.Desc_Label.TextXAlignment = Enum.TextXAlignment.Left
-            Gui.Desc_Label.Visible = false 
+            Gui.Desc_Label.Visible = false -- Скрыт по умолчанию, покажем если есть текст
             Gui.Desc_Label.LayoutOrder = 2
             Gui.Desc_Label.ZIndex = 111
+
+            -- Конец свойств для LabelElement
 
             return Gui.UIObjects
         end
@@ -2574,19 +2576,17 @@ local function getObjGen()
 
     function objGen.new(objectType, cheatName)
         if objectType == "Cheat" then
-            local cheatTemplate = script.Cheats:FindFirstChild(cheatName)
-            if cheatTemplate then
-                return cheatTemplate:Clone()
+            if script.Cheats:FindFirstChild(cheatName) then
+                return script.Cheats[cheatName]:Clone()
             else
-                error("Invalid cheatType: " .. tostring(cheatName))
+                error("Invalid cheatType")
             end
         end
 
-        local objectTemplate = script.Objects:FindFirstChild(objectType)
-        if objectTemplate then
-            return objectTemplate:Clone()
+        if script.Objects:FindFirstChild(objectType) then
+            return script.Objects[objectType]:Clone()
         else
-            error("Invalid objectType: " .. tostring(objectType))
+            error("Invalid objectType: " .. tostring(objectType)) -- Добавлено сообщение об ошибке
         end
     end
 
@@ -2595,26 +2595,19 @@ end
 
 local objectGenerator = getObjGen()
 
-local UserInputService = game:GetService("UserInputService") 
 
 local function initUtils()
     local utils = {}
-    local camera = workspace.CurrentCamera 
-    
-    function utils.getViewportSize() 
-        return camera and camera.ViewportSize or Vector2.new(0,0)
-    end
+    local camera = workspace.Camera.ViewportSize
+    local centre = Vector2.new(camera.X/2, camera.Y/2)
 
     utils.OffsetToScale = function(Offset)
-        local vpSize = utils.getViewportSize()
-        if vpSize.X == 0 or vpSize.Y == 0 then return {0,0} end
-        return ({Offset[1] / vpSize.X, Offset[2] / vpSize.Y})
+        return ({Offset[1] / camera.X, Offset[2] / camera.Y})
     end
 
     utils.ScaleToOffset = function(Scale)
-        local vpSize = utils.getViewportSize()
-        local X = Scale[1] * vpSize.X
-        local Y = Scale[2] * vpSize.Y
+        local X = Scale[1] * camera.X
+        local Y = Scale[2] * camera.Y
         return X , Y
     end
 
@@ -2622,16 +2615,20 @@ local function initUtils()
         if Boundary then
             local Size = Boundary.AbsoluteSize
             local Position = Boundary.AbsolutePosition
+
             local Min = -(Size-Position) + Size
             local Max = (Size+Position) - Object.AbsoluteSize
+
             local ObjPos = Object.Position
             local X , Y = utils.ScaleToOffset({ObjPos.X.Scale,ObjPos.Y.Scale})
+
             local GuiVector = Vector2.new(ObjPos.X.Offset+Change.X+X,ObjPos.Y.Offset+Change.Y+Y)
+
             X = math.clamp(GuiVector.X,Min.X,Max.X)
             Y = math.clamp(GuiVector.Y,Min.Y,Max.Y)
+
             return X , Y
         end
-        return Change.X, Change.Y 
     end
 
     utils.SortTable = function(Clippings , Current , Object)
@@ -2639,6 +2636,7 @@ local function initUtils()
         Current = Current or {}
         local Suitable
         local CurrentDist
+
         pcall(function()
             if Object then
                 for _ , v in ipairs(Current) do
@@ -2657,86 +2655,98 @@ local function initUtils()
                 end
             end
         end)
+
         return Suitable
     end
 
     utils.Side = function(E)
-        if E >= -135 and E <= -45 then return 'Left'
-        elseif E <= 45 and E > -45 then return 'Down'
-        elseif E  <= 135 and E > 45 then return 'Right'
-        else return 'Up' end
+        if E >= -135 and E <= -45 then
+            return 'Left'
+        elseif E <= 45 and E > -45 then
+            return 'Down'
+        elseif E  <= 135 and E > 45 then
+            return 'Right'
+        else
+            return 'Up'
+        end
     end
 
+
     utils.Snap = function(B,C,Target)
-        local vpSize = utils.getViewportSize()
-        if vpSize.X == 0 or vpSize.Y == 0 then return C.Position end 
-        local centre = Vector2.new(vpSize.X/2, vpSize.Y/2)
         local aPos = C.AbsolutePosition - centre
         local bPos = B.AbsolutePosition - centre
-        local bPosRel = aPos - bPos 
-        local Dot = math.deg(math.atan2(bPosRel.X, bPosRel.Y)) 
+        local bPos = aPos - bPos
+
+
+        local Dot = math.deg(math.atan2(bPos.X, bPos.Y))
+
         local SideGot = utils.Side(Dot)
-        local SizeB = B.Size 
-        local SizeC = C.Size
-        local CSizeX,CSizeY= table.unpack(utils.OffsetToScale({SizeC.X.Offset,SizeC.Y.Offset}))
-        CSizeX = CSizeX + SizeC.X.Scale
-        CSizeY = CSizeY + SizeC.Y.Scale
-        local Size1,Size2 = table.unpack(utils.OffsetToScale({SizeB.X.Offset,SizeB.Y.Offset}))
-        Size1 = Size1 + SizeB.X.Scale
-        Size2 = Size2 + SizeB.Y.Scale
-        local SizeArr = {Size1,Size2}
+        local Size = B.Size
+        local CSize = C.Size
+
+        local CSizeX,CSizeY= table.unpack(utils.OffsetToScale({CSize.X.Offset,CSize.Y.Offset}))
+        CSizeX = CSizeX + CSize.X.Scale
+        CSizeY = CSizeY + CSize.Y.Scale
+
+        local Size1,Size2 = table.unpack(utils.OffsetToScale({Size.X.Offset,Size.Y.Offset}))
+        Size1 = Size1 + Size.X.Scale
+        Size2 = Size2 + Size.Y.Scale
+
+        local Size = {Size1,Size2}
+
         local Pos1,Pos2 = table.unpack(utils.OffsetToScale({B.Position.X.Offset,B.Position.Y.Offset}))
         local X =  (Target and utils.OffsetToScale({Target.X.Offset,0})[1])  or utils.OffsetToScale({C.Position.X.Offset,0})[1]
         local Y =  (Target and utils.OffsetToScale({0,Target.Y.Offset})[2])  or utils.OffsetToScale({0,C.Position.Y.Offset})[2]
 
         if SideGot == 'Up' then
             local Pos = UDim2.new(X,0,Pos2+B.Position.Y.Scale,0)
-            SizeArr[2] = SizeArr[2] + CSizeY-Size2
-            return Pos+ UDim2.new(0,0,-SizeArr[2],0)
+            Size[2] = Size[2] + CSizeY-Size2
+            return Pos+ UDim2.new(0,0,-Size[2],0)
         elseif SideGot == 'Down' then
             local Pos = UDim2.new(X,0,Pos2+B.Position.Y.Scale,0)
-            return Pos+ UDim2.new(0,0,SizeArr[2],0)
+            return Pos+ UDim2.new(0,0,Size[2],0)
         elseif SideGot == 'Left' then
             local Pos = UDim2.new(Pos1+B.Position.X.Scale,0,Y,0)
-            SizeArr[1] = SizeArr[1] + CSizeX-Size1
-            return Pos+ UDim2.new(-SizeArr[1],0,0,0)
+            Size[1] = Size[1] + CSizeX-Size1
+            return Pos+ UDim2.new(-Size[1],0,0,0)
         elseif SideGot == 'Right' then
             local Pos = UDim2.new(Pos1+B.Position.X.Scale,0,Y,0)
-            return Pos+ UDim2.new(SizeArr[1],0,0,0)
+            return Pos+ UDim2.new(Size[1],0,0,0)
         end
-        return C.Position 
     end
-    return utils
-end
 
-local Utils = initUtils()
+    return utils
+
+end
 
 local function getDragIt()
     local RS = game:GetService("RunService")
     local IsClient = RS:IsClient()
 
     if IsClient then
-        local UIS = UserInputService
+        local UIS = game:GetService("UserInputService")
         local TWS = game:GetService("TweenService")
+        local Utils = initUtils()
 
         local Player = game.Players.LocalPlayer
         local Mouse = Player:GetMouse()
         local drag = {}
-        local Events = {} 
+        local Events = {}
         local Holding = false
-        local Hovering = false 
+        local Hovering = false
+        local camera = workspace.Camera.ViewportSize
+        local centre = Vector2.new(camera.X / 2, camera.Y / 2)
+        local Tween
         local RenderConnection
-        local currentDragInputObject = nil 
-        local currentDraggingGuiObject = nil 
 
         local GuiObject = {}
         GuiObject.__index = GuiObject
-        local Objects = {} 
+        local Objects = {}
         local Settings = {
             HoverIcon = nil,
             DraggingIcon = nil,
-            PriorityIcon = nil,
-            Priority = "Snapping"
+            PriorityIcon = nil, -- This Defines the Icon to which more priority should be given , "Hover" for HoverIcon "Dragging" for DraggingIcon
+            Priority = "Snapping" -- This Defines whether "Clipping" or "Snapping" should be more prioritized.
         }
 
         function GuiObject:SetData(Data)
@@ -2749,95 +2759,66 @@ local function getDragIt()
             local Index = table.find(Objects, self)
             if Index then
                 if Events[self] then
-                    for _, eventInstance in ipairs(Events[self]) do
-                        if eventInstance then
-                            eventInstance:Destroy()
+                    for _, v in ipairs(Events[self]) do
+                        if v then
+                            v:Destroy()
                         end
                     end
                     Events[self] = nil
                 end
-                if self._mouseInputCheck then
-                    self._mouseInputCheck:Disconnect()
-                    self._mouseInputCheck = nil
-                end
-                if self._touchStartedConn then
-                    self._touchStartedConn:Disconnect()
-                    self._touchStartedConn = nil
-                end
-                if self._touchEndedConn then
-                    self._touchEndedConn:Disconnect()
-                    self._touchEndedConn = nil
-                end
-                 if self._touchMovedConn then 
-                    self._touchMovedConn:Disconnect()
-                    self._touchMovedConn = nil
+                if self._InputCheck then
+                    self._InputCheck:Disconnect()
+                    self._InputCheck = nil
                 end
 
                 table.remove(Objects, Index)
-                if currentDraggingGuiObject == self then
-                    currentDraggingGuiObject = nil
-                    currentDragInputObject = nil
-                    Holding = false
-                    if RenderConnection then
-                        RenderConnection:Disconnect()
-                        RenderConnection = nil
-                    end
-                end
-
-                if #Objects == 0 and RenderConnection then 
+                if #Objects == 0 and RenderConnection then
                     RenderConnection:Disconnect()
                     RenderConnection = nil
                 end
             end
         end
-        
+
         function GuiObject:GetDistanceFromUI(UI)
-            local vpSize = Utils.getViewportSize()
-            if vpSize.X == 0 or vpSize.Y == 0 then return "N/A" end
-            local centre = Vector2.new(vpSize.X/2, vpSize.Y/2)
             local aPos = UI.AbsolutePosition - centre
             local bPos = self.Object.AbsolutePosition - centre
-            local bPosRel = aPos - bPos
-            local Dot = math.deg(math.atan2(bPosRel.X, bPosRel.Y))
-            return Utils.Side(Dot)
+            local bPos = aPos - bPos
+
+            local Dot = math.deg(math.atan2(bPos.X, bPos.Y))
+
+            local Side = Utils.Side(Dot)
+            if Side == "Up" then
+            elseif Side == "Down" then
+            elseif Side == "Left" then
+            elseif Side == "Right" then
+            end
         end
 
         coroutine.wrap(
             function()
-                while Settings.HoverIcon do 
+                while Settings.HoverIcon do
                     RS.RenderStepped:Wait()
                     if Settings.PriorityIcon == "Hover" or not Holding then
-                        local canSetHover = true
-                        if currentDraggingGuiObject then 
-                            canSetHover = false
+                        local CanSet = true
+                        for _, v in ipairs(Objects) do
+                            if v.CanDrag then
+                                CanSet = false
+                                break
+                            end
                         end
 
-                        if canSetHover then
-                            local mousePosVec = Vector2.new(Mouse.X, Mouse.Y)
-                            local guisUnderMouse = Player.PlayerGui:GetGuiObjectsAtPosition(mousePosVec.X, mousePosVec.Y)
-                            local isOverDraggableArea = false
-                            for _, guiInstance in ipairs(guisUnderMouse) do
-                                for _, draggableObj in ipairs(Objects) do
-                                    if draggableObj._setToElement and guiInstance == draggableObj._setToElement then 
-                                        isOverDraggableArea = true
-                                        break
-                                    end
-                                end
-                                if isOverDraggableArea then break end
-                            end
-
-                            if isOverDraggableArea then
+                        if CanSet then
+                            local MousePos = Vector2.new(Mouse.X, Mouse.Y)
+                            local Guis = Player.PlayerGui:GetGuiObjectsAtPosition(MousePos.X, MousePos.Y)
+                            if #Guis >= 1 then
                                 Hovering = true
-                                Mouse.Icon = Settings.HoverIcon
+                                if Settings.HoverIcon then
+                                    Mouse.Icon = Settings.HoverIcon
+                                end
                             else
                                 Hovering = false
-                                if not Holding then 
-                                    Mouse.Icon = ""
-                                end
+                                Mouse.Icon = ""
                             end
-                        else
-                            Hovering = false
-                            if not Holding then Mouse.Icon = "" end
                         end
                     end
                 end
@@ -2846,11 +2827,10 @@ local function getDragIt()
 
         drag.Drag = function(Gui, setTo, Boundary, Clippings, AutoClip, ResponseTime, Snappings)
             local self = {}
-            self.Object = Gui
-            self._setToElement = setTo 
             self.Boundary = Boundary
+            self.Object = Gui
             self.Clippings = Clippings
-            self.CanDrag = false 
+            self.CanDrag = false
             self.OldPosition = nil
             self.Clipped = nil
             self.AutoClip = AutoClip
@@ -2858,254 +2838,316 @@ local function getDragIt()
             self.Snappings = Snappings
             self.Snapped = nil
 
-            local function AttemptStartDragging(inputObj)
-                if Holding then return end 
-
-                self.CanDrag = true
-                Holding = true
-                currentDragInputObject = inputObj
-                currentDraggingGuiObject = self
-
-                if inputObj.UserInputType == Enum.UserInputType.MouseButton1 then
-                    self.OldPosition = Vector2.new(Mouse.X, Mouse.Y)
-                elseif inputObj.UserInputType == Enum.UserInputType.Touch then
-                    self.OldPosition = inputObj.Position
-                end
-
-                if Events[self] and Events[self][1] then Events[self][1]:Fire() end
-            end
-
-            local function AttemptStopDragging(inputObj)
-                if self.CanDrag and currentDraggingGuiObject == self then 
-                    self.CanDrag = false
-                    Holding = false
-                    currentDragInputObject = nil
-                    currentDraggingGuiObject = nil
-                    if Events[self] and Events[self][2] then Events[self][2]:Fire() end
-                end
-            end
-
-            self._mouseInputCheck = setTo.InputBegan:Connect(function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    AttemptStartDragging(Input)
-                end
-            end)
-            
-            self._touchStartedConn = setTo.TouchStarted:Connect(function(inputObject)
-                AttemptStartDragging(inputObject)
-            end)
-
-            self._touchEndedConn = setTo.TouchEnded:Connect(function(inputObject)
-                 if currentDragInputObject and inputObject.TouchId == currentDragInputObject.TouchId then
-                    AttemptStopDragging(inputObject)
-                end
-            end)
-            
-            local DragStart = Instance.new("BindableEvent")
-            local DragEnd = Instance.new("BindableEvent")
-            Events[self] = {DragStart, DragEnd}
-
-            setmetatable(self, GuiObject)
-            table.insert(Objects, self)
-            return self
-        end
-
-        drag.InputBegan = UIS.InputBegan:Connect(function(Input, gp)
-            if gp then return end
-
-            if Holding and currentDraggingGuiObject and not RenderConnection then
-                RenderConnection = RS.RenderStepped:Connect(function(DT)
-                    if not Holding or not currentDraggingGuiObject or not currentDragInputObject then
-                        if RenderConnection then RenderConnection:Disconnect(); RenderConnection = nil; end
-                        if Settings.DraggingIcon and Mouse.Icon == Settings.DraggingIcon then Mouse.Icon = "" end
-                        return
-                    end
-
-                    local v = currentDraggingGuiObject
-                    local currentInputPos
-                    local inputType = currentDragInputObject.UserInputType
-
-                    if inputType == Enum.UserInputType.MouseButton1 then
-                        currentInputPos = Vector2.new(Mouse.X, Mouse.Y)
-                    elseif inputType == Enum.UserInputType.Touch then
-                        local touchFound = false
-                        for _, touch in ipairs(UIS:GetTouchPositions()) do
-                            if touch.TouchId == currentDragInputObject.TouchId then
-                                currentInputPos = touch.Position
-                                touchFound = true
+            self._InputCheck =
+                setTo.InputBegan:Connect(
+                function(Input)
+                    if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        local CanSet = false
+                        for _, v in ipairs(Objects) do
+                            if v.CanDrag then
+                                CanSet = true
                                 break
                             end
                         end
-                        if not touchFound then 
-                            if RenderConnection then RenderConnection:Disconnect(); RenderConnection = nil; end
-                            if v and Events[v] and Events[v][2] then 
-                                v.CanDrag = false; 
-                                Events[v][2]:Fire() 
-                            end
-                            Holding = false; currentDragInputObject = nil; currentDraggingGuiObject = nil;
-                            return
+
+                        local Event = Events[self]
+
+                        if not CanSet then
+                            self.CanDrag = true
+                            Event[1]:Fire()
+
+                            local Connection
+                            Connection =
+                                Input.Changed:Connect(
+                                function()
+                                    if Input.UserInputState == Enum.UserInputState.End then
+                                        self.CanDrag = false
+                                        Event[2]:Fire()
+                                        Connection:Disconnect()
+                                    end
+                                end
+                            )
                         end
-                    else
-                        if RenderConnection then RenderConnection:Disconnect(); RenderConnection = nil; end
-                        return 
                     end
-                    
-                    if not v.OldPosition then v.OldPosition = currentInputPos end 
+                end
+            )
 
-                    local Position = v.Object.Position
-                    local Change = currentInputPos - v.OldPosition
-                    local ScaleX, ScaleY = Utils.ScaleToOffset({Position.X.Scale, Position.Y.Scale})
-                    local NewPos = UDim2.new(0, Position.X.Offset + Change.X + ScaleX, 0, Position.Y.Offset + Change.Y + ScaleY)
+            local DragStart = Instance.new("BindableEvent")
+            local DragEnd = Instance.new("BindableEvent")
 
-                    if v.Boundary then
-                        local X, Y = Utils.CheckBoundary(v.Boundary, v.Object, Change)
-                        NewPos = UDim2.new(0, X, 0, Y)
+            self.DragStart = DragStart.Event
+            self.DragEnd = DragEnd.Event
+
+            Events[self] = {DragStart, DragEnd}
+
+            setmetatable(self, GuiObject)
+
+            table.insert(Objects, self)
+
+            return self
+        end
+
+        drag.InputBegan =
+            UIS.InputBegan:Connect(
+            function(Input, gp)
+                if gp then
+                    return
+                end
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    for _, v in ipairs(Objects) do
+                        if v.CanDrag then
+                            v.OldPosition = Vector2.new(Mouse.X, Mouse.Y)
+                        end
                     end
-                    local Alpha = v.ResponseTime and (DT * 7 * v.ResponseTime) or 1
-                    
-                    v._Target = NewPos
-                    v.Object.Position = v.Object.Position:Lerp(NewPos, Alpha)
-                    v.OldPosition = v.OldPosition:Lerp(currentInputPos, Alpha)
+                    RenderConnection =
+                        RS.RenderStepped:Connect(
+                        function(DT)
+                            local MousePos = Vector2.new(Mouse.X, Mouse.Y)
+                            local Possible = 0
+                            for _, v in ipairs(Objects) do
+                                if v.CanDrag then
+                                    Possible = Possible + 1
+                                    local Position = v.Object.Position
+                                    local Change = MousePos - v.OldPosition
 
-                    local guisAtPos = Player.PlayerGui:GetGuiObjectsAtPosition(currentInputPos.X, currentInputPos.Y)
-                    local Sorted = Utils.SortTable(v.Clippings, guisAtPos, v.Object)
-                    if Sorted then v.Clipped = Sorted else if not v.AutoClip then v.Clipped = nil end end
+                                    local ScaleX, ScaleY = Utils.ScaleToOffset({Position.X.Scale, Position.Y.Scale})
+                                    local NewPos =
+                                        UDim2.new(
+                                        0,
+                                        Position.X.Offset + Change.X + ScaleX,
+                                        0,
+                                        Position.Y.Offset + Change.Y + ScaleY
+                                    )
 
-                    if v.Snappings then
-                        local Closest
-                        local ChosenSnap
-                        for _, snap_obj in ipairs(v.Snappings) do 
-                            if not Closest then
-                                Closest = (v.Object.AbsolutePosition - snap_obj.AbsolutePosition).Magnitude
-                                ChosenSnap = snap_obj
-                            else
-                                local CurrentMag = (v.Object.AbsolutePosition - snap_obj.AbsolutePosition).Magnitude
-                                if CurrentMag < Closest then
-                                    Closest = CurrentMag
-                                    ChosenSnap = snap_obj
+                                    if v.Boundary then
+                                        local X, Y = Utils.CheckBoundary(v.Boundary, v.Object, Change)
+                                        NewPos = UDim2.new(0, X, 0, Y)
+                                    end
+                                    local Alpha
+                                    if v.ResponseTime then
+                                        Alpha = DT * 7 * v.ResponseTime
+                                    else
+                                        Alpha = 1
+                                    end
+                                    v._Target = NewPos
+                                    v.Object.Position = v.Object.Position:Lerp(NewPos, Alpha)
+                                    v.OldPosition = v.OldPosition:Lerp(MousePos, Alpha)
+
+                                    local Guis = Player.PlayerGui:GetGuiObjectsAtPosition(MousePos.X, MousePos.Y)
+                                    local Sorted = Utils.SortTable(v.Clippings, Guis, v.Object)
+                                    if Sorted then
+                                        v.Clipped = Sorted
+                                    else
+                                        if not v.AutoClip then
+                                            v.Clipped = nil
+                                        end
+                                    end
+                                    if v.Snappings then
+                                        local Closest
+                                        local ChosenSnap
+                                        for _, snap in ipairs(v.Snappings) do
+                                            if not Closest then
+                                                Closest =
+                                                    (v.Object.AbsolutePosition - snap.AbsolutePosition).Magnitude
+                                                ChosenSnap = snap
+                                            else
+                                                local CurrentMag =
+                                                    (v.Object.AbsolutePosition - snap.AbsolutePosition).Magnitude
+                                                if CurrentMag < Closest then
+                                                    Closest = CurrentMag
+                                                    ChosenSnap = snap
+                                                end
+                                            end
+                                        end
+                                        if Closest then
+                                            local X, Y =
+                                                Utils.ScaleToOffset(
+                                                {ChosenSnap.Size.X.Scale, ChosenSnap.Size.Y.Scale}
+                                            )
+                                            X = X + ChosenSnap.Size.X.Offset
+                                            Y = Y + ChosenSnap.Size.X.Offset
+
+                                            local Right =
+                                                (v.Object.AbsolutePosition -
+                                                (ChosenSnap.AbsolutePosition + Vector2.new(X))).Magnitude *
+                                                0.0264583333
+                                            local Left =
+                                                (v.Object.AbsolutePosition -
+                                                (ChosenSnap.AbsolutePosition - Vector2.new(X))).Magnitude *
+                                                0.0264583333
+                                            local Top =
+                                                (v.Object.AbsolutePosition -
+                                                (ChosenSnap.AbsolutePosition + Vector2.new(0, Y))).Magnitude *
+                                                0.0264583333
+                                            local Bottom =
+                                                (v.Object.AbsolutePosition -
+                                                (ChosenSnap.AbsolutePosition - Vector2.new(0, Y))).Magnitude *
+                                                0.0264583333
+
+                                            if
+                                                (Closest * 0.0264583333) <= 3.5 or Top <= 2.5 or Right <= 2.5 or
+                                                    Left <= 2.5 and Bottom <= 2.5
+                                                then -- Converting the Pixels to CM for easy comparing
+                                                v.Snap = ChosenSnap
+                                            else
+                                                v.Snap = nil
+                                            end
+                                        end
+                                    end
                                 end
                             end
-                        end
-                        if Closest then
-                            local X, Y = Utils.ScaleToOffset({ChosenSnap.Size.X.Scale, ChosenSnap.Size.Y.Scale})
-                            X = X + ChosenSnap.Size.X.Offset
-                            Y = Y + ChosenSnap.Size.Y.Offset 
-                            
-                            local objAbsPos = v.Object.AbsolutePosition
-                            local snapAbsPos = ChosenSnap.AbsolutePosition
-
-                            local Right = (objAbsPos - (snapAbsPos + Vector2.new(X, 0))).Magnitude * 0.0264583333
-                            local Left = (objAbsPos - (snapAbsPos - Vector2.new(X, 0))).Magnitude * 0.0264583333
-                            local Top = (objAbsPos - (snapAbsPos - Vector2.new(0, Y))).Magnitude * 0.0264583333 
-                            local Bottom = (objAbsPos - (snapAbsPos + Vector2.new(0, Y))).Magnitude * 0.0264583333
-
-                            if (Closest * 0.0264583333) <= 3.5 or Top <= 2.5 or Right <= 2.5 or Left <= 2.5 or Bottom <= 2.5 then
-                                v.Snap = ChosenSnap
-                            else
-                                v.Snap = nil
+                            if
+                                Possible ~= 0 and (Settings.PriorityIcon == "Dragging" or not Hovering) and
+                                    Settings.DraggingIcon
+                                then
+                                Mouse.Icon = Settings.DraggingIcon
                             end
                         end
-                    end
-
-                    if Settings.DraggingIcon and (Settings.PriorityIcon == "Dragging" or not Hovering) then
-                        if inputType == Enum.UserInputType.MouseButton1 then Mouse.Icon = Settings.DraggingIcon end
-                    end
-                end)
+                    )
+                end
             end
-        end)
+        )
 
-        drag.InputEnd = UIS.InputEnded:Connect(function(Input)
-            if Holding and currentDragInputObject and 
-               (Input.UserInputType == currentDragInputObject.UserInputType and 
-                (Input.UserInputType ~= Enum.UserInputType.Touch or Input.TouchId == currentDragInputObject.TouchId)) then
+        drag.InputEnd =
+            UIS.InputEnded:Connect(
+            function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if RenderConnection then
+                        RenderConnection:Disconnect()
+                        RenderConnection = nil
+                        Mouse.Icon = ""
+                        for _, v in ipairs(Objects) do
+                            coroutine.wrap(
+                                function()
+                                    if v.Clipped and (not v.Snap or Settings.Priority == "Clipping") then
+                                        if v.ResponseTime then
+                                            if v.ResponseTime > 0 then
+                                                for i = 1, 10 do
+                                                    RS.RenderStepped:Wait()
+                                                    v.Object.Position =
+                                                        v.Object.Position:Lerp(v.Clipped.Position, i / 10)
+                                                end
+                                            end
+                                        else
+                                            v.Object.Position = v.Clipped.Position
+                                        end
+                                        v.Object.Rotation = v.Clipped.Rotation
+                                    end
+                                    if v.Snap and (not v.Clipped or Settings.Priority == "Snapping") then
+                                        local Target = Utils.Snap(v.Snap, v.Object, v._Target)
+                                        if v.ResponseTime then
+                                            for i = 1, 10 do
+                                                RS.RenderStepped:Wait()
 
-                if RenderConnection then
-                    RenderConnection:Disconnect()
-                    RenderConnection = nil
-                end
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Hovering and Settings.DraggingIcon then
-                    Mouse.Icon = ""
-                end
-
-                local v = currentDraggingGuiObject
-                if v and v.Object and v.Object.Parent then 
-                    coroutine.wrap(function()
-                        if v.Clipped and (not v.Snap or Settings.Priority == "Clipping") then
-                            if v.ResponseTime and v.ResponseTime > 0 then
-                                for i = 1, 10 do RS.RenderStepped:Wait(); if not v.Object or not v.Object.Parent then return end; v.Object.Position = v.Object.Position:Lerp(v.Clipped.Position, i / 10) end
-                            else
-                               if v.Object and v.Object.Parent then v.Object.Position = v.Clipped.Position end
-                            end
-                            if v.Object and v.Object.Parent then v.Object.Rotation = v.Clipped.Rotation end
-                        end
-                        if v.Snap and (not v.Clipped or Settings.Priority == "Snapping") then
-                            if v.Object and v.Object.Parent then -- Добавлена проверка перед вызовом Utils.Snap
-                                local Target = Utils.Snap(v.Snap, v.Object, v._Target)
-                                if v.ResponseTime and v.ResponseTime > 0 then
-                                    for i = 1, 10 do RS.RenderStepped:Wait(); if not v.Object or not v.Object.Parent then return end; v.Object.Position = v.Object.Position:Lerp(Target, i / 10) end
-                                else
-                                    if v.Object and v.Object.Parent then v.Object.Position = Target end
+                                                v.Object.Position = v.Object.Position:Lerp(Target, i / 10)
+                                            end
+                                        else
+                                            v.Object.Position = Target
+                                        end
+                                        v.Snap = nil
+                                    end
                                 end
-                                v.Snap = nil
+                            )()
+                            if v.CanDrag then
+                                v.OldPosition = nil
                             end
                         end
-                    end)()
-                    
-                    if Events[v] and Events[v][2] then Events[v][2]:Fire() end 
-                    v.CanDrag = false
-                    v.OldPosition = nil
+                    end
                 end
-                
-                Holding = false
-                currentDragInputObject = nil
-                currentDraggingGuiObject = nil
             end
-        end)
+        )
 
         return drag
     end
-    return nil 
 end
 
 local Draggable = getDragIt()
 
 local function getEffect()
+
     local module = {}
+
     local TweenService = game:GetService("TweenService")
     local TI = TweenInfo.new(.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
 
     module.ButtonHoverEffect = function(ui, req)
         local HoverEvent = Instance.new("BindableEvent")
         local conns = {}
+
+        --// effect here
+        local function Start()
+            TweenService:Create(
+                ui.HoverFrame,
+                TI,
+                {
+                    BackgroundTransparency = .5
+                }
+            ):Play()
+        end
+
+        local function End()
+            TweenService:Create(
+                ui.HoverFrame,
+                TI,
+                {
+                    BackgroundTransparency = 1
+                }
+            ):Play()
+        end
+
         local hovering = false
 
-        local function Start()
-            if ui and ui:FindFirstChild("HoverFrame") and ui.HoverFrame.Parent then 
-                TweenService:Create(ui.HoverFrame, TI, {BackgroundTransparency = .5}):Play()
-            end
-        end
-        local function End()
-            if ui and ui:FindFirstChild("HoverFrame") and ui.HoverFrame.Parent then 
-                TweenService:Create(ui.HoverFrame, TI, {BackgroundTransparency = 1}):Play()
-            end
-        end
+        table.insert(
+            conns,
+            ui.InputBegan:Connect(
+                function(input, gp)
+                    if gp == true or input.UserInputType ~= Enum.UserInputType.MouseMovement then
+                        return
+                    end
 
-        table.insert(conns, ui.MouseEnter:Connect(function()
-            if req and not req() then return end
-            hovering = true
-            Start()
-            HoverEvent:Fire()
-        end))
-        table.insert(conns, ui.MouseLeave:Connect(function()
-            if hovering then End() end
-            hovering = false
-        end))
+                    if req then
+                        if req() == false then
+                            return
+                        end
+                    end
+
+                    hovering = true
+
+                    Start()
+                    HoverEvent:Fire()
+                end
+            )
+        )
+
+        table.insert(
+            conns,
+            ui.InputEnded:Connect(
+                function(input, gp)
+                    if gp == true or input.UserInputType ~= Enum.UserInputType.MouseMovement then
+                        return
+                    end
+
+                    if req then
+                        if req() == false then
+                            return
+                        end
+                    end
+
+                    hovering = false
+
+                    End()
+                end
+            )
+        )
 
         return {
             Event = HoverEvent.Event,
             Disconnect = function()
-                for _, v_conn in ipairs(conns) do v_conn:Disconnect() end
-                if hovering then End() end 
+                for i, v in pairs(conns) do
+                    conns:Disconnect()
+                end
+
+                End()
             end
         }
     end
@@ -3113,81 +3155,96 @@ local function getEffect()
     module.ButtonClickEffect = function(ui, req)
         local ClickEvent = Instance.new("BindableEvent")
         local conns = {}
-        local isPressed = false
 
-        local function StartEffect()
-            if ui and ui.Parent then 
-                TweenService:Create(ui, TI, {BackgroundTransparency = .5}):Play()
-            end
+        --// effect here
+        local function Start()
+            TweenService:Create(
+                ui,
+                TI,
+                {
+                    BackgroundTransparency = .5
+                }
+            ):Play()
         end
-        local function EndEffect()
-             if ui and ui.Parent then 
-                TweenService:Create(ui, TI, {BackgroundTransparency = 1}):Play()
-            end
+
+        local function End()
+            TweenService:Create(
+                ui,
+                TI,
+                {
+                    BackgroundTransparency = 1
+                }
+            ):Play()
         end
 
-        table.insert(conns, ui.InputBegan:Connect(function(input, gp)
-            if gp then return end
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                if req and not req() then return end
-                isPressed = true
-                StartEffect()
-            end
-        end))
+        table.insert(
+            conns,
+            ui.InputBegan:Connect(
+                function(input, gp)
+                    if gp == true or input.UserInputType ~= Enum.UserInputType.MouseButton1 then
+                        return
+                    end
 
-        table.insert(conns, ui.InputEnded:Connect(function(input, gp)
-            if gp then return end
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                if isPressed then
-                    isPressed = false
-                    EndEffect()
-                    if req and not req() then return end
+                    if req then
+                        if req() == false then
+                            return
+                        end
+                    end
+
+                    Start()
+                end
+            )
+        )
+
+        table.insert(
+            conns,
+            ui.InputEnded:Connect(
+                function(input, gp)
+                    if gp == true or input.UserInputType ~= Enum.UserInputType.MouseButton1 then
+                        return
+                    end
+
+                    End()
+
+                    if req then
+                        if req() == false then
+                            return
+                        end
+                    end
+
                     ClickEvent:Fire()
                 end
-            end
-        end))
-        
-        table.insert(conns, ui.TouchEnded:Connect(function(touch, gp)
-            if gp then return end
-            if isPressed then
-                isPressed = false
-                EndEffect()
-            end
-        end))
-        
-        table.insert(conns, ui.MouseLeave:Connect(function()
-            if isPressed and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-                isPressed = false 
-                EndEffect()
-            end
-        end))
+            )
+        )
 
         return {
             Event = ClickEvent.Event,
             Disconnect = function()
-                for _, v_conn in ipairs(conns) do v_conn:Disconnect() end
-                if isPressed then EndEffect() end 
+                for i, v in pairs(conns) do
+                    conns:Disconnect()
+                end
+
+                End()
             end
         }
     end
+
     return module
 end
 
 local EffectLib = getEffect()
-
 local CircleClick = function(Button)
-    if not Button or not Button.Parent then return end 
     local circle = Instance.new("Frame");
     Instance.new("UICorner", circle);
 
     circle.UICorner.CornerRadius = UDim.new(1, 0);
     circle.AnchorPoint = Vector2.new(0.5, 0.5);
     circle.BackgroundColor3 = Color3.fromRGB(0,0,0);
-    local mouse = game.Players.LocalPlayer:GetMouse()
-    circle.Position = UDim2.new(0, mouse.X - Button.AbsolutePosition.X, 0, mouse.Y - Button.AbsolutePosition.Y);
+    circle.Position = UDim2.new(0, game.Players.LocalPlayer:GetMouse().X - Button.AbsolutePosition.X, 0, game.Players.LocalPlayer:GetMouse().Y - Button.AbsolutePosition.Y);
     circle.Size = UDim2.new(0, 1, 0, 1);
     circle.Transparency = .8;
     circle.ZIndex = 999
+
     circle.Parent = Button;
 
     local finalGoal = {};
@@ -3195,31 +3252,41 @@ local CircleClick = function(Button)
     finalGoal.Transparency = 1;
 
     game.Debris:AddItem(circle,.4)
+
     local tween = game:GetService("TweenService"):Create(circle, TweenInfo.new(.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), finalGoal);
     tween:Play();
 end
 
+--// Util
 local function getLayoutOrder(UI)
     local layoutTable = {0}
-    if UI and typeof(UI.GetChildren) == "function" then
-        for i, v in pairs(UI:GetChildren()) do
-            if v:IsA("GuiObject") then
-                table.insert(layoutTable, v.LayoutOrder)
-            end
+
+    for i, v in pairs(UI:GetChildren()) do
+        if v:IsA("GuiObject") then
+            table.insert(layoutTable, v.LayoutOrder)
         end
     end
-    if #layoutTable == 0 then return 1 end -- Если таблица пуста (нет GuiObject'ов), вернуть 1
+
     return math.max(unpack(layoutTable)) + 1
 end
 
+--// Services
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+
 local TweenService = game:GetService("TweenService")
 local TI = TweenInfo.new(.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
 
-local UILibNames = { "Window", "Category", "Button", "Section" }
+-->> setup UILib table
+local UILibNames = {
+    "Window",
+    "Category",
+    "Button",
+    "Section"
+}
+
 for i, v in pairs(UILibNames) do
     UILibrary[v] = {}
     UILibrary[v].__index = UILibrary[v]
@@ -3236,108 +3303,30 @@ function UILibrary.new(gameName, userId, rank)
     local window = objectGenerator.new("Window")
     window.Parent = GUI
 
-    --// make UI draggable (этот блок остается)
+    --// make UI draggable
     -->> LogoHitbox
+
     local Frame = Instance.new("Frame")
     Frame.BackgroundTransparency = 1
     Frame.Size = UDim2.fromScale(2, 2)
+
     Frame.AnchorPoint = Vector2.new(0.5, 0.5)
     Frame.Position = UDim2.fromScale(.5, .5)
+
     local AspectRatio = Instance.new("UIAspectRatioConstraint", Frame)
     AspectRatio.AspectRatio = 1.2
-    Frame.Parent = window.MainUI.Sidebar.ContentHolder.Cheats.Logo -- Убедимся, что путь к Logo верный
+
+    Frame.Parent = window.MainUI.Sidebar.ContentHolder.Cheats.Logo
     Frame.ZIndex = 300
+
     local Drag = Draggable.Drag(window.MainUI, Frame)
 
-    --// Customize the GUI (этот блок остается)
+    --// Customize the GUI
     window.Watermark.Text = ("visuals | %s | %s"):format(userId, gameName)
     local userinfo = window.MainUI.Sidebar.ContentHolder.UserInfo.Content
     userinfo.Rank.Text = rank
     userinfo.Title.Text = userId
 
-    -- =========================================================== --
-    -- ========= НАЧАЛО БЛОКА АДАПТАЦИИ ВНУТРИ БИБЛИОТЕКИ ========= --
-    -- =========================================================== --
-    local actualMainUI = window:FindFirstChild("MainUI") -- Ищем внутренний MainUI
-    if actualMainUI and actualMainUI:IsA("Frame") then
-
-        -- Убедимся, что внутренний фрейм центрирован
-        if actualMainUI.AnchorPoint ~= Vector2.new(0.5, 0.5) then
-           actualMainUI.AnchorPoint = Vector2.new(0.5, 0.5)
-        end
-        if actualMainUI.Position.X.Scale ~= 0.5 or actualMainUI.Position.Y.Scale ~= 0.5 then
-           actualMainUI.Position = UDim2.fromScale(0.5, 0.5)
-        end
-
-        -- Создаем UIScale ВНУТРИ actualMainUI
-        local scaler = actualMainUI:FindFirstChild("MainUIScaler")
-        if not scaler then
-            scaler = Instance.new("UIScale")
-            scaler.Name = "MainUIScaler"
-            scaler.Parent = actualMainUI
-        end
-
-        -- --- Функция для обновления масштаба ---
-        local function updateScale()
-            local camera = workspace.CurrentCamera -- Получаем камеру здесь
-            if not camera then return end
-
-            local viewportSize = camera.ViewportSize
-            if viewportSize.X == 0 or viewportSize.Y == 0 then return end
-
-            -- Используем РЕАЛЬНЫЕ размеры actualMainUI из библиотеки
-            local referenceWidth = 851
-            local referenceHeight = 488
-
-            local scaleX = viewportSize.X / referenceWidth
-            local scaleY = viewportSize.Y / referenceHeight
-            local targetScale = math.min(scaleX, scaleY)
-
-            -- --- НАСТРАИВАЕМЫЕ ПАРАМЕТРЫ МАСШТАБА ---
-            local minScale = 0.35 -- Минимальный масштаб
-            local maxScale = 1.0  -- Максимальный масштаб (1.0 = исходный размер)
-            targetScale = math.clamp(targetScale, minScale, maxScale)
-            -- ----------------------------------------
-
-            scaler.Scale = targetScale
-        end
-        -- -------------------------------------
-
-        -- Подключаемся к изменению размера экрана
-        local camera = workspace.CurrentCamera
-        if camera then
-            camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
-        else
-            -- Попробуем подождать камеру, если ее нет сразу
-            task.spawn(function()
-                local camera = workspace:WaitForChild("Camera", 10)
-                if camera then
-                    camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
-                    task.wait(0.1) -- Даем время на прогрузку
-                    updateScale() -- Вызываем после ожидания
-                else
-                    warn("[UI Scaler Lib] Не удалось найти камеру для подключения сигнала ViewportSize.")
-                end
-            end)
-        end
-
-        -- Устанавливаем начальный масштаб (с небольшой задержкой, чтобы UI успел прогрузиться)
-        task.spawn(function()
-            task.wait(0.2)
-            updateScale()
-        end)
-
-        print("[UI Scaler Lib] Адаптивное масштабирование встроено и применено к MainUI.")
-
-    else
-        warn("[UI Scaler Lib] Не удалось найти внутренний 'MainUI' для применения масштабирования!")
-    end
-    -- =========================================================== --
-    -- ========= КОНЕЦ БЛОКА АДАПТАЦИИ ВНУТРИ БИБЛИОТЕКИ ========= --
-    -- =========================================================== --
-
-
-    -- Эта строка должна быть последней в функции
     return setmetatable(
         {
             UI = {},
@@ -3349,370 +3338,634 @@ function UILibrary.new(gameName, userId, rank)
             currentSelection = nil,
             currentCategorySelection = nil,
             currentTab = nil,
-            MainUI = window -- Возвращаем внешний Window Frame
+            MainUI = window
         },
         UILibrary.Window
     )
-end -- Конец функции UILibrary.new
+end
 
 function UILibrary.Window:setAnimSpeed(val)
     TI = TweenInfo.new(.4 / (val / 100), Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
 end
 
 function UILibrary.Window:Notification(sett)
-    local NotifFrame = objectGenerator.new("Notification")
-    if not NotifFrame then warn("UILib: Шаблон Notification не найден"); return end
-    local Notif = NotifFrame:FindFirstChild("Main")
-    if not Notif then warn("UILib: Notif.Main не найден в шаблоне Notification"); NotifFrame:Destroy(); return end
+    local Notif = objectGenerator.new("Notification").Main
 
-    local aspectRatio = Notif:FindFirstChildOfClass("UIAspectRatioConstraint")
-    if aspectRatio then aspectRatio:Destroy() end
+    Notif.Size = UDim2.new(1, 0, 1, -5)
+    Notif:FindFirstChildOfClass("UIAspectRatioConstraint"):Destroy()
 
-    local uiNotifications = self.MainUI:FindFirstChild("Notifications")
-    if not uiNotifications then warn("UILib: Notifications контейнер не найден в MainUI"); NotifFrame:Destroy(); return end
+    local ui = self.MainUI.Notifications
 
-    local textContainer = Notif:FindFirstChild("Content", true) and Notif.Content:FindFirstChild("Text", true)
-    if textContainer then
-        local titleLabel = textContainer:FindFirstChild("Title")
-        local descLabel = textContainer:FindFirstChild("Desc")
-        if titleLabel then titleLabel.Text = sett.Title or "Notification" end
-        if descLabel then descLabel.Text = sett.Desc or "Description" end
-    else
-        warn("UILib: Text контейнер не найден в Notification")
-    end
-    
-    local notificationInner = Notif:FindFirstChild("Notification") 
-    if notificationInner then notificationInner.BackgroundTransparency = 0 end
+    Notif.Content.Text.Title.Text = sett.Title
+    Notif.Content.Text.Desc.Text = sett.Desc
 
-    NotifFrame.LayoutOrder = getLayoutOrder(uiNotifications)
-    NotifFrame.Size = UDim2.fromScale(1, 0)
-    NotifFrame.Parent = uiNotifications
+    local layout = getLayoutOrder(ui)
 
-    task.wait(.02)
-    TweenService:Create(NotifFrame, TI, {Size = UDim2.new(1, 0, .1, 5)}):Play()
-    task.wait(.2)
-    if notificationInner then 
-        TweenService:Create(notificationInner, TI, {BackgroundTransparency = 1}):Play()
-    end
+    Notif.LayoutOrder = layout
+
+    Notif.Notification.BackgroundTransparency = 0
+    Notif.Parent.Size = UDim2.fromScale(1, 0)
+
+    Notif.Parent.Parent = ui
+
+    wait(.02)
+
+    TweenService:Create(
+        Notif.Parent,
+        TI,
+        {
+            Size = UDim2.new(1, 0, .1, 5)
+        }
+    ):Play()
+
+    wait(.2)
+
+    TweenService:Create(
+        Notif.Notification,
+        TI,
+        {
+            BackgroundTransparency = 1
+        }
+    ):Play()
 
     local connections = {}
     local isOpen = true
 
     local function expire()
-        if not isOpen then return end
         isOpen = false
-        for _, v_conn in pairs(connections) do v_conn:Disconnect() end
-        connections = {}
 
-        if notificationInner then TweenService:Create(notificationInner, TI, {BackgroundTransparency = 0}):Play() end
-        TweenService:Create(Notif, TweenInfo.new(.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Position = UDim2.fromScale(2, 0)}):Play()
+        for i, v in pairs(connections) do
+            v:Disconnect()
+        end
 
-        task.delay(.3, function()
-            TweenService:Create(NotifFrame, TweenInfo.new(.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0, 0)}):Play()
-            task.delay(.5, function() if NotifFrame and NotifFrame.Parent then NotifFrame:Destroy() end end)
-        end)
+        TweenService:Create(
+            Notif.Notification,
+            TI,
+            {
+                BackgroundTransparency = 0
+            }
+        ):Play()
 
-        for _, v_descendant in pairs(Notif:GetDescendants()) do
-            if v_descendant:IsA("ImageLabel") or v_descendant:IsA("ImageButton") then
-                TweenService:Create(v_descendant, TI, {ImageTransparency = 1}):Play()
-            elseif v_descendant:IsA("TextLabel") then
-                TweenService:Create(v_descendant, TI, {TextTransparency = 1}):Play()
+        TweenService:Create(
+            Notif,
+            TweenInfo.new(.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+            {
+                Position = UDim2.fromScale(2, 0)
+                --Size = UDim2.fromScale(0,1)
+            }
+        ):Play()
+
+        task.delay(
+            .3,
+            function()
+                TweenService:Create(
+                    Notif.Parent,
+                    TweenInfo.new(.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
+                    {
+                        Size = UDim2.fromScale(0, 0)
+                    }
+                ):Play()
+
+                local parent = Notif.Parent
+
+                Notif.Parent:ClearAllChildren()
+
+                wait(.3)
+                parent:Destroy()
+            end
+        )
+
+        for i, v in pairs(Notif:GetDescendants()) do
+            if v:IsA("ImageLabel") or v:IsA("ImageButton") then
+                TweenService:Create(
+                    v,
+                    TI,
+                    {
+                        ImageTransparency = 1
+                    }
+                ):Play()
+            elseif v:IsA("TextLabel") then
+                TweenService:Create(
+                    v,
+                    TI,
+                    {
+                        TextTransparency = 1
+                    }
+                ):Play()
             end
         end
     end
 
-    if sett.expire then
-        task.delay(sett.expire, function() if isOpen then expire() end end)
-    end
-    
-    local buttonsContainer = Notif:FindFirstChild("Content", true) and Notif.Content:FindFirstChild("Buttons", true)
-    local closeButton = buttonsContainer and buttonsContainer:FindFirstChild("Close")
+    --// too fucking lazy to re-encode all instances
 
-    if buttonsContainer and closeButton then
-        table.insert(connections, buttonsContainer.InputBegan:Connect(function(input, gp)
-            if gp then return end
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                TweenService:Create(closeButton, TI, {ImageColor3 = Color3.fromRGB(181, 181, 181)}):Play()
-            elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                expire()
+    if sett.expire then
+        task.delay(
+            sett.expire,
+            function()
+                if isOpen then
+                    expire()
+                end
             end
-        end))
-        table.insert(connections, buttonsContainer.InputEnded:Connect(function(input, gp)
-            if gp then return end
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                TweenService:Create(closeButton, TI, {ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-            end
-        end))
-    else
-        warn("UILib: Кнопка закрытия или контейнер кнопок не найдены в Notification.")
+        )
     end
+
+    table.insert(
+        connections,
+        Notif.Content.Buttons.InputBegan:Connect(
+            function(input, gp)
+                if gp then
+                    return
+                end
+
+                if input.UserInputType == Enum.UserInputType.MouseMovement then
+                    TweenService:Create(
+                        Notif.Content.Buttons.Close,
+                        TI,
+                        {
+                            ImageColor3 = Color3.fromRGB(181, 181, 181)
+                        }
+                    ):Play()
+                elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    expire()
+                end
+            end
+        )
+    )
+
+    table.insert(
+        connections,
+        Notif.Content.Buttons.InputEnded:Connect(
+            function(input, gp)
+                if gp then
+                    return
+                end
+
+                if input.UserInputType == Enum.UserInputType.MouseMovement then
+                    TweenService:Create(
+                        Notif.Content.Buttons.Close,
+                        TI,
+                        {
+                            ImageColor3 = Color3.fromRGB(255, 255, 255)
+                        }
+                    ):Play()
+                end
+            end
+        )
+    )
 end
 
-
 function UILibrary.Window:Prompt(sett)
-    local PromptFrame = objectGenerator.new("Prompt")
-    if not PromptFrame then warn("UILib: Шаблон Prompt не найден"); return end
-    local Notif = PromptFrame:FindFirstChild("Main") 
-    if not Notif then warn("UILib: Notif.Main не найден в шаблоне Prompt"); PromptFrame:Destroy(); return end
+    local Notif = objectGenerator.new("Prompt").Main
 
-    local aspectRatio = Notif:FindFirstChildOfClass("UIAspectRatioConstraint")
-    if aspectRatio then aspectRatio:Destroy() end
+    Notif.Size = UDim2.new(1, 0, 1, -5)
+    Notif:FindFirstChildOfClass("UIAspectRatioConstraint"):Destroy()
 
-    local uiNotifications = self.MainUI:FindFirstChild("Notifications")
-     if not uiNotifications then warn("UILib: Notifications контейнер не найден в MainUI"); PromptFrame:Destroy(); return end
+    local ui = self.MainUI.Notifications
 
-    local textContainer = Notif:FindFirstChild("Content", true) and Notif.Content:FindFirstChild("Text", true)
-    if textContainer then
-        local titleLabel = textContainer:FindFirstChild("Title")
-        local descLabel = textContainer:FindFirstChild("Desc")
-        if titleLabel then titleLabel.Text = sett.Title or "Prompt" end
-        if descLabel then descLabel.Text = sett.Desc or "Description" end
-    else
-        warn("UILib: Text контейнер не найден в Prompt")
-    end
-    
-    local notificationInner = Notif:FindFirstChild("Notification") 
-    if notificationInner then notificationInner.BackgroundTransparency = 0 end
+    Notif.Content.Text.Title.Text = sett.Title
+    Notif.Content.Text.Desc.Text = sett.Desc
 
-    PromptFrame.LayoutOrder = getLayoutOrder(uiNotifications)
-    PromptFrame.Size = UDim2.fromScale(1,0) 
-    PromptFrame.Parent = uiNotifications
+    local layout = getLayoutOrder(ui)
 
-    task.wait(.02)
-    TweenService:Create(PromptFrame, TI, {Size = UDim2.new(1, 0, .1, 5)}):Play()
-    task.wait(.2)
-    if notificationInner then 
-        TweenService:Create(notificationInner, TI, {BackgroundTransparency = 1}):Play()
-    end
+    Notif.LayoutOrder = layout
+
+    Notif.Notification.BackgroundTransparency = 0
+    Notif.Parent.Size = UDim2.fromScale(1, 0)
+
+    Notif.Parent.Parent = ui
+
+    wait(.02)
+
+    TweenService:Create(
+        Notif.Parent,
+        TI,
+        {
+            Size = UDim2.new(1, 0, .1, 5)
+        }
+    ):Play()
+
+    wait(.2)
+
+    TweenService:Create(
+        Notif.Notification,
+        TI,
+        {
+            BackgroundTransparency = 1
+        }
+    ):Play()
 
     local connections = {}
     local isOpen = true
+
     local selection = nil
     local bindable = Instance.new("BindableEvent")
 
     local function expire()
-        if not isOpen then return end
         isOpen = false
-        bindable:Fire()
-        for _, v_conn in pairs(connections) do v_conn:Disconnect() end
-        connections = {}
 
-        if notificationInner then TweenService:Create(notificationInner, TI, {BackgroundTransparency = 0}):Play() end
-        TweenService:Create(Notif, TweenInfo.new(.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Position = UDim2.fromScale(2, 0)}):Play()
-        task.delay(.3, function()
-            TweenService:Create(PromptFrame, TweenInfo.new(.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), {Size = UDim2.fromScale(0, 0)}):Play()
-            task.delay(.5, function() if PromptFrame and PromptFrame.Parent then PromptFrame:Destroy() end end)
-        end)
-        for _, v_descendant in pairs(Notif:GetDescendants()) do
-            if v_descendant:IsA("ImageLabel") or v_descendant:IsA("ImageButton") then
-                TweenService:Create(v_descendant, TI, {ImageTransparency = 1}):Play()
-            elseif v_descendant:IsA("TextLabel") then
-                TweenService:Create(v_descendant, TI, {TextTransparency = 1}):Play()
+        bindable:Fire()
+
+        for i, v in pairs(connections) do
+            v:Disconnect()
+        end
+
+        TweenService:Create(
+            Notif.Notification,
+            TI,
+            {
+                BackgroundTransparency = 0
+            }
+        ):Play()
+
+        TweenService:Create(
+            Notif,
+            TweenInfo.new(.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+            {
+                Position = UDim2.fromScale(2, 0)
+                --Size = UDim2.fromScale(0,1)
+            }
+        ):Play()
+
+        task.delay(
+            .3,
+            function()
+                TweenService:Create(
+                    Notif.Parent,
+                    TweenInfo.new(.5, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out),
+                    {
+                        Size = UDim2.fromScale(0, 0)
+                    }
+                ):Play()
+
+                local parent = Notif.Parent
+
+                Notif.Parent:ClearAllChildren()
+
+                wait(.3)
+                parent:Destroy()
+            end
+        )
+
+        for i, v in pairs(Notif:GetDescendants()) do
+            if v:IsA("ImageLabel") or v:IsA("ImageButton") then
+                TweenService:Create(
+                    v,
+                    TI,
+                    {
+                        ImageTransparency = 1
+                    }
+                ):Play()
+            elseif v:IsA("TextLabel") then
+                TweenService:Create(
+                    v,
+                    TI,
+                    {
+                        TextTransparency = 1
+                    }
+                ):Play()
             end
         end
     end
 
     local function extraHitbox(obj, downOrUp)
-        if not obj then return nil end
         local Frame = Instance.new("Frame")
         Frame.Size = UDim2.fromScale(1, .35)
         Frame.BackgroundTransparency = 1
+
         obj.Parent = Frame
         Frame.Name = obj.Name
         obj.Name = "Button"
+
         obj.Position = UDim2.fromScale(.5, .5 - (.2 / downOrUp))
+
         return Frame
     end
 
-    local buttonsContainer = Notif:FindFirstChild("Content", true) and Notif.Content:FindFirstChild("Buttons", true)
-    if not buttonsContainer then
-        warn("UILib: Buttons контейнер не найден в Prompt")
-        expire() 
-        return bindable.Event:Wait()
-    end
+    local Parent = Notif.Content.Buttons
 
-    local CloseButtonOriginal = buttonsContainer:FindFirstChild("Close")
-    local AcceptButtonOriginal = buttonsContainer:FindFirstChild("Accept")
+    local Close = extraHitbox(Notif.Content.Buttons.Close, 1)
+    Close.LayoutOrder = 1
 
-    local Close = extraHitbox(CloseButtonOriginal, 1)
-    local Accept = extraHitbox(AcceptButtonOriginal, -1)
+    local Accept = extraHitbox(Notif.Content.Buttons.Accept, -1)
 
-    if Close then Close.LayoutOrder = 1; Close.Parent = buttonsContainer end
-    if Accept then Accept.Parent = buttonsContainer end
+    Close.Parent = Parent
+    Accept.Parent = Parent
 
-    if Close and Close:FindFirstChild("Button") then
-        local closeActualButton = Close:FindFirstChild("Button")
-        table.insert(connections, Close.InputBegan:Connect(function(input, gp)
-            if gp then return end
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                TweenService:Create(closeActualButton, TI, {ImageColor3 = Color3.fromRGB(181, 181, 181)}):Play()
-            elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                expire()
+    table.insert(
+        connections,
+        Close.InputBegan:Connect(
+            function(input, gp)
+                if gp then
+                    return
+                end
+
+                if input.UserInputType == Enum.UserInputType.MouseMovement then
+                    TweenService:Create(
+                        Close.Button,
+                        TI,
+                        {
+                            ImageColor3 = Color3.fromRGB(181, 181, 181)
+                        }
+                    ):Play()
+                elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    expire()
+                end
             end
-        end))
-        table.insert(connections, Close.InputEnded:Connect(function(input, gp)
-            if gp then return end
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                TweenService:Create(closeActualButton, TI, {ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-            end
-        end))
-    else
-        warn("UILib: Кнопка Close или ее Button не найдены в Prompt.")
-    end
+        )
+    )
 
-    if Accept and Accept:FindFirstChild("Button") then
-        local acceptActualButton = Accept:FindFirstChild("Button")
-        table.insert(connections, Accept.InputBegan:Connect(function(input, gp)
-            if gp then return end
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                TweenService:Create(acceptActualButton, TI, {ImageColor3 = Color3.fromRGB(181, 181, 181)}):Play()
-            elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                selection = true
-                expire()
+    table.insert(
+        connections,
+        Close.InputEnded:Connect(
+            function(input, gp)
+                if gp then
+                    return
+                end
+
+                if input.UserInputType == Enum.UserInputType.MouseMovement then
+                    TweenService:Create(
+                        Close.Button,
+                        TI,
+                        {
+                            ImageColor3 = Color3.fromRGB(255, 255, 255)
+                        }
+                    ):Play()
+                end
             end
-        end))
-        table.insert(connections, Accept.InputEnded:Connect(function(input, gp)
-            if gp then return end
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                TweenService:Create(acceptActualButton, TI, {ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+        )
+    )
+
+    table.insert(
+        connections,
+        Accept.InputBegan:Connect(
+            function(input, gp)
+                if gp then
+                    return
+                end
+
+                if input.UserInputType == Enum.UserInputType.MouseMovement then
+                    TweenService:Create(
+                        Accept.Button,
+                        TI,
+                        {
+                            ImageColor3 = Color3.fromRGB(181, 181, 181)
+                        }
+                    ):Play()
+                elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    selection = true
+                    expire()
+                end
             end
-        end))
-    else
-        warn("UILib: Кнопка Accept или ее Button не найдены в Prompt.")
-    end
-    
+        )
+    )
+
+    table.insert(
+        connections,
+        Accept.InputEnded:Connect(
+            function(input, gp)
+                if gp then
+                    return
+                end
+
+                if input.UserInputType == Enum.UserInputType.MouseMovement then
+                    TweenService:Create(
+                        Accept.Button,
+                        TI,
+                        {
+                            ImageColor3 = Color3.fromRGB(255, 255, 255)
+                        }
+                    ):Play()
+                end
+            end
+        )
+    )
+
     bindable.Event:Wait()
     return selection
 end
 
 function UILibrary.Window:ChangeCategory(new)
-    local mainUI = self.MainUI:FindFirstChild("MainUI")
-    if not mainUI then return end
-    local catFolder = mainUI.Sidebar.ContentHolder.Cheats.CheatHolder
+    local catFolder = self.MainUI.MainUI.Sidebar.ContentHolder.Cheats.CheatHolder
     local Object = catFolder:FindFirstChild(new)
 
     if Object and self.currentSelection ~= Object then
         if self.currentSelection then
-            TweenService:Create(self.currentSelection.Content.Image, TI, {ImageColor3 = Color3.fromRGB(90, 90, 90)}):Play()
-            TweenService:Create(self.currentSelection.Content.Title, TI, {TextColor3 = Color3.fromRGB(90, 90, 90)}):Play()
-            TweenService:Create(self.currentSelection.HoverFrame, TI, {BackgroundTransparency = 1}):Play()
-            local oldTabContent = mainUI.Sidebar.Sidebar2:FindFirstChild(self.currentSelection.Name)
-            if oldTabContent then
-                TweenService:Create(oldTabContent, TI, {Position = UDim2.fromScale(1, 0)}):Play()
-            end
+            TweenService:Create(
+                self.currentSelection.Content.Image,
+                TI,
+                {
+                    ImageColor3 = Color3.fromRGB(90, 90, 90)
+                }
+            ):Play()
+
+            TweenService:Create(
+                self.currentSelection.Content.Title,
+                TI,
+                {
+                    TextColor3 = Color3.fromRGB(90, 90, 90)
+                }
+            ):Play()
+
+            TweenService:Create(
+                self.currentSelection.HoverFrame,
+                TI,
+                {
+                    BackgroundTransparency = 1
+                }
+            ):Play()
+
+            TweenService:Create(
+                self.MainUI.MainUI.Sidebar.Sidebar2[self.currentSelection.Name],
+                TI,
+                {
+                    Position = UDim2.fromScale(1, 0)
+                }
+            ):Play()
         end
 
-        TweenService:Create(Object.Content.Image, TI, {ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-        TweenService:Create(Object.Content.Title, TI, {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-        TweenService:Create(Object.HoverFrame, TI, {BackgroundTransparency = .3}):Play()
-        local newTabContent = mainUI.Sidebar.Sidebar2:FindFirstChild(Object.Name)
-        if newTabContent then
-             TweenService:Create(newTabContent, TI, {Position = UDim2.fromScale(0, 0)}):Play()
-        end
+        TweenService:Create(
+            Object.Content.Image,
+            TI,
+            {
+                ImageColor3 = Color3.fromRGB(255, 255, 255)
+            }
+        ):Play()
+
+        TweenService:Create(
+            Object.Content.Title,
+            TI,
+            {
+                TextColor3 = Color3.fromRGB(255, 255, 255)
+            }
+        ):Play()
+
+        TweenService:Create(
+            Object.HoverFrame,
+            TI,
+            {
+                BackgroundTransparency = .3
+            }
+        ):Play()
+
+        TweenService:Create(
+            self.MainUI.MainUI.Sidebar.Sidebar2[Object.Name],
+            TI,
+            {
+                Position = UDim2.fromScale(0, 0)
+            }
+        ):Play()
 
         self.currentSelection = Object
+
         local firstChild = nil
-        if newTabContent and newTabContent:FindFirstChild("Bar2Holder") then
-            for _, v in pairs(newTabContent.Bar2Holder:GetChildren()) do
-                if v:IsA("GuiObject") then
-                    firstChild = v
-                    break
-                end
+
+        for i, v in pairs(self.MainUI.MainUI.Sidebar.Sidebar2[Object.Name].Bar2Holder:GetChildren()) do
+            if v:IsA("GuiObject") then
+                firstChild = v
+                break
             end
         end
+
         if firstChild then
             self:ChangeCategorySelection(firstChild.Name)
-        else
-            self.currentCategorySelection = nil 
-            if self.currentTab and self.currentTab.Parent then 
-                 TweenService:Create(self.currentTab, TI, { Position = UDim2.fromScale(0, 1) }):Play()
-            end
-            self.currentTab = nil
         end
     end
 end
 
 function UILibrary.Window:ChangeCategorySelection(name)
-    local mainUI = self.MainUI:FindFirstChild("MainUI")
-    if not mainUI or not self.currentSelection then return end
-    local sidebar2 = mainUI.Sidebar:FindFirstChild("Sidebar2")
-    if not sidebar2 then return end
-    local currentSelectionName = self.currentSelection.Name
-    local subCategoryContainer = sidebar2:FindFirstChild(currentSelectionName)
-    if not subCategoryContainer then return end
-    local catFolder = subCategoryContainer:FindFirstChild("Bar2Holder")
-    if not catFolder then return end
-    
+    local catFolder = self.MainUI.MainUI.Sidebar.Sidebar2[self.currentSelection.Name].Bar2Holder
     local Object = catFolder:FindFirstChild(name)
 
     if Object and self.currentCategorySelection ~= Object then
         if self.currentCategorySelection then
-            local innerContentOld = self.currentCategorySelection:FindFirstChild("InnerContent")
-            if innerContentOld then
-                TweenService:Create(innerContentOld.Image, TI, {ImageColor3 = Color3.fromRGB(90, 90, 90)}):Play()
-                TweenService:Create(innerContentOld.Title, TI, {TextColor3 = Color3.fromRGB(90, 90, 90)}):Play()
-            end
-            TweenService:Create(self.currentCategorySelection.HoverFrame, TI, {BackgroundTransparency = 1}):Play()
-            TweenService:Create(self.currentCategorySelection.SelectionShadow, TI, {BackgroundTransparency = 1}):Play()
-            if self.currentTab and self.currentTab.Parent then
-                TweenService:Create(self.currentTab, TI, {Position = UDim2.fromScale(0, 1)}):Play()
-            end
-        end
-        
-        local innerContentNew = Object:FindFirstChild("InnerContent")
-        if innerContentNew then
-            TweenService:Create(innerContentNew.Image, TI, {ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-            TweenService:Create(innerContentNew.Title, TI, {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-        end
-        TweenService:Create(Object.HoverFrame, TI, {BackgroundTransparency = .3}):Play()
-        TweenService:Create(Object.SelectionShadow, TI, {BackgroundTransparency = .6}):Play()
+            TweenService:Create(
+                self.currentCategorySelection.InnerContent.Image,
+                TI,
+                {
+                    ImageColor3 = Color3.fromRGB(90, 90, 90)
+                }
+            ):Play()
 
-        local mainContent = mainUI:FindFirstChild("Content")
-        if not mainContent then return end
-        local tab = mainContent:FindFirstChild(name)
-        if tab then
-            TweenService:Create(tab, TI, {Position = UDim2.fromScale(0, 0)}):Play()
+            TweenService:Create(
+                self.currentCategorySelection.InnerContent.Title,
+                TI,
+                {
+                    TextColor3 = Color3.fromRGB(90, 90, 90)
+                }
+            ):Play()
+
+            TweenService:Create(
+                self.currentCategorySelection.HoverFrame,
+                TI,
+                {
+                    BackgroundTransparency = 1
+                }
+            ):Play()
+
+            TweenService:Create(
+                self.currentCategorySelection.SelectionShadow,
+                TI,
+                {
+                    BackgroundTransparency = 1
+                }
+            ):Play()
+
+            TweenService:Create(
+                self.currentTab,
+                TI,
+                {
+                    Position = UDim2.fromScale(0, 1)
+                }
+            ):Play()
         end
+
+        TweenService:Create(
+            Object.InnerContent.Image,
+            TI,
+            {
+                ImageColor3 = Color3.fromRGB(255, 255, 255)
+            }
+        ):Play()
+
+        TweenService:Create(
+            Object.InnerContent.Title,
+            TI,
+            {
+                TextColor3 = Color3.fromRGB(255, 255, 255)
+            }
+        ):Play()
+
+        TweenService:Create(
+            Object.HoverFrame,
+            TI,
+            {
+                BackgroundTransparency = .3
+            }
+        ):Play()
+
+        TweenService:Create(
+            Object.SelectionShadow,
+            TI,
+            {
+                BackgroundTransparency = .6
+            }
+        ):Play()
+
+        local tab = self.MainUI.MainUI.Content:FindFirstChild(name)
+
+        if tab then
+            TweenService:Create(
+                tab,
+                TI,
+                {
+                    Position = UDim2.fromScale(0, 0)
+                }
+            ):Play()
+        end
+
         self.currentTab = tab
         self.currentCategorySelection = Object
     end
 end
 
-
 function UILibrary.Window:Category(name, icon)
-    local mainUI = self.MainUI:FindFirstChild("MainUI")
-    if not mainUI then warn("UILib.Window:Category - MainUI не найден"); return end
-    local catFolder = mainUI.Sidebar.ContentHolder.Cheats.CheatHolder
+    local catFolder = self.MainUI.MainUI.Sidebar.ContentHolder.Cheats.CheatHolder
     local category = objectGenerator.new("Category")
-    if not category then warn("UILib: Не удалось создать шаблон Category"); return end
 
-    local content = category:FindFirstChild("Content")
-    if content and content:FindFirstChild("Title") and content:FindFirstChild("Image") then
-        content.Title.Text = name
-        content.Image.Image = icon
-    else
-        warn("UILib.Window:Category - Отсутствует Content.Title или Content.Image в шаблоне Category")
-    end
+    category.Content.Title.Text = name
+    category.Content.Image.Image = icon
 
     self.UI[name] = {}
+
     category.Name = name
     category.Parent = catFolder
     category.LayoutOrder = getLayoutOrder(catFolder)
 
     local contentHolder = objectGenerator.new("CategoryContent")
-    if not contentHolder then warn("UILib: Не удалось создать шаблон CategoryContent"); category:Destroy(); return end
     contentHolder.Name = name
-    contentHolder.Visible = true 
-    contentHolder.Position = UDim2.fromScale(1,0) 
-    contentHolder.Parent = mainUI.Sidebar.Sidebar2
+    contentHolder.Visible = true
+    contentHolder.Parent = self.MainUI.MainUI.Sidebar.Sidebar2
 
-    local Hover = EffectLib.ButtonHoverEffect(category, function() return self.currentSelection ~= category end)
+    local Hover =
+        EffectLib.ButtonHoverEffect(
+        category,
+        function()
+            if self.currentSelection ~= category then
+                return true
+            else
+                return false
+            end
+        end
+    )
     local Click = EffectLib.ButtonClickEffect(category)
 
-    Click.Event:Connect(function()
-        CircleClick(category)
-        self:ChangeCategory(name)
-    end)
+    Click.Event:Connect(
+        function()
+            CircleClick(category, LocalPlayer:GetMouse().X, LocalPlayer:GetMouse().Y)
+
+            self:ChangeCategory(name)
+        end
+    )
 
     if self.currentSelection == nil then
         self:ChangeCategory(name)
@@ -3720,7 +3973,10 @@ function UILibrary.Window:Category(name, icon)
 
     return setmetatable(
         {
-            Effects = {Hover = Hover, Click = Click},
+            Effects = {
+                Hover = Hover,
+                Click = Click
+            },
             oldSelf = self,
             categoryUI = category,
             contentHolder = contentHolder
@@ -3730,71 +3986,74 @@ function UILibrary.Window:Category(name, icon)
 end
 
 function UILibrary.Category:Button(name, icon)
-    if not self.contentHolder or not self.contentHolder:FindFirstChild("Bar2Holder") then
-        warn("UILib.Category:Button - Отсутствует Bar2Holder в contentHolder для категории: " .. tostring(self.categoryUI and self.categoryUI.Name))
-        return
-    end
-    local bar2Holder = self.contentHolder.Bar2Holder
+    local contentholder = self.ContentHolder
     local button = objectGenerator.new("CategoryButton")
-    if not button then warn("UILib: Не удалось создать шаблон CategoryButton"); return end
 
-    local innerContent = button:FindFirstChild("InnerContent")
-    if innerContent and innerContent:FindFirstChild("Image") and innerContent:FindFirstChild("Title") then
-        innerContent.Image.Image = icon
-        innerContent.Title.Text = name
-    else
-        warn("UILib.Category:Button - Отсутствует InnerContent.Image или InnerContent.Title в шаблоне CategoryButton")
-    end
+    button.InnerContent.Image.Image = icon
+    button.InnerContent.Title.Text = name
 
-    button.Parent = bar2Holder
-    button.LayoutOrder = getLayoutOrder(bar2Holder)
+    button.Parent = self.contentHolder.Bar2Holder
+    button.LayoutOrder = getLayoutOrder(self.contentHolder.Bar2Holder)
     button.Name = name
 
     local totalCount = 0
-    for _, v in pairs(bar2Holder:GetChildren()) do
-        if v:IsA("GuiObject") then totalCount = totalCount + 1 end
-    end
-    if totalCount > 0 then
-        for _, v in pairs(bar2Holder:GetChildren()) do
-            if v:IsA("GuiObject") then v.Size = UDim2.fromScale(1, 1 / totalCount) end
+
+    for i, v in pairs(self.contentHolder.Bar2Holder:GetChildren()) do
+        if v:IsA("GuiObject") then
+            totalCount = totalCount + 1
         end
     end
-    
-    local categoryUIName = self.categoryUI and self.categoryUI.Name or "UnknownCategory"
-    self.oldSelf.UI[categoryUIName] = self.oldSelf.UI[categoryUIName] or {}
-    self.oldSelf.UI[categoryUIName][name] = {}
 
-    local mainUI = self.oldSelf.MainUI:FindFirstChild("MainUI")
-    if not mainUI then warn("UILib.Category:Button - Не найден MainUI"); button:Destroy(); return end
-    local mainContentArea = mainUI:FindFirstChild("Content")
-    if not mainContentArea then warn("UILib.Category:Button - Не найден главный Content контейнер"); button:Destroy(); return end
+    for i, v in pairs(self.contentHolder.Bar2Holder:GetChildren()) do
+        if v:IsA("GuiObject") then
+            v.Size = UDim2.fromScale(1, 1 / totalCount)
+        end
+    end
+
+    button.Size = UDim2.fromScale(1, 1 / totalCount)
+
+    self.oldSelf.UI[self.categoryUI.Name][name] = {}
 
     local CategoryFrame = objectGenerator.new("CategoryFrame")
-    if not CategoryFrame then warn("UILib: Не удалось создать шаблон CategoryFrame"); button:Destroy(); return end
     CategoryFrame.Name = name
-    CategoryFrame.Parent = mainContentArea
+    CategoryFrame.Parent = self.oldSelf.MainUI.MainUI.Content
     CategoryFrame.Visible = true
-    CategoryFrame.Position = UDim2.fromScale(0,1) 
 
-    local Hover = EffectLib.ButtonHoverEffect(button, function() return self.oldSelf.currentCategorySelection ~= button end)
+    local Hover =
+        EffectLib.ButtonHoverEffect(
+        button,
+        function()
+            if self.currentCategorySelection ~= button then
+                return true
+            else
+                return false
+            end
+        end
+    )
     local Click = EffectLib.ButtonClickEffect(button)
 
-    Click.Event:Connect(function()
-        CircleClick(button)
-        if self.oldSelf.currentSelection and self.oldSelf.currentSelection.Name == categoryUIName then
-            self.oldSelf:ChangeCategorySelection(name)
-        end
-    end)
+    Click.Event:Connect(
+        function()
+            CircleClick(button, LocalPlayer:GetMouse().X, LocalPlayer:GetMouse().Y)
 
-    if self.oldSelf.currentCategorySelection == nil and self.oldSelf.currentSelection and self.oldSelf.currentSelection.Name == categoryUIName then
+            if self.oldSelf.currentSelection.Name == self.categoryUI.Name then
+                self.oldSelf:ChangeCategorySelection(name)
+            end
+        end
+    )
+
+    if self.oldSelf.currentCategorySelection == nil and self.oldSelf.currentSelection.Name == self.categoryUI.Name then
         self.oldSelf:ChangeCategorySelection(name)
     end
 
     return setmetatable(
         {
-            Effects = {Hover = Hover, Click = Click},
+            Effects = {
+                Hover = Hover,
+                Click = Click
+            },
             oldSelf = self,
-            CategoryName = categoryUIName,
+            CategoryName = self.categoryUI.Name,
             SectionName = name,
             CategoryFrame = CategoryFrame
         },
@@ -3802,7 +4061,9 @@ function UILibrary.Category:Button(name, icon)
     )
 end
 
-function UILibrary.Button:Section(name, side, options) 
+-- Вставьте этот ИСПРАВЛЕННЫЙ блок в ваш файл БИБЛИОТЕКИ (uiLIB.txt) --
+
+function UILibrary.Button:Section(name, side, options)
     local SectionInstance = objectGenerator.new("Section")
 
     if not SectionInstance then
@@ -3811,29 +4072,37 @@ function UILibrary.Button:Section(name, side, options)
     end
 
     local Section = SectionInstance
-    Section.Name = name 
+    Section.Name = name -- Устанавливаем имя раньше для логов
 
+    -- Проверка на Border остается важной
     local BorderFrame = Section:FindFirstChild("Border")
     if not BorderFrame then
         error(string.format("UILibrary.Button:Section - КРИТИЧЕСКАЯ ОШИБКА: У созданного экземпляра Section ('%s') отсутствует дочерний элемент 'Border'.", name))
         Section:Destroy()
         return
     end
-    
-    local sectionTitleElement = BorderFrame:FindFirstChild("SectionTitle")
-    if sectionTitleElement then sectionTitleElement.Text = name else warn("UILib: SectionTitle не найден в Border для секции " .. name) end
-    
+
+    BorderFrame.SectionTitle.Text = name
+    -- Размер тени задается в initObj и не меняется здесь
+
+    -- =========================================================== --
+    -- === НАЧАЛО БЛОКА: Ручное ограничение высоты (БЕЗ UISizeConstraint) + Отложенная инициализация === --
+    -- =========================================================== --
+
     local minPixelHeight = options and options.MinHeight or 0
     local maxPixelHeight = options and options.MaxHeight or math.huge
 
     local oldSizeConstraint = Section:FindFirstChild("HeightConstraint")
-    if oldSizeConstraint then oldSizeConstraint:Destroy() end
+    if oldSizeConstraint then
+        oldSizeConstraint:Destroy()
+    end
 
     local SECTION_VERTICAL_PADDING = 20
 
     local function updateSectionHeight()
+        -- Добавляем больше проверок перед доступом
         local border = Section:FindFirstChild("Border")
-        if not border then return end 
+        if not border then return end -- Если Border пропал, ничего не делаем
         local content = border:FindFirstChild("Content")
         if not content then return end
         local listLayout = content:FindFirstChild("UIListLayout")
@@ -3843,6 +4112,7 @@ function UILibrary.Button:Section(name, side, options)
         local desiredHeight = contentHeight + SECTION_VERTICAL_PADDING
         local clampedHeight = math.clamp(desiredHeight, minPixelHeight, maxPixelHeight)
 
+        -- Используем pcall для большей безопасности при изменении размера
         local success, err = pcall(function()
             Section.Size = UDim2.new(1, 0, 0, clampedHeight)
         end)
@@ -3851,8 +4121,9 @@ function UILibrary.Button:Section(name, side, options)
         end
     end
 
+    -- Используем task.defer для подключения сигналов и первого вызова
     task.defer(function()
-        if not Section or not Section.Parent then return end 
+        if not Section or not Section.Parent then return end -- Доп. проверка, если секция была удалена очень быстро
 
         local border = Section:FindFirstChild("Border")
         if not border then return end
@@ -3870,28 +4141,19 @@ function UILibrary.Button:Section(name, side, options)
         else
              warn("UILibrary.Button:Section (defer) - UIListLayout не найден в Section.Border.Content для секции: " .. name)
         end
+
+        -- Вызываем первый раз после небольшой задержки
         updateSectionHeight()
     end)
-    
-    local mainUI = self.oldSelf.oldSelf.MainUI:FindFirstChild("MainUI")
-    if not mainUI then warn("UILib.Button:Section - MainUI не найден"); Section:Destroy(); return end
-    local mainUIContent = mainUI:FindFirstChild("Content")
-    if not mainUIContent then warn("UILib.Button:Section - Не найден главный Content контейнер для размещения секции"); Section:Destroy(); return end
-    
-    local categoryFrame = mainUIContent:FindFirstChild(self.SectionName)
-    if not categoryFrame then warn("UILib.Button:Section - Не найден CategoryFrame: " .. tostring(self.SectionName)); Section:Destroy(); return end
-    
-    local sideFrame = categoryFrame:FindFirstChild(side)
-    if not sideFrame then warn("UILib.Button:Section - Не найден sideFrame ('"..tostring(side).."') внутри CategoryFrame '"..tostring(self.SectionName).."' для секции "..name); Section:Destroy(); return end
 
-    Section.Parent = sideFrame
-    Section.LayoutOrder = getLayoutOrder(sideFrame)
+    -- =========================================================== --
+    -- === КОНЕЦ БЛОКА: Ручное ограничение высоты (БЕЗ UISizeConstraint) + Отложенная инициализация === --
+    -- =========================================================== --
 
-    local categoryUIName = self.oldSelf.categoryUI and self.oldSelf.categoryUI.Name or "UnknownCategory"
-    local sectionTabName = self.SectionName or "UnknownSectionTab"
-    self.oldSelf.oldSelf.UI[categoryUIName] = self.oldSelf.oldSelf.UI[categoryUIName] or {}
-    self.oldSelf.oldSelf.UI[categoryUIName][sectionTabName] = self.oldSelf.oldSelf.UI[categoryUIName][sectionTabName] or {}
-    self.oldSelf.oldSelf.UI[categoryUIName][sectionTabName][name] = {}
+    Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
+    Section.LayoutOrder = getLayoutOrder(self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side])
+
+    self.oldSelf.oldSelf.UI[self.oldSelf.categoryUI.Name][self.SectionName][name] = {}
 
     return setmetatable(
         {
@@ -3901,43 +4163,53 @@ function UILibrary.Button:Section(name, side, options)
         },
         UILibrary.Section
     )
-end 
+end -- Убедитесь, что этот end на месте
+
+--// now it gets fun!!!
+--// im jk this is where the pain begins
 
 local cheatInfo = {
-    ["Button"] = { FullSize = true },
-    ["Checkbox"] = { TextSize = UDim2.fromScale(.2, 1) },
-    ["Textbox"] = { TextSize = UDim2.fromScale(.4, 1), FullSize = true },
-    ["Dropdown"] = { FullSize = true },
-    ["Slider"] = { TextSize = UDim2.fromScale(.45, 1) },
-    ["Toggle"] = { TextSize = UDim2.fromScale(.5, 1) }
+    ["Button"] = {
+        FullSize = true
+    },
+    ["Checkbox"] = {
+        TextSize = UDim2.fromScale(.2, 1)
+    },
+    ["Textbox"] = {
+        TextSize = UDim2.fromScale(.4, 1),
+        FullSize = true
+    },
+    ["Dropdown"] = {
+        FullSize = true
+    },
+    ["Slider"] = {
+        TextSize = UDim2.fromScale(.45, 1)
+    },
+    ["Toggle"] = {
+        TextSize = UDim2.fromScale(.5, 1)
+    }
 }
 
 local function generateCheatBase(Cheat, sett)
     local cheatBase = objectGenerator.new("CheatBase")
-    if not cheatBase then warn("generateCheatBase: Не удалось создать CheatBase"); return nil end
 
     local cheatinfo = cheatInfo[Cheat]
-    local supportsFullSize = cheatinfo and cheatinfo.FullSize or false
+    local supportsFullSize = cheatinfo ~= nil and cheatinfo.FullSize or false
+
     local Size = supportsFullSize and UDim2.fromScale(1, 1) or UDim2.fromScale(.5, 1)
 
-    local contentFrame = cheatBase:FindFirstChild("Content")
-    if not contentFrame then warn("generateCheatBase: Content Frame не найден в CheatBase"); return cheatBase end
-    
-    local textContainer = contentFrame:FindFirstChild("Text")
-    local textLabel = textContainer and textContainer:FindFirstChild("Text")
-
-    if textLabel and sett.Title then
-        textLabel.Text = sett.Title
-        textLabel.Visible = true
+    if sett.Title then
         if sett.Description then
-            local descLabel = textLabel:FindFirstChild("Desc")
-            if descLabel then
-                descLabel.Text = sett.Description
-                descLabel.Visible = true
-            end
+            cheatBase.Content.Text.Text.Text = sett.Title
+            cheatBase.Content.Text.Text.Desc.Text = sett.Description
+
+            cheatBase.Content.Text.Text.Desc.Visible = true
+            cheatBase.Content.Text.Text.Visible = true
         else
-            textLabel.Size = UDim2.fromScale(.9, 1)
-            textLabel.Position = UDim2.fromScale(.5, .5)
+            cheatBase.Content.Text.Text.Text = sett.Title
+            cheatBase.Content.Text.Text.Size = UDim2.fromScale(.9, 1)
+            cheatBase.Content.Text.Text.Position = UDim2.fromScale(.5, .5)
+            cheatBase.Content.Text.Text.Visible = true
         end
 
         if cheatinfo and cheatinfo.TextSize then
@@ -3945,97 +4217,64 @@ local function generateCheatBase(Cheat, sett)
         else
             Size = UDim2.fromScale(.5, 1)
         end
-    elseif not textLabel and sett.Title then
-        warn("generateCheatBase: TextLabel не найден в CheatBase для Title: " .. sett.Title)
     end
-    
-    local elementContentContainer = contentFrame:FindFirstChild("ElementContent")
-    if elementContentContainer then elementContentContainer.Size = Size end
-    if textContainer then textContainer.Size = UDim2.fromScale(1 - Size.X.Scale, 1) end
 
-    local ContentElement = objectGenerator.new("Cheat", Cheat)
-    if ContentElement and elementContentContainer then
-        ContentElement.Parent = elementContentContainer
-    elseif not ContentElement then
-        warn("generateCheatBase: Не удалось создать элемент '" .. Cheat .. "' из objectGenerator")
+    local XSize = 1 - Size.X.Scale
+
+    cheatBase.Content.ElementContent.Size = Size
+    cheatBase.Content.Text.Size = UDim2.fromScale(XSize, 1)
+
+    local Content = objectGenerator.new("Cheat", Cheat)
+
+    if Content then
+        Content.Parent = cheatBase.Content.ElementContent
     end
+
     return cheatBase
 end
 
+--// some effects because my lazy ass is too lazy to put it in the module
 local function setupEffects(ui, hover)
     local ClickEvent = Instance.new("BindableEvent")
-    local uiTweenType = (hover and hover:IsA("ImageLabel") or hover:IsA("ImageButton")) and "ImageTransparency" or "BackgroundTransparency"
+
+    local uiTweenType =
+        (hover:IsA("ImageLabel") or hover:IsA("ImageButton")) and "ImageTransparency" or "BackgroundTransparency"
 
     local function constructTweenInfo(value)
-        return { [uiTweenType] = value }
+        return {
+            [uiTweenType] = value
+        }
     end
 
-    local isPressed = false 
-    local isHovering = false 
+    ui.InputBegan:Connect(
+        function(input, gp)
+            if gp then
+                return
+            end
 
-    ui.InputBegan:Connect(function(input, gp)
-        if gp then return end
-        if not hover or not hover.Parent then return end -- Проверка на hover
-
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            if not isPressed then 
-                isHovering = true
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
                 TweenService:Create(hover, TI, constructTweenInfo(.5)):Play()
+            elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+                TweenService:Create(hover, TI, constructTweenInfo(.2)):Play()
             end
-        elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isPressed = true
-            isHovering = false 
-            TweenService:Create(hover, TI, constructTweenInfo(.2)):Play() 
         end
-    end)
+    )
 
-    ui.InputEnded:Connect(function(input, gp)
-        if gp then return end
-        if not hover or not hover.Parent then return end -- Проверка на hover
-
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            isHovering = false
-            if not isPressed then 
-                 TweenService:Create(hover, TI, constructTweenInfo(1)):Play()
+    ui.InputEnded:Connect(
+        function(input, gp)
+            if gp then
+                return
             end
-        elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            if isPressed then 
-                isPressed = false
-                local mouseLocation = UserInputService:GetMouseLocation()
-                local topLeft = ui.AbsolutePosition
-                local bottomRight = topLeft + ui.AbsoluteSize
-                local mouseOverElementAfterRelease = (mouseLocation.X >= topLeft.X and mouseLocation.X <= bottomRight.X and
-                                                     mouseLocation.Y >= topLeft.Y and mouseLocation.Y <= bottomRight.Y)
 
-                if input.UserInputType == Enum.UserInputType.MouseButton1 and mouseOverElementAfterRelease then
-                    TweenService:Create(hover, TI, constructTweenInfo(.5)):Play() 
-                    isHovering = true
-                else
-                    TweenService:Create(hover, TI, constructTweenInfo(1)):Play() 
-                    isHovering = false
-                end
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                TweenService:Create(hover, TI, constructTweenInfo(1)):Play()
+            elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+                TweenService:Create(hover, TI, constructTweenInfo(.5)):Play()
+
                 ClickEvent:Fire()
             end
         end
-    end)
-
-    ui.TouchEnded:Connect(function(touch, gp) 
-        if gp then return end
-        if not hover or not hover.Parent then return end -- Проверка на hover
-        if isPressed then 
-            isPressed = false
-            isHovering = false
-            TweenService:Create(hover, TI, constructTweenInfo(1)):Play() 
-        end
-    end)
-
-    ui.MouseLeave:Connect(function() 
-        if not hover or not hover.Parent then return end -- Проверка на hover
-        isHovering = false
-        if not isPressed then 
-             TweenService:Create(hover, TI, constructTweenInfo(1)):Play()
-        end
-    end)
+    )
 
     return ClickEvent.Event
 end
@@ -4594,8 +4833,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
                         return
                     end
 
-                    -- Добавляем проверку на Touch
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
                         holdingHsv = true
                     end
                 end
@@ -5070,8 +5308,7 @@ function UILibrary.Section:Slider(sett, callback)
     dragElement.InputBegan:Connect(
         function(input, gp)
             if gp == true then return end
-            -- Добавляем проверку на Touch
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 holding = true
             end
         end
@@ -5080,8 +5317,7 @@ function UILibrary.Section:Slider(sett, callback)
     dragElement.InputEnded:Connect(
         function(input, gp)
             if gp == true then return end
-            -- Добавляем проверку на Touch
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 holding = false
             end
         end
@@ -5273,10 +5509,8 @@ function UILibrary.Section:Dropdown(sett, callback)
                             return
                         end
 
-                        -- Добавляем проверку на Touch для основного действия
-                        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
                             functions.setValue(v, not options[v])
-                        -- Ховер-эффект остается только для мыши
                         elseif input.UserInputType == Enum.UserInputType.MouseMovement then
                             TweenService:Create(
                                 Option,
@@ -5434,7 +5668,6 @@ function UILibrary.Section:Dropdown(sett, callback)
                     return
                 end
 
-                -- Ховер-эффект только для мыши
                 if input.UserInputType == Enum.UserInputType.MouseMovement then
                     TweenService:Create(
                         element.MainHolder.Content.Icon.Holder.Icon,
@@ -5444,8 +5677,7 @@ function UILibrary.Section:Dropdown(sett, callback)
                             ImageColor3 = Color3.fromRGB(50, 50, 50)
                         }
                     ):Play()
-                -- Основное действие для мыши ИЛИ касания
-                elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
                     functions.openMenu()
                 end
             end
