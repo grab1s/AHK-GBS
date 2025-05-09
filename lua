@@ -4000,6 +4000,7 @@ local function generateCheatBase(Cheat, sett)
     return cheatBase
 end
 
+--// some effects because my lazy ass is too lazy to put it in the module
 local function setupEffects(ui, hover)
     local ClickEvent = Instance.new("BindableEvent")
     local uiTweenType = (hover and hover:IsA("ImageLabel") or hover:IsA("ImageButton")) and "ImageTransparency" or "BackgroundTransparency"
@@ -4010,32 +4011,42 @@ local function setupEffects(ui, hover)
 
     local isPressed = false 
     local isHovering = false 
+    local conns = {} -- Таблица для хранения соединений, чтобы их можно было отключить
 
-    ui.InputBegan:Connect(function(input, gp)
+    -- Проверяем, является ли ui элементом, поддерживающим Touch события напрямую
+    local supportsDirectTouchEvents = ui:IsA("GuiButton") -- Включает ImageButton, TextButton и т.д.
+
+    table.insert(conns, ui.InputBegan:Connect(function(input, gp)
         if gp then return end
-        if not hover or not hover.Parent then return end -- Проверка на hover
-
+        
+        -- Ховер-эффект (только для мыши и если есть hover-элемент)
         if input.UserInputType == Enum.UserInputType.MouseMovement then
-            if not isPressed then 
+            if hover and hover.Parent and not isPressed then 
                 isHovering = true
                 TweenService:Create(hover, TI, constructTweenInfo(.5)):Play()
             end
+        -- Нажатие/Касание
         elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             isPressed = true
             isHovering = false 
-            TweenService:Create(hover, TI, constructTweenInfo(.2)):Play() 
+            if hover and hover.Parent then
+                TweenService:Create(hover, TI, constructTweenInfo(.2)):Play() 
+            elseif ui and ui.Parent then -- Если нет hover-элемента, применяем эффект к самому ui
+                 TweenService:Create(ui, TI, {BackgroundTransparency = ui.BackgroundTransparency * 0.5 + 0.1}):Play() -- Пример эффекта для Frame
+            end
         end
-    end)
+    end))
 
-    ui.InputEnded:Connect(function(input, gp)
+    table.insert(conns, ui.InputEnded:Connect(function(input, gp)
         if gp then return end
-        if not hover or not hover.Parent then return end -- Проверка на hover
-
+        
+        -- Завершение ховера (только для мыши)
         if input.UserInputType == Enum.UserInputType.MouseMovement then
             isHovering = false
-            if not isPressed then 
+            if hover and hover.Parent and not isPressed then 
                  TweenService:Create(hover, TI, constructTweenInfo(1)):Play()
             end
+        -- Отпускание кнопки/касания
         elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             if isPressed then 
                 isPressed = false
@@ -4044,38 +4055,77 @@ local function setupEffects(ui, hover)
                 local bottomRight = topLeft + ui.AbsoluteSize
                 local mouseOverElementAfterRelease = (mouseLocation.X >= topLeft.X and mouseLocation.X <= bottomRight.X and
                                                      mouseLocation.Y >= topLeft.Y and mouseLocation.Y <= bottomRight.Y)
+                
+                local targetForEndEffect = hover and hover.Parent and hover or ui
+                local originalTransparency = hover and 1 or (ui:FindFirstChild("OriginalTransparencyValue") and ui.OriginalTransparencyValue.Value or ui.BackgroundTransparency)
 
-                if input.UserInputType == Enum.UserInputType.MouseButton1 and mouseOverElementAfterRelease then
-                    TweenService:Create(hover, TI, constructTweenInfo(.5)):Play() 
+
+                if input.UserInputType == Enum.UserInputType.MouseButton1 and mouseOverElementAfterRelease and hover and hover.Parent then
+                    TweenService:Create(targetForEndEffect, TI, constructTweenInfo(.5)):Play() 
                     isHovering = true
                 else
-                    TweenService:Create(hover, TI, constructTweenInfo(1)):Play() 
+                    TweenService:Create(targetForEndEffect, TI, constructTweenInfo(originalTransparency)):Play() 
                     isHovering = false
                 end
                 ClickEvent:Fire()
             end
         end
-    end)
+    end))
 
-    ui.TouchEnded:Connect(function(touch, gp) 
-        if gp then return end
-        if not hover or not hover.Parent then return end -- Проверка на hover
-        if isPressed then 
-            isPressed = false
-            isHovering = false
-            TweenService:Create(hover, TI, constructTweenInfo(1)):Play() 
-        end
-    end)
+    -- Только если элемент поддерживает прямые Touch-события
+    if supportsDirectTouchEvents then
+        table.insert(conns, ui.TouchEnded:Connect(function(touch, gp) 
+            if gp then return end
+            if isPressed then 
+                isPressed = false
+                isHovering = false
+                local targetForEndEffect = hover and hover.Parent and hover or ui
+                local originalTransparency = hover and 1 or (ui:FindFirstChild("OriginalTransparencyValue") and ui.OriginalTransparencyValue.Value or ui.BackgroundTransparency)
+                TweenService:Create(targetForEndEffect, TI, constructTweenInfo(originalTransparency)):Play() 
+            end
+        end))
+    end
 
-    ui.MouseLeave:Connect(function() 
-        if not hover or not hover.Parent then return end -- Проверка на hover
+    table.insert(conns, ui.MouseLeave:Connect(function() 
         isHovering = false
-        if not isPressed then 
+        if hover and hover.Parent and not isPressed then 
              TweenService:Create(hover, TI, constructTweenInfo(1)):Play()
         end
-    end)
+        -- Если мышь ушла во время нажатия, эффект нажатия остается до InputEnded или TouchEnded (если применимо)
+        -- Но если это был MouseButton1 и он все еще нажат, а мышь ушла, сбрасываем isPressed
+        if isPressed and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
+             isPressed = false -- Считаем, что нажатие мышью прервано для этого элемента
+             local targetForEndEffect = hover and hover.Parent and hover or ui
+             local originalTransparency = hover and 1 or (ui:FindFirstChild("OriginalTransparencyValue") and ui.OriginalTransparencyValue.Value or ui.BackgroundTransparency)
+             TweenService:Create(targetForEndEffect, TI, constructTweenInfo(originalTransparency)):Play()
+        end
+    end))
+    
+    -- Сохраняем оригинальную прозрачность для Frame, если нет hover элемента
+    if not hover and ui:IsA("Frame") then
+        local originalTrans = Instance.new("NumberValue")
+        originalTrans.Name = "OriginalTransparencyValue"
+        originalTrans.Value = ui.BackgroundTransparency
+        originalTrans.Parent = ui
+    end
 
-    return ClickEvent.Event
+    -- Добавляем метод Disconnect к возвращаемой таблице
+    local returnTable = {Event = ClickEvent.Event}
+    function returnTable:Disconnect()
+        for _, v_conn in ipairs(conns) do
+            v_conn:Disconnect()
+        end
+        conns = {} -- Очищаем таблицу соединений
+        -- Попытка сбросить эффект, если он был активен
+        if isPressed or isHovering then
+            local targetForEndEffect = hover and hover.Parent and hover or ui
+            local originalTransparency = hover and 1 or (ui:FindFirstChild("OriginalTransparencyValue") and ui.OriginalTransparencyValue.Value or ui.BackgroundTransparency)
+            if targetForEndEffect and targetForEndEffect.Parent then
+                 TweenService:Create(targetForEndEffect, TI, constructTweenInfo(originalTransparency)):Play()
+            end
+        end
+    end
+    return returnTable
 end
 -- Конец обновленного блока --
 
