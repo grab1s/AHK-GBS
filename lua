@@ -3292,6 +3292,7 @@ for i, v in pairs(UILibNames) do
     UILibrary[v].__index = UILibrary[v]
 end
 
+-- Найдите эту функцию (примерно строка 1514)
 function UILibrary.new(gameName, userId, rank)
     local GUI = Instance.new("ScreenGui")
     GUI.Name = HttpService:GenerateGUID(false)
@@ -3303,30 +3304,108 @@ function UILibrary.new(gameName, userId, rank)
     local window = objectGenerator.new("Window")
     window.Parent = GUI
 
-    --// make UI draggable
+    --// make UI draggable (этот блок остается)
     -->> LogoHitbox
-
     local Frame = Instance.new("Frame")
     Frame.BackgroundTransparency = 1
     Frame.Size = UDim2.fromScale(2, 2)
-
     Frame.AnchorPoint = Vector2.new(0.5, 0.5)
     Frame.Position = UDim2.fromScale(.5, .5)
-
     local AspectRatio = Instance.new("UIAspectRatioConstraint", Frame)
     AspectRatio.AspectRatio = 1.2
-
-    Frame.Parent = window.MainUI.Sidebar.ContentHolder.Cheats.Logo
+    Frame.Parent = window.MainUI.Sidebar.ContentHolder.Cheats.Logo -- Убедимся, что путь к Logo верный
     Frame.ZIndex = 300
-
     local Drag = Draggable.Drag(window.MainUI, Frame)
 
-    --// Customize the GUI
+    --// Customize the GUI (этот блок остается)
     window.Watermark.Text = ("visuals | %s | %s"):format(userId, gameName)
     local userinfo = window.MainUI.Sidebar.ContentHolder.UserInfo.Content
     userinfo.Rank.Text = rank
     userinfo.Title.Text = userId
 
+    -- =========================================================== --
+    -- ========= НАЧАЛО БЛОКА АДАПТАЦИИ ВНУТРИ БИБЛИОТЕКИ ========= --
+    -- =========================================================== --
+    local actualMainUI = window:FindFirstChild("MainUI") -- Ищем внутренний MainUI
+    if actualMainUI and actualMainUI:IsA("Frame") then
+
+        -- Убедимся, что внутренний фрейм центрирован
+        if actualMainUI.AnchorPoint ~= Vector2.new(0.5, 0.5) then
+           actualMainUI.AnchorPoint = Vector2.new(0.5, 0.5)
+        end
+        if actualMainUI.Position.X.Scale ~= 0.5 or actualMainUI.Position.Y.Scale ~= 0.5 then
+           actualMainUI.Position = UDim2.fromScale(0.5, 0.5)
+        end
+
+        -- Создаем UIScale ВНУТРИ actualMainUI
+        local scaler = actualMainUI:FindFirstChild("MainUIScaler")
+        if not scaler then
+            scaler = Instance.new("UIScale")
+            scaler.Name = "MainUIScaler"
+            scaler.Parent = actualMainUI
+        end
+
+        -- --- Функция для обновления масштаба ---
+        local function updateScale()
+            local camera = workspace.CurrentCamera -- Получаем камеру здесь
+            if not camera then return end
+
+            local viewportSize = camera.ViewportSize
+            if viewportSize.X == 0 or viewportSize.Y == 0 then return end
+
+            -- Используем РЕАЛЬНЫЕ размеры actualMainUI из библиотеки
+            local referenceWidth = 851
+            local referenceHeight = 488
+
+            local scaleX = viewportSize.X / referenceWidth
+            local scaleY = viewportSize.Y / referenceHeight
+            local targetScale = math.min(scaleX, scaleY)
+
+            -- --- НАСТРАИВАЕМЫЕ ПАРАМЕТРЫ МАСШТАБА ---
+            local minScale = 0.35 -- Минимальный масштаб
+            local maxScale = 1.0  -- Максимальный масштаб (1.0 = исходный размер)
+            targetScale = math.clamp(targetScale, minScale, maxScale)
+            -- ----------------------------------------
+
+            scaler.Scale = targetScale
+        end
+        -- -------------------------------------
+
+        -- Подключаемся к изменению размера экрана
+        local camera = workspace.CurrentCamera
+        if camera then
+            camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+        else
+            -- Попробуем подождать камеру, если ее нет сразу
+            task.spawn(function()
+                local camera = workspace:WaitForChild("Camera", 10)
+                if camera then
+                    camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+                    task.wait(0.1) -- Даем время на прогрузку
+                    updateScale() -- Вызываем после ожидания
+                else
+                    warn("[UI Scaler Lib] Не удалось найти камеру для подключения сигнала ViewportSize.")
+                end
+            end)
+        end
+
+        -- Устанавливаем начальный масштаб (с небольшой задержкой, чтобы UI успел прогрузиться)
+        task.spawn(function()
+            task.wait(0.2)
+            updateScale()
+        end)
+
+        print("[UI Scaler Lib] Адаптивное масштабирование встроено и применено к MainUI.")
+
+    else
+        warn("[UI Scaler Lib] Не удалось найти внутренний 'MainUI' для применения масштабирования!")
+    end
+    -- =========================================================== --
+    -- ========= КОНЕЦ БЛОКА АДАПТАЦИИ ВНУТРИ БИБЛИОТЕКИ ========= --
+    -- =========================================================== --
+
+
+    -- Эта строка должна быть последней в функции
     return setmetatable(
         {
             UI = {},
@@ -3338,11 +3417,11 @@ function UILibrary.new(gameName, userId, rank)
             currentSelection = nil,
             currentCategorySelection = nil,
             currentTab = nil,
-            MainUI = window
+            MainUI = window -- Возвращаем внешний Window Frame
         },
         UILibrary.Window
     )
-end
+end -- Конец функции UILibrary.new
 
 function UILibrary.Window:setAnimSpeed(val)
     TI = TweenInfo.new(.4 / (val / 100), Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
