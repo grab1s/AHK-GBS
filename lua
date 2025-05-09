@@ -2619,16 +2619,16 @@ local function initUtils()
     end
 
     utils.CheckBoundary = function(Boundary,Object,Change)
-        if Boundary and Object then -- Добавлена проверка на Object
+        if Boundary and Object then 
             local Size = Boundary.AbsoluteSize
             local Position = Boundary.AbsolutePosition
-            local ObjAbsSize = Object.AbsoluteSize -- Получаем AbsoluteSize один раз
+            local ObjAbsSize = Object.AbsoluteSize 
 
             local Min = -(Size-Position) + Size
             local Max = (Size+Position) - ObjAbsSize
 
             local ObjPos = Object.Position
-            local X_ScaleOffset , Y_ScaleOffset = utils.ScaleToOffset({ObjPos.X.Scale,ObjPos.Y.Scale}) -- Переименовал X, Y
+            local X_ScaleOffset , Y_ScaleOffset = utils.ScaleToOffset({ObjPos.X.Scale,ObjPos.Y.Scale}) 
 
             local GuiVector = Vector2.new(ObjPos.X.Offset+Change.X+X_ScaleOffset,ObjPos.Y.Offset+Change.Y+Y_ScaleOffset)
 
@@ -2647,7 +2647,7 @@ local function initUtils()
         local CurrentDist
 
         pcall(function()
-            if Object and Object.Parent then -- Добавлена проверка на Object.Parent
+            if Object and Object.Parent then 
                 for _ , v in ipairs(Current) do
                     if v and v.Parent and table.find(Clippings,v) and v.ZIndex <= Object.ZIndex then
                         if not CurrentDist then
@@ -2675,7 +2675,7 @@ local function initUtils()
     end
 
     utils.Snap = function(B,C,Target)
-        if not B or not C or not B.Parent or not C.Parent then return C and C.Position or UDim2.new() end -- Добавлена проверка
+        if not B or not C or not B.Parent or not C.Parent then return C and C.Position or UDim2.new() end 
 
         local vpSize = utils.getViewportSize()
         if vpSize.X == 0 or vpSize.Y == 0 then return C.Position end 
@@ -2765,22 +2765,16 @@ local function getDragIt()
                     end
                     Events[self] = nil
                 end
+                -- _mouseInputCheck отключается, если он был создан для этого объекта
                 if self._mouseInputCheck then
                     self._mouseInputCheck:Disconnect()
                     self._mouseInputCheck = nil
                 end
-                if self._touchStartedConn then -- Этот обработчик больше не создается в drag.Drag
-                    self._touchStartedConn:Disconnect()
-                    self._touchStartedConn = nil
-                end
-                if self._touchEndedConn then -- Этот обработчик больше не создается в drag.Drag
-                    self._touchEndedConn:Disconnect()
-                    self._touchEndedConn = nil
-                end
-                 if self._touchMovedConn then 
-                    self._touchMovedConn:Disconnect()
-                    self._touchMovedConn = nil
-                end
+                -- _touchStartedConn и _touchEndedConn больше не создаются в drag.Drag для Frame,
+                -- поэтому их не нужно здесь отключать, если setTo - это Frame.
+                -- Если setTo МОЖЕТ БЫТЬ GuiButton, то их нужно было бы сохранять и отключать.
+                -- Для текущей логики, где setTo для Draggable.Drag(window.MainUI, Frame) является Frame,
+                -- эти соединения не создаются.
 
                 table.remove(Objects, Index)
                 if currentDraggingGuiObject == self then
@@ -2867,8 +2861,10 @@ local function getDragIt()
             self.Snappings = Snappings
             self.Snapped = nil
             
-            -- _mouseInputCheck будет создан ниже, но он не нужен для TouchStarted/Ended на Frame
-            -- self._touchStartedConn и self._touchEndedConn удалены, так как Frame их не поддерживает
+            --[[ _mouseInputCheck, _touchStartedConn, _touchEndedConn больше не создаются здесь
+                 Вся логика начала перетаскивания теперь в глобальном UIS.InputBegan
+                 с проверкой наведения на self._setToElement.
+            ]]
 
             local DragStart = Instance.new("BindableEvent")
             local DragEnd = Instance.new("BindableEvent")
@@ -2882,7 +2878,7 @@ local function getDragIt()
         -- Глобальный InputBegan: Определяет, нужно ли начинать перетаскивание и запускает RenderStepped
         drag.InputBegan = UIS.InputBegan:Connect(function(Input, gp)
             if gp then return end
-            if Holding then return end 
+            if Holding then return end -- Если уже что-то перетаскивается, игнорируем новые InputBegan для начала
 
             local targetObject = nil
             local isMouseInput = Input.UserInputType == Enum.UserInputType.MouseButton1
@@ -3074,117 +3070,6 @@ local function getDragIt()
     end
     return nil 
 end
-
-local Draggable = getDragIt()
-
-local function getEffect()
-    local module = {}
-    local TweenService = game:GetService("TweenService")
-    local TI = TweenInfo.new(.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
-
-    module.ButtonHoverEffect = function(ui, req)
-        local HoverEvent = Instance.new("BindableEvent")
-        local conns = {}
-        local hovering = false
-
-        local function Start()
-            if ui and ui:FindFirstChild("HoverFrame") and ui.HoverFrame.Parent then 
-                TweenService:Create(ui.HoverFrame, TI, {BackgroundTransparency = .5}):Play()
-            end
-        end
-        local function End()
-            if ui and ui:FindFirstChild("HoverFrame") and ui.HoverFrame.Parent then 
-                TweenService:Create(ui.HoverFrame, TI, {BackgroundTransparency = 1}):Play()
-            end
-        end
-
-        table.insert(conns, ui.MouseEnter:Connect(function()
-            if req and not req() then return end
-            hovering = true
-            Start()
-            HoverEvent:Fire()
-        end))
-        table.insert(conns, ui.MouseLeave:Connect(function()
-            if hovering then End() end
-            hovering = false
-        end))
-
-        return {
-            Event = HoverEvent.Event,
-            Disconnect = function()
-                for _, v_conn in ipairs(conns) do v_conn:Disconnect() end
-                if hovering then End() end 
-            end
-        }
-    end
-
-    module.ButtonClickEffect = function(ui, req)
-        local ClickEvent = Instance.new("BindableEvent")
-        local conns = {}
-        local isPressed = false
-
-        local function StartEffect()
-            if ui and ui.Parent then 
-                TweenService:Create(ui, TI, {BackgroundTransparency = .5}):Play()
-            end
-        end
-        local function EndEffect()
-             if ui and ui.Parent then 
-                TweenService:Create(ui, TI, {BackgroundTransparency = 1}):Play()
-            end
-        end
-
-        table.insert(conns, ui.InputBegan:Connect(function(input, gp)
-            if gp then return end
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                if req and not req() then return end
-                isPressed = true
-                StartEffect()
-            end
-        end))
-
-        table.insert(conns, ui.InputEnded:Connect(function(input, gp)
-            if gp then return end
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                if isPressed then
-                    isPressed = false
-                    EndEffect()
-                    if req and not req() then return end
-                    ClickEvent:Fire()
-                end
-            end
-        end))
-        
-        -- Только если элемент поддерживает прямые Touch-события (GuiButton и наследники)
-        if ui:IsA("GuiButton") then
-            table.insert(conns, ui.TouchEnded:Connect(function(touch, gp)
-                if gp then return end
-                if isPressed then
-                    isPressed = false
-                    EndEffect()
-                end
-            end))
-        end
-        
-        table.insert(conns, ui.MouseLeave:Connect(function()
-            if isPressed and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-                isPressed = false 
-                EndEffect()
-            end
-        end))
-
-        return {
-            Event = ClickEvent.Event,
-            Disconnect = function()
-                for _, v_conn in ipairs(conns) do v_conn:Disconnect() end
-                if isPressed then EndEffect() end 
-            end
-        }
-    end
-    return module
-end
-
-local EffectLib = getEffect()
 
 local CircleClick = function(Button)
     if not Button or not Button.Parent then return end 
