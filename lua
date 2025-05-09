@@ -286,12 +286,11 @@ local function getObjGen()
                 UICorner_23 = Instance.new("UICorner"),
                 UIAspectRatioConstraint_17 = Instance.new("UIAspectRatioConstraint"),
                 LabelElement = Instance.new("Frame"),
-                UIListLayout_Label = Instance.new("UIListLayout"), -- Уникальное имя
-                UIPadding_Label = Instance.new("UIPadding"),       -- Уникальное имя
-                Title_Label = Instance.new("TextLabel"),           -- Уникальное имя
-                Desc_Label = Instance.new("TextLabel"),            -- Уникальное имя
-
-                Objects = Instance.new("Folder") -- Эта строка должна быть последней в списке инстансов
+                UIListLayout_Label = Instance.new("UIListLayout"),
+                UIPadding_Label = Instance.new("UIPadding"),   
+                Title_Label = Instance.new("TextLabel"),
+                Desc_Label = Instance.new("TextLabel"),
+                Objects = Instance.new("Folder")
             }
 
 
@@ -355,6 +354,7 @@ local function getObjGen()
             Gui.HoverFrame.BorderSizePixel = 0
             Gui.HoverFrame.Size = UDim2.new(1, 0, 1, 0)
             Gui.HoverFrame.ZIndex = 111
+            Gui.HoverFrame.Active = false
 
             Gui.UICorner_2.CornerRadius = UDim.new(0.100000001, 0)
             Gui.UICorner_2.Parent = Gui.HoverFrame
@@ -395,6 +395,7 @@ local function getObjGen()
             Gui.HoverFrame_2.BorderSizePixel = 0
             Gui.HoverFrame_2.Size = UDim2.new(1, 0, 1, 0)
             Gui.HoverFrame_2.ZIndex = 111
+            Gui.HoverFrame_2.Active = false
 
             Gui.UICorner_4.CornerRadius = UDim.new(0.200000003, 0)
             Gui.UICorner_4.Parent = Gui.Checkbox
@@ -473,6 +474,7 @@ local function getObjGen()
             Gui.HoverFrame_3.Position = UDim2.new(0.5, 0, 0.5, 0)
             Gui.HoverFrame_3.Size = UDim2.new(1, 4, 1, 4)
             Gui.HoverFrame_3.ZIndex = 111
+            Gui.HoverFrame_3.Active = false
 
             Gui.UIPadding_2.Parent = Gui.HoverFrame_3
             Gui.UIPadding_2.PaddingBottom = UDim.new(0, 2)
@@ -597,6 +599,7 @@ local function getObjGen()
             Gui.HoverFrame_4.BorderSizePixel = 0
             Gui.HoverFrame_4.Size = UDim2.new(1, 0, 1, 0)
             Gui.HoverFrame_4.ZIndex = 111
+            Gui.HoverFrame_4.Active = false
 
             Gui.UICorner_10.CornerRadius = UDim.new(0.100000001, 0)
             Gui.UICorner_10.Parent = Gui.HoverFrame_4
@@ -1139,6 +1142,7 @@ local function getObjGen()
             Gui.HoverFrame_5.BorderSizePixel = 0
             Gui.HoverFrame_5.Size = UDim2.new(1, 0, 1, 0)
             Gui.HoverFrame_5.ZIndex = 122
+            Gui.HoverFrame_5.Active = false
 
             Gui.Content_4.Name = "Content"
             Gui.Content_4.Parent = Gui.Category
@@ -2011,6 +2015,7 @@ local function getObjGen()
             Gui.SelectionShadow.BorderSizePixel = 0
             Gui.SelectionShadow.Size = UDim2.new(1, 0, 1, 0)
             Gui.SelectionShadow.ZIndex = 123
+            Gui.SelectionShadow.Active = false
 
             Gui.UIGradient_9.Transparency =
                 NumberSequence.new {
@@ -2027,6 +2032,7 @@ local function getObjGen()
             Gui.HoverFrame_6.BorderSizePixel = 0
             Gui.HoverFrame_6.Size = UDim2.new(1, 0, 1, 0)
             Gui.HoverFrame_6.ZIndex = 122
+            Gui.HoverFrame_6.Active = false
 
             Gui.CategoryFrame.Name = "CategoryFrame"
             Gui.CategoryFrame.Parent = Gui.Objects
