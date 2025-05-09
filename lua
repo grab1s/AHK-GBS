@@ -2858,49 +2858,9 @@ local function getDragIt()
             self.Snappings = Snappings
             self.Snapped = nil
 
-            local function AttemptStartDragging(inputObj)
-                if Holding then return end 
+            -- _mouseInputCheck будет создан ниже
+            -- _touchStartedConn и _touchEndedConn не нужны здесь, т.к. обработка Touch идет через глобальный UIS.InputBegan
 
-                self.CanDrag = true
-                Holding = true
-                currentDragInputObject = inputObj
-                currentDraggingGuiObject = self
-
-                if inputObj.UserInputType == Enum.UserInputType.MouseButton1 then
-                    self.OldPosition = Vector2.new(Mouse.X, Mouse.Y)
-                elseif inputObj.UserInputType == Enum.UserInputType.Touch then
-                    self.OldPosition = inputObj.Position
-                end
-
-                if Events[self] and Events[self][1] then Events[self][1]:Fire() end
-            end
-
-            local function AttemptStopDragging(inputObj)
-                if self.CanDrag and currentDraggingGuiObject == self then 
-                    self.CanDrag = false
-                    Holding = false
-                    currentDragInputObject = nil
-                    currentDraggingGuiObject = nil
-                    if Events[self] and Events[self][2] then Events[self][2]:Fire() end
-                end
-            end
-
-            self._mouseInputCheck = setTo.InputBegan:Connect(function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    AttemptStartDragging(Input)
-                end
-            end)
-            
-            self._touchStartedConn = setTo.TouchStarted:Connect(function(inputObject)
-                AttemptStartDragging(inputObject)
-            end)
-
-            self._touchEndedConn = setTo.TouchEnded:Connect(function(inputObject)
-                 if currentDragInputObject and inputObject.TouchId == currentDragInputObject.TouchId then
-                    AttemptStopDragging(inputObject)
-                end
-            end)
-            
             local DragStart = Instance.new("BindableEvent")
             local DragEnd = Instance.new("BindableEvent")
             Events[self] = {DragStart, DragEnd}
@@ -2910,107 +2870,194 @@ local function getDragIt()
             return self
         end
 
+        -- Глобальный InputBegan: Определяет, нужно ли начинать перетаскивание и запускает RenderStepped
         drag.InputBegan = UIS.InputBegan:Connect(function(Input, gp)
             if gp then return end
+            if Holding then return end -- Если уже что-то перетаскивается, игнорируем новые InputBegan для начала
 
-            if Holding and currentDraggingGuiObject and not RenderConnection then
-                RenderConnection = RS.RenderStepped:Connect(function(DT)
-                    if not Holding or not currentDraggingGuiObject or not currentDragInputObject then
-                        if RenderConnection then RenderConnection:Disconnect(); RenderConnection = nil; end
-                        if Settings.DraggingIcon and Mouse.Icon == Settings.DraggingIcon then Mouse.Icon = "" end
-                        return
+            local targetObject = nil
+            local isMouseInput = Input.UserInputType == Enum.UserInputType.MouseButton1
+            local isTouchInput = Input.UserInputType == Enum.UserInputType.Touch
+            local inputPosition = nil
+
+            if isMouseInput then
+                inputPosition = Vector2.new(Mouse.X, Mouse.Y)
+            elseif isTouchInput then
+                inputPosition = Input.Position
+            else
+                return -- Необрабатываемый тип ввода
+            end
+            
+            local guisUnderInput = Player.PlayerGui:GetGuiObjectsAtPosition(inputPosition.X, inputPosition.Y)
+            for _, guiInstance in ipairs(guisUnderInput) do
+                for _, draggableObj in ipairs(Objects) do
+                    if guiInstance == draggableObj._setToElement then
+                        targetObject = draggableObj
+                        break
                     end
+                end
+                if targetObject then break end
+            end
 
-                    local v = currentDraggingGuiObject
-                    local currentInputPos
-                    local inputType = currentDragInputObject.UserInputType
+            if targetObject then
+                targetObject.CanDrag = true
+                Holding = true
+                currentDragInputObject = Input
+                currentDraggingGuiObject = targetObject
+                targetObject.OldPosition = inputPosition
+                
+                if Events[targetObject] and Events[targetObject][1] then
+                    Events[targetObject][1]:Fire() -- DragStart
+                end
 
-                    if inputType == Enum.UserInputType.MouseButton1 then
-                        currentInputPos = Vector2.new(Mouse.X, Mouse.Y)
-                    elseif inputType == Enum.UserInputType.Touch then
-                        local touchFound = false
-                        for _, touch in ipairs(UIS:GetTouchPositions()) do
-                            if touch.TouchId == currentDragInputObject.TouchId then
-                                currentInputPos = touch.Position
-                                touchFound = true
-                                break
-                            end
-                        end
-                        if not touchFound then 
+                if not RenderConnection then
+                    RenderConnection = RS.RenderStepped:Connect(function(DT)
+                        if not Holding or not currentDraggingGuiObject or not currentDragInputObject then
                             if RenderConnection then RenderConnection:Disconnect(); RenderConnection = nil; end
-                            if v and Events[v] and Events[v][2] then 
-                                v.CanDrag = false; 
-                                Events[v][2]:Fire() 
-                            end
-                            Holding = false; currentDragInputObject = nil; currentDraggingGuiObject = nil;
+                            if Settings.DraggingIcon and Mouse.Icon == Settings.DraggingIcon then Mouse.Icon = "" end
                             return
                         end
-                    else
-                        if RenderConnection then RenderConnection:Disconnect(); RenderConnection = nil; end
-                        return 
-                    end
-                    
-                    if not v.OldPosition then v.OldPosition = currentInputPos end 
 
-                    local Position = v.Object.Position
-                    local Change = currentInputPos - v.OldPosition
-                    local ScaleX, ScaleY = Utils.ScaleToOffset({Position.X.Scale, Position.Y.Scale})
-                    local NewPos = UDim2.new(0, Position.X.Offset + Change.X + ScaleX, 0, Position.Y.Offset + Change.Y + ScaleY)
+                        local v = currentDraggingGuiObject
+                        local currentFrameInputPos -- Переименовано для ясности, что это позиция для текущего кадра
+                        local inputType = currentDragInputObject.UserInputType
 
-                    if v.Boundary then
-                        local X, Y = Utils.CheckBoundary(v.Boundary, v.Object, Change)
-                        NewPos = UDim2.new(0, X, 0, Y)
-                    end
-                    local Alpha = v.ResponseTime and (DT * 7 * v.ResponseTime) or 1
-                    
-                    v._Target = NewPos
-                    v.Object.Position = v.Object.Position:Lerp(NewPos, Alpha)
-                    v.OldPosition = v.OldPosition:Lerp(currentInputPos, Alpha)
+                        if inputType == Enum.UserInputType.MouseButton1 then
+                            currentFrameInputPos = Vector2.new(Mouse.X, Mouse.Y)
+                        elseif inputType == Enum.UserInputType.Touch then
+                            local touchFound = false
+                            for _, touch in ipairs(UIS:GetTouchPositions()) do
+                                if touch.TouchId == currentDragInputObject.TouchId then
+                                    currentFrameInputPos = touch.Position
+                                    touchFound = true
+                                    break
+                                end
+                            end
+                            if not touchFound then 
+                                if RenderConnection then RenderConnection:Disconnect(); RenderConnection = nil; end
+                                if v and Events[v] and Events[v][2] then 
+                                    v.CanDrag = false; 
+                                    Events[v][2]:Fire() 
+                                end
+                                Holding = false; currentDragInputObject = nil; currentDraggingGuiObject = nil;
+                                return
+                            end
+                        else
+                            if RenderConnection then RenderConnection:Disconnect(); RenderConnection = nil; end
+                            return 
+                        end
+                        
+                        if not v.OldPosition then v.OldPosition = currentFrameInputPos end 
 
-                    local guisAtPos = Player.PlayerGui:GetGuiObjectsAtPosition(currentInputPos.X, currentInputPos.Y)
-                    local Sorted = Utils.SortTable(v.Clippings, guisAtPos, v.Object)
-                    if Sorted then v.Clipped = Sorted else if not v.AutoClip then v.Clipped = nil end end
+                        local Position = v.Object.Position
+                        local Change = currentFrameInputPos - v.OldPosition
+                        local ScaleX, ScaleY = Utils.ScaleToOffset({Position.X.Scale, Position.Y.Scale})
+                        local NewPos = UDim2.new(0, Position.X.Offset + Change.X + ScaleX, 0, Position.Y.Offset + Change.Y + ScaleY)
 
-                    if v.Snappings then
-                        local Closest
-                        local ChosenSnap
-                        for _, snap_obj in ipairs(v.Snappings) do 
-                            if not Closest then
-                                Closest = (v.Object.AbsolutePosition - snap_obj.AbsolutePosition).Magnitude
-                                ChosenSnap = snap_obj
-                            else
-                                local CurrentMag = (v.Object.AbsolutePosition - snap_obj.AbsolutePosition).Magnitude
-                                if CurrentMag < Closest then
-                                    Closest = CurrentMag
+                        if v.Boundary then
+                            local X, Y = Utils.CheckBoundary(v.Boundary, v.Object, Change)
+                            NewPos = UDim2.new(0, X, 0, Y)
+                        end
+                        local Alpha = v.ResponseTime and (DT * 7 * v.ResponseTime) or 1
+                        
+                        v._Target = NewPos
+                        v.Object.Position = v.Object.Position:Lerp(NewPos, Alpha)
+                        v.OldPosition = v.OldPosition:Lerp(currentFrameInputPos, Alpha)
+
+                        local guisAtPos = Player.PlayerGui:GetGuiObjectsAtPosition(currentFrameInputPos.X, currentFrameInputPos.Y)
+                        local Sorted = Utils.SortTable(v.Clippings, guisAtPos, v.Object)
+                        if Sorted then v.Clipped = Sorted else if not v.AutoClip then v.Clipped = nil end end
+
+                        if v.Snappings then
+                            local Closest
+                            local ChosenSnap
+                            for _, snap_obj in ipairs(v.Snappings) do 
+                                if not Closest then
+                                    Closest = (v.Object.AbsolutePosition - snap_obj.AbsolutePosition).Magnitude
                                     ChosenSnap = snap_obj
+                                else
+                                    local CurrentMag = (v.Object.AbsolutePosition - snap_obj.AbsolutePosition).Magnitude
+                                    if CurrentMag < Closest then
+                                        Closest = CurrentMag
+                                        ChosenSnap = snap_obj
+                                    end
+                                end
+                            end
+                            if Closest then
+                                local X, Y = Utils.ScaleToOffset({ChosenSnap.Size.X.Scale, ChosenSnap.Size.Y.Scale})
+                                X = X + ChosenSnap.Size.X.Offset
+                                Y = Y + ChosenSnap.Size.Y.Offset 
+                                
+                                local objAbsPos = v.Object.AbsolutePosition
+                                local snapAbsPos = ChosenSnap.AbsolutePosition
+
+                                local Right = (objAbsPos - (snapAbsPos + Vector2.new(X, 0))).Magnitude * 0.0264583333
+                                local Left = (objAbsPos - (snapAbsPos - Vector2.new(X, 0))).Magnitude * 0.0264583333
+                                local Top = (objAbsPos - (snapAbsPos - Vector2.new(0, Y))).Magnitude * 0.0264583333 
+                                local Bottom = (objAbsPos - (snapAbsPos + Vector2.new(0, Y))).Magnitude * 0.0264583333
+
+                                if (Closest * 0.0264583333) <= 3.5 or Top <= 2.5 or Right <= 2.5 or Left <= 2.5 or Bottom <= 2.5 then
+                                    v.Snap = ChosenSnap
+                                else
+                                    v.Snap = nil
                                 end
                             end
                         end
-                        if Closest then
-                            local X, Y = Utils.ScaleToOffset({ChosenSnap.Size.X.Scale, ChosenSnap.Size.Y.Scale})
-                            X = X + ChosenSnap.Size.X.Offset
-                            Y = Y + ChosenSnap.Size.Y.Offset 
-                            
-                            local objAbsPos = v.Object.AbsolutePosition
-                            local snapAbsPos = ChosenSnap.AbsolutePosition
 
-                            local Right = (objAbsPos - (snapAbsPos + Vector2.new(X, 0))).Magnitude * 0.0264583333
-                            local Left = (objAbsPos - (snapAbsPos - Vector2.new(X, 0))).Magnitude * 0.0264583333
-                            local Top = (objAbsPos - (snapAbsPos - Vector2.new(0, Y))).Magnitude * 0.0264583333 
-                            local Bottom = (objAbsPos - (snapAbsPos + Vector2.new(0, Y))).Magnitude * 0.0264583333
+                        if Settings.DraggingIcon and (Settings.PriorityIcon == "Dragging" or not Hovering) then
+                            if inputType == Enum.UserInputType.MouseButton1 then Mouse.Icon = Settings.DraggingIcon end
+                        end
+                    end)
+                end
+            end
+        end)
 
-                            if (Closest * 0.0264583333) <= 3.5 or Top <= 2.5 or Right <= 2.5 or Left <= 2.5 or Bottom <= 2.5 then
-                                v.Snap = ChosenSnap
+        -- Глобальный InputEnded: Останавливает RenderStepped и завершает перетаскивание
+        drag.InputEnd = UIS.InputEnded:Connect(function(Input)
+            if Holding and currentDragInputObject and 
+               (Input.UserInputType == currentDragInputObject.UserInputType and 
+                (Input.UserInputType ~= Enum.UserInputType.Touch or Input.TouchId == currentDragInputObject.TouchId)) then
+
+                if RenderConnection then
+                    RenderConnection:Disconnect()
+                    RenderConnection = nil
+                end
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Hovering and Settings.DraggingIcon then
+                    Mouse.Icon = ""
+                end
+
+                local v = currentDraggingGuiObject
+                if v and v.Object and v.Object.Parent then 
+                    coroutine.wrap(function()
+                        if v.Clipped and (not v.Snap or Settings.Priority == "Clipping") then
+                            if v.ResponseTime and v.ResponseTime > 0 then
+                                for i = 1, 10 do RS.RenderStepped:Wait(); if not v.Object or not v.Object.Parent then return end; v.Object.Position = v.Object.Position:Lerp(v.Clipped.Position, i / 10) end
                             else
+                               if v.Object and v.Object.Parent then v.Object.Position = v.Clipped.Position end
+                            end
+                            if v.Object and v.Object.Parent then v.Object.Rotation = v.Clipped.Rotation end
+                        end
+                        if v.Snap and (not v.Clipped or Settings.Priority == "Snapping") then
+                            if v.Object and v.Object.Parent then 
+                                local Target = Utils.Snap(v.Snap, v.Object, v._Target)
+                                if v.ResponseTime and v.ResponseTime > 0 then
+                                    for i = 1, 10 do RS.RenderStepped:Wait(); if not v.Object or not v.Object.Parent then return end; v.Object.Position = v.Object.Position:Lerp(Target, i / 10) end
+                                else
+                                    if v.Object and v.Object.Parent then v.Object.Position = Target end
+                                end
                                 v.Snap = nil
                             end
                         end
-                    end
-
-                    if Settings.DraggingIcon and (Settings.PriorityIcon == "Dragging" or not Hovering) then
-                        if inputType == Enum.UserInputType.MouseButton1 then Mouse.Icon = Settings.DraggingIcon end
-                    end
-                end)
+                    end)()
+                    
+                    if Events[v] and Events[v][2] then Events[v][2]:Fire() end 
+                    v.CanDrag = false
+                    v.OldPosition = nil
+                end
+                
+                Holding = false
+                currentDragInputObject = nil
+                currentDraggingGuiObject = nil
             end
         end)
 
