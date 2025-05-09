@@ -4132,13 +4132,12 @@ function UILibrary.Window:Category(name, icon)
     end
 
     subContentHolder.Name = name
-    subContentHolder.Visible = true -- Обычно управляется через ChangeCategory
+    subContentHolder.Visible = true -- Обычно управляется через ChangeCategory. Может быть лучше false по умолчанию?
     subContentHolder.Parent = self.MainUI.MainUI.Sidebar.Sidebar2
 
-    local Hover, Click
+    local HoverEvent, ClickEvent -- Храним сами Event'ы
     local hoverEffectInstance, clickEffectInstance -- Для хранения возвращаемых объектов с методом Disconnect
 
-    -- Подключаем эффекты только если EffectLib доступен
     if EffectLib and EffectLib.ButtonHoverEffect and EffectLib.ButtonClickEffect then
         hoverEffectInstance = EffectLib.ButtonHoverEffect(
             category,
@@ -4150,23 +4149,20 @@ function UILibrary.Window:Category(name, icon)
                 end
             end
         )
-        Hover = hoverEffectInstance and hoverEffectInstance.Event -- Получаем сам Event
+        HoverEvent = hoverEffectInstance and hoverEffectInstance.Event
 
         clickEffectInstance = EffectLib.ButtonClickEffect(category)
-        Click = clickEffectInstance and clickEffectInstance.Event -- Получаем сам Event
+        ClickEvent = clickEffectInstance and clickEffectInstance.Event
 
-        if Click then
-            Click:Connect(function(clickPosition) -- Ожидаем clickPosition от ButtonClickEffect
-                if not category or not category.Parent then return end -- Проверка, если категория была удалена
-
-                -- CircleClick теперь должен принимать позицию
-                -- Если clickPosition не передан, CircleClick должен иметь фоллбэк на Mouse.Position
+        if ClickEvent then
+            ClickEvent:Connect(function(clickPosition) 
+                if not category or not category.Parent then return end
                 CircleClick(category, clickPosition) 
                 self:ChangeCategory(name)
             end)
         else
-            warn("UILibrary.Window:Category - Не удалось получить Click.Event от EffectLib.ButtonClickEffect для: " .. tostring(name))
-            -- Можно добавить фоллбэк на простой InputBegan, если EffectLib не работает
+            warn("UILibrary.Window:Category - Не удалось получить ClickEvent от EffectLib.ButtonClickEffect для: " .. tostring(name))
+            -- Фоллбэк
             category.InputBegan:Connect(function(input, gp)
                 if gp then return end
                 if input.UserInputState == Enum.UserInputState.Begin and
@@ -4179,7 +4175,7 @@ function UILibrary.Window:Category(name, icon)
         end
     else
         warn("UILibrary.Window:Category - EffectLib или его функции не доступны для: " .. tostring(name))
-        -- Фоллбэк на простой InputBegan без кастомных эффектов
+        -- Фоллбэк
         category.InputBegan:Connect(function(input, gp)
             if gp then return end
             if input.UserInputState == Enum.UserInputState.Begin and
@@ -4191,19 +4187,18 @@ function UILibrary.Window:Category(name, icon)
         end)
     end
 
-
     if self.currentSelection == nil then
         self:ChangeCategory(name)
     end
 
     local metaTable = {
         Effects = {
-            Hover = Hover, -- Event
-            Click = Click  -- Event
+            Hover = HoverEvent, 
+            Click = ClickEvent  
         },
         oldSelf = self,
         categoryUI = category,
-        contentHolder = subContentHolder, -- Это Sidebar2 content holder
+        contentHolder = subContentHolder,
         Destroy = function(self)
             if hoverEffectInstance and hoverEffectInstance.Disconnect then
                 pcall(hoverEffectInstance.Disconnect)
@@ -4211,21 +4206,190 @@ function UILibrary.Window:Category(name, icon)
             if clickEffectInstance and clickEffectInstance.Disconnect then
                 pcall(clickEffectInstance.Disconnect)
             end
-            -- Уничтожаем UI элементы, созданные этой категорией
             if self.categoryUI and self.categoryUI.Parent then
                 self.categoryUI:Destroy()
             end
-            if self.contentHolder and self.contentHolder.Parent then -- subContentHolder
+            if self.contentHolder and self.contentHolder.Parent then
                 self.contentHolder:Destroy()
             end
-            -- Очистка из self.UI (опционально, если это важно для логики)
             if self.oldSelf and self.oldSelf.UI and self.oldSelf.UI[name] then
                 self.oldSelf.UI[name] = nil
             end
         end
     }
-
     return setmetatable(metaTable, UILibrary.Category)
+end
+
+function UILibrary.Category:Button(name, icon)
+    -- Проверки на существование основных UI контейнеров
+    if not (self.contentHolder and self.contentHolder.Bar2Holder and 
+            self.oldSelf and self.oldSelf.MainUI and self.oldSelf.MainUI.MainUI and
+            self.oldSelf.MainUI.MainUI.Content) then
+        warn("UILibrary.Category:Button - Отсутствуют необходимые родительские UI элементы для кнопки подкатегории: " .. tostring(name))
+        return nil
+    end
+
+    local button = objectGenerator.new("CategoryButton")
+    if not button then
+        warn("UILibrary.Category:Button - Не удалось создать экземпляр 'CategoryButton' для: " .. tostring(name))
+        return nil
+    end
+
+    local innerContent = button:FindFirstChild("InnerContent")
+    local imageLabel = innerContent and innerContent:FindFirstChild("Image")
+    local titleLabel = innerContent and innerContent:FindFirstChild("Title")
+
+    if not (innerContent and imageLabel and titleLabel) then
+        warn("UILibrary.Category:Button - Экземпляр 'CategoryButton' имеет неполную структуру для: " .. tostring(name))
+        button:Destroy()
+        return nil
+    end
+    
+    if icon then
+        imageLabel.Image = icon
+    end
+    titleLabel.Text = name or "Tab"
+
+    button.Parent = self.contentHolder.Bar2Holder
+    button.LayoutOrder = getLayoutOrder(self.contentHolder.Bar2Holder)
+    button.Name = name
+
+    -- Пересчет размеров кнопок в Bar2Holder
+    local childrenInBar = self.contentHolder.Bar2Holder:GetChildren()
+    local guiObjectCount = 0
+    for _, child in ipairs(childrenInBar) do
+        if child:IsA("GuiObject") then
+            guiObjectCount = guiObjectCount + 1
+        end
+    end
+
+    if guiObjectCount > 0 then
+        local newSize = 1 / guiObjectCount
+        for _, child in ipairs(childrenInBar) do
+            if child:IsA("GuiObject") then
+                child.Size = UDim2.fromScale(1, newSize)
+            end
+        end
+    end
+    -- button.Size уже будет установлен в цикле выше, если он там есть, или можно установить явно:
+    -- button.Size = UDim2.fromScale(1, (guiObjectCount > 0 and (1/guiObjectCount)) or 1)
+
+
+    if not (self.oldSelf.UI and self.categoryUI) then
+        warn("UILibrary.Category:Button - Отсутствует self.oldSelf.UI или self.categoryUI для: " .. tostring(name))
+        button:Destroy()
+        return nil
+    end
+    if not self.oldSelf.UI[self.categoryUI.Name] then
+         self.oldSelf.UI[self.categoryUI.Name] = {} -- Инициализация, если не существует
+    end
+    self.oldSelf.UI[self.categoryUI.Name][name] = {}
+
+
+    local CategoryFrameInstance = objectGenerator.new("CategoryFrame")
+    if not CategoryFrameInstance then
+        warn("UILibrary.Category:Button - Не удалось создать экземпляр 'CategoryFrame' для: " .. tostring(name))
+        button:Destroy()
+        return nil
+    end
+    CategoryFrameInstance.Name = name
+    CategoryFrameInstance.Parent = self.oldSelf.MainUI.MainUI.Content
+    CategoryFrameInstance.Visible = true -- Управляется ChangeCategorySelection
+
+    local HoverEvent, ClickEvent
+    local hoverEffectInstance, clickEffectInstance
+
+    if EffectLib and EffectLib.ButtonHoverEffect and EffectLib.ButtonClickEffect then
+        hoverEffectInstance = EffectLib.ButtonHoverEffect(
+            button,
+            function()
+                -- self здесь это метатаблица UILibrary.Button, у нее нет currentCategorySelection
+                -- нужно ссылаться на self.oldSelf (который UILibrary.Category)
+                -- и затем на self.oldSelf.oldSelf (который UILibrary.Window)
+                if self.oldSelf.oldSelf.currentCategorySelection ~= button then
+                    return true
+                else
+                    return false
+                end
+            end
+        )
+        HoverEvent = hoverEffectInstance and hoverEffectInstance.Event
+
+        clickEffectInstance = EffectLib.ButtonClickEffect(button)
+        ClickEvent = clickEffectInstance and clickEffectInstance.Event
+
+        if ClickEvent then
+            ClickEvent:Connect(function(clickPosition)
+                if not button or not button.Parent then return end
+                CircleClick(button, clickPosition)
+                if self.oldSelf.oldSelf.currentSelection.Name == self.categoryUI.Name then
+                    self.oldSelf.oldSelf:ChangeCategorySelection(name)
+                end
+            end)
+        else
+            warn("UILibrary.Category:Button - Не удалось получить Click.Event от EffectLib.ButtonClickEffect для: " .. tostring(name))
+            button.InputBegan:Connect(function(input, gp)
+                if gp then return end
+                if input.UserInputState == Enum.UserInputState.Begin and
+                   (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+                    if not button or not button.Parent then return end
+                    CircleClick(button, input.Position)
+                    if self.oldSelf.oldSelf.currentSelection.Name == self.categoryUI.Name then
+                        self.oldSelf.oldSelf:ChangeCategorySelection(name)
+                    end
+                end
+            end)
+        end
+    else
+        warn("UILibrary.Category:Button - EffectLib или его функции не доступны для: " .. tostring(name))
+        button.InputBegan:Connect(function(input, gp)
+            if gp then return end
+            if input.UserInputState == Enum.UserInputState.Begin and
+               (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+                if not button or not button.Parent then return end
+                CircleClick(button, input.Position)
+                if self.oldSelf.oldSelf.currentSelection.Name == self.categoryUI.Name then
+                    self.oldSelf.oldSelf:ChangeCategorySelection(name)
+                end
+            end
+        end)
+    end
+
+
+    if self.oldSelf.oldSelf.currentCategorySelection == nil and self.oldSelf.oldSelf.currentSelection.Name == self.categoryUI.Name then
+        self.oldSelf.oldSelf:ChangeCategorySelection(name)
+    end
+
+    local metaTable = {
+        Effects = {
+            Hover = HoverEvent,
+            Click = ClickEvent
+        },
+        oldSelf = self, -- Это UILibrary.Category
+        CategoryName = self.categoryUI.Name,
+        SectionName = name, -- Это имя текущей кнопки/таба
+        CategoryFrame = CategoryFrameInstance,
+        Destroy = function(self)
+            if hoverEffectInstance and hoverEffectInstance.Disconnect then
+                pcall(hoverEffectInstance.Disconnect)
+            end
+            if clickEffectInstance and clickEffectInstance.Disconnect then
+                pcall(clickEffectInstance.Disconnect)
+            end
+            if button and button.Parent then -- 'button' это CategoryButton
+                button:Destroy()
+            end
+            if self.CategoryFrame and self.CategoryFrame.Parent then
+                self.CategoryFrame:Destroy()
+            end
+            if self.oldSelf and self.oldSelf.oldSelf and self.oldSelf.oldSelf.UI and
+               self.oldSelf.categoryUI and self.oldSelf.UI[self.oldSelf.categoryUI.Name] and
+               self.oldSelf.UI[self.oldSelf.categoryUI.Name][name] then
+                self.oldSelf.UI[self.oldSelf.categoryUI.Name][name] = nil
+            end
+        end
+    }
+    return setmetatable(metaTable, UILibrary.Button)
 end
 
 function UILibrary.Category:Button(name, icon)
