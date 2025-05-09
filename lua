@@ -3067,12 +3067,11 @@ local function getDragIt()
     return nil 
 end
 
-local Draggable = getDragIt()
-
 local function getEffect()
     local module = {}
     local TweenService = game:GetService("TweenService")
     local TI = TweenInfo.new(.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out)
+    local UserInputService = game:GetService("UserInputService") 
 
     module.ButtonHoverEffect = function(ui, req)
         local HoverEvent = Instance.new("BindableEvent")
@@ -3147,13 +3146,15 @@ local function getEffect()
             end
         end))
         
-        table.insert(conns, ui.TouchEnded:Connect(function(touch, gp)
-            if gp then return end
-            if isPressed then
-                isPressed = false
-                EndEffect()
-            end
-        end))
+        if ui:IsA("GuiButton") then
+            table.insert(conns, ui.TouchEnded:Connect(function(touch, gp)
+                if gp then return end
+                if isPressed then
+                    isPressed = false
+                    EndEffect()
+                end
+            end))
+        end
         
         table.insert(conns, ui.MouseLeave:Connect(function()
             if isPressed and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
@@ -3173,7 +3174,7 @@ local function getEffect()
     return module
 end
 
-local EffectLib = getEffect()
+local EffectLib = getEffect() -- <<<< ЭТА СТРОКА ДОЛЖНА БЫТЬ ЗДЕСЬ, ПОСЛЕ getEffect()
 
 local CircleClick = function(Button)
     if not Button or not Button.Parent then return end 
