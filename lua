@@ -3354,16 +3354,16 @@ function UILibrary.new(gameName, userId, rank)
             if viewportSize.X == 0 or viewportSize.Y == 0 then return end
 
             -- Используем РЕАЛЬНЫЕ размеры actualMainUI из библиотеки
-            local referenceWidth = 851
-            local referenceHeight = 488
+            local referenceWidth = 100
+            local referenceHeight = 760
 
             local scaleX = viewportSize.X / referenceWidth
             local scaleY = viewportSize.Y / referenceHeight
             local targetScale = math.min(scaleX, scaleY)
 
             -- --- НАСТРАИВАЕМЫЕ ПАРАМЕТРЫ МАСШТАБА ---
-            local minScale = 0.35 -- Минимальный масштаб
-            local maxScale = 1.0  -- Максимальный масштаб (1.0 = исходный размер)
+            local minScale = 0.32 -- Минимальный масштаб
+            local maxScale = 0.92  -- Максимальный масштаб (1.0 = исходный размер)
             targetScale = math.clamp(targetScale, minScale, maxScale)
             -- ----------------------------------------
 
