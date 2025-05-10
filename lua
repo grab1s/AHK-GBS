@@ -1121,10 +1121,13 @@ local function getObjGen()
             Gui.Objects.Name = "Objects"
             Gui.Objects.Parent = Gui.UIObjects
 
+            Gui.Category = Instance.new("ImageButton")
             Gui.Category.Name = "Category"
             Gui.Category.Parent = Gui.Objects
+            Gui.Category.AutoButtonColor = false
             Gui.Category.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
             Gui.Category.BackgroundTransparency = 1.000
+            Gui.Category.Selectable = true
             Gui.Category.BorderSizePixel = 0
             Gui.Category.LayoutOrder = 1
             Gui.Category.Size = UDim2.new(1, 0, 0.25, 0)
@@ -1953,10 +1956,13 @@ local function getObjGen()
             Gui.UIListLayout_18.SortOrder = Enum.SortOrder.LayoutOrder
             Gui.UIListLayout_18.VerticalAlignment = Enum.VerticalAlignment.Bottom
 
+            Gui.CategoryButton = Instance.new("ImageButton")
             Gui.CategoryButton.Name = "CategoryButton"
             Gui.CategoryButton.Parent = Gui.Objects
+            Gui.CategoryButton.AutoButtonColor = false
             Gui.CategoryButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
             Gui.CategoryButton.BackgroundTransparency = 1.000
+            Gui.CategoryButton.Selectable = true
             Gui.CategoryButton.BorderSizePixel = 0
             Gui.CategoryButton.Size = UDim2.new(1, 0, 0.200000003, 0)
             Gui.CategoryButton.ZIndex = 121
@@ -3723,7 +3729,20 @@ end
 
 function UILibrary.Window:Category(name, icon)
     local catFolder = self.MainUI.MainUI.Sidebar.ContentHolder.Cheats.CheatHolder
-    local category = objectGenerator.new("Category")
+    local category = objectGenerator.new("Category") -- Ожидается, что это ImageButton или TextButton
+
+    -- Проверка, является ли 'category' интерактивным элементом
+    if not (category:IsA("GuiButton") or category:IsA("TextButton") or category:IsA("ImageButton")) then
+        warn("UILibrary.Window:Category - ОШИБКА: 'category' ("..category.Name..") не является интерактивным Gui элементом (GuiButton/TextButton/ImageButton). Эффекты могут не работать. Проверьте шаблон 'Category' в objectGenerator.")
+        -- Можно создать невидимую кнопку поверх, если category должен оставаться Frame
+        -- local interactiveOverlay = Instance.new("ImageButton")
+        -- interactiveOverlay.Name = "InteractiveOverlay"
+        -- interactiveOverlay.Size = UDim2.fromScale(1,1)
+        -- interactiveOverlay.BackgroundTransparency = 1
+        -- interactiveOverlay.AutoButtonColor = false
+        -- interactiveOverlay.Parent = category
+        -- category = interactiveOverlay -- Переназначаем для EffectLib, но это усложнит доступ к оригинальному category
+    end
 
     category.Content.Title.Text = name
     category.Content.Image.Image = icon
@@ -3739,47 +3758,40 @@ function UILibrary.Window:Category(name, icon)
     contentHolder.Visible = true
     contentHolder.Parent = self.MainUI.MainUI.Sidebar.Sidebar2
 
-    local Hover =
-        EffectLib.ButtonHoverEffect(
-        category,
-        function()
-            if self.currentSelection ~= category then
-                return true
-            else
-                return false
-            end
-        end
-    )
+    local Hover = EffectLib.ButtonHoverEffect(category, function()
+        return self.currentSelection ~= category
+    end)
+
     local Click = EffectLib.ButtonClickEffect(category)
 
-    Click.Event:Connect(
-        function(inputObj)
-            CircleClick(category, inputObj)
-            self:ChangeCategory(name)
-        end
-    )
+    Click.Event:Connect(function(inputObj)
+        CircleClick(category, inputObj) -- Передаем inputObj для корректных координат
+        self:ChangeCategory(name)
+    end)
 
     if self.currentSelection == nil then
         self:ChangeCategory(name)
     end
 
-    return setmetatable(
-        {
-            Effects = {
-                Hover = Hover,
-                Click = Click
-            },
-            oldSelf = self,
-            categoryUI = category,
-            contentHolder = contentHolder
+    return setmetatable({
+        Effects = {
+            Hover = Hover,
+            Click = Click
         },
-        UILibrary.Category
-    )
+        oldSelf = self,
+        categoryUI = category, -- Это должен быть оригинальный объект категории, не оверлей
+        contentHolder = contentHolder
+    }, UILibrary.Category)
 end
 
 function UILibrary.Category:Button(name, icon)
-    local contentholder = self.ContentHolder
-    local button = objectGenerator.new("CategoryButton")
+    local contentholder = self.contentHolder -- Исправлено на self.contentHolder
+    local button = objectGenerator.new("CategoryButton") -- Ожидается, что это ImageButton или TextButton
+
+    -- Проверка, является ли 'button' интерактивным элементом
+    if not (button:IsA("GuiButton") or button:IsA("TextButton") or button:IsA("ImageButton")) then
+        warn("UILibrary.Category:Button - ОШИБКА: 'button' ("..button.Name..") не является интерактивным Gui элементом. Эффекты могут не работать. Проверьте шаблон 'CategoryButton' в objectGenerator.")
+    end
 
     button.InnerContent.Image.Image = icon
     button.InnerContent.Title.Text = name
@@ -3789,20 +3801,22 @@ function UILibrary.Category:Button(name, icon)
     button.Name = name
 
     local totalCount = 0
-
     for i, v in pairs(self.contentHolder.Bar2Holder:GetChildren()) do
         if v:IsA("GuiObject") then
             totalCount = totalCount + 1
         end
     end
 
+    -- Убедимся, что totalCount не 0, чтобы избежать деления на ноль
+    if totalCount == 0 then totalCount = 1 end 
+
     for i, v in pairs(self.contentHolder.Bar2Holder:GetChildren()) do
         if v:IsA("GuiObject") then
             v.Size = UDim2.fromScale(1, 1 / totalCount)
         end
     end
-
     button.Size = UDim2.fromScale(1, 1 / totalCount)
+
 
     self.oldSelf.UI[self.categoryUI.Name][name] = {}
 
@@ -3811,45 +3825,33 @@ function UILibrary.Category:Button(name, icon)
     CategoryFrame.Parent = self.oldSelf.MainUI.MainUI.Content
     CategoryFrame.Visible = true
 
-    local Hover =
-        EffectLib.ButtonHoverEffect(
-        button,
-        function()
-            if self.currentCategorySelection ~= button then
-                return true
-            else
-                return false
-            end
-        end
-    )
+    local Hover = EffectLib.ButtonHoverEffect(button, function()
+        return self.oldSelf.currentCategorySelection ~= button -- Используем self.oldSelf для доступа к currentCategorySelection
+    end)
+
     local Click = EffectLib.ButtonClickEffect(button)
 
-    Click.Event:Connect(
-        function(inputObj)
-            CircleClick(button, inputObj)
-            if self.oldSelf.currentSelection.Name == self.categoryUI.Name then
-                self.oldSelf:ChangeCategorySelection(name)
-            end
+    Click.Event:Connect(function(inputObj)
+        CircleClick(button, inputObj) -- Передаем inputObj
+        if self.oldSelf.currentSelection.Name == self.categoryUI.Name then
+            self.oldSelf:ChangeCategorySelection(name)
         end
-    )
+    end)
 
     if self.oldSelf.currentCategorySelection == nil and self.oldSelf.currentSelection.Name == self.categoryUI.Name then
         self.oldSelf:ChangeCategorySelection(name)
     end
 
-    return setmetatable(
-        {
-            Effects = {
-                Hover = Hover,
-                Click = Click
-            },
-            oldSelf = self,
-            CategoryName = self.categoryUI.Name,
-            SectionName = name,
-            CategoryFrame = CategoryFrame
+    return setmetatable({
+        Effects = {
+            Hover = Hover,
+            Click = Click
         },
-        UILibrary.Button
-    )
+        oldSelf = self,
+        CategoryName = self.categoryUI.Name,
+        SectionName = name,
+        CategoryFrame = CategoryFrame
+    }, UILibrary.Button)
 end
 
 function UILibrary.Button:Section(name, side, options)
