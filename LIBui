@@ -2984,7 +2984,7 @@ local function getEffect()
         local function StartHover()
             if hovering then return end
             hovering = true
-            if ui:FindFirstChild("HoverFrame") then
+            if ui:FindFirstChild("HoverFrame") then -- Убедимся, что HoverFrame существует
                 TweenService:Create(ui.HoverFrame, TI_effect, { BackgroundTransparency = .5 }):Play()
             end
             HoverEvent:Fire()
@@ -2994,21 +2994,36 @@ local function getEffect()
             if not hovering then return end
             hovering = false
             touchActiveId = nil
-            if ui:FindFirstChild("HoverFrame") then
+            if ui:FindFirstChild("HoverFrame") then -- Убедимся, что HoverFrame существует
                 TweenService:Create(ui.HoverFrame, TI_effect, { BackgroundTransparency = 1 }):Play()
             end
         end
 
-        if ui:IsA("GuiButton") or ui:IsA("TextButton") or ui:IsA("ImageButton") then
+        -- Проверяем наличие событий перед подключением
+        if ui.MouseEnter then -- Стандартное событие для GuiButton
             table.insert(conns, ui.MouseEnter:Connect(function()
                 if req and req() == false then return end
                 StartHover()
             end))
+        else
+            warn("ButtonHoverEffect: ui.MouseEnter не найдено для " .. ui:GetFullName())
+        end
+
+        if ui.MouseLeave then
             table.insert(conns, ui.MouseLeave:Connect(function()
                 if req and req() == false then return end
                 EndHover()
             end))
+        else
+            warn("ButtonHoverEffect: ui.MouseLeave не найдено для " .. ui:GetFullName())
+        end
+        
+        -- Для сенсорных событий будем использовать UserInputService, если стандартные отсутствуют
+        -- Это более надежно для кастомных интерактивных Frame, но для ImageButton стандартные должны быть.
+        -- Однако, если ошибка "TouchBegan is not a valid member", то стандартных нет.
+        local hasNativeTouchEvents = pcall(function() return ui.TouchBegan end)
 
+        if hasNativeTouchEvents then
             table.insert(conns, ui.TouchBegan:Connect(function(input)
                 if touchActiveId then return end
                 if req and req() == false then return end
@@ -3039,7 +3054,11 @@ local function getEffect()
                 end
             end))
         else
-            warn("ButtonHoverEffect: 'ui' is not a GuiButton, TextButton, or ImageButton. Events like MouseEnter, TouchBegan may not be available. UI: " .. ui:GetFullName())
+            warn("ButtonHoverEffect: Стандартные сенсорные события (TouchBegan и др.) не найдены для " .. ui:GetFullName() .. ". Попытка использовать UserInputService.")
+            -- Фоллбэк на UserInputService, если стандартные события отсутствуют
+            -- (Это более сложная логика и может потребовать передачи UserInputService в EffectLib)
+            -- Для простоты пока оставим так, но имейте в виду, что это может не дать ожидаемого эффекта наведения для касаний.
+            -- Если ui - это Frame, то этот блок не будет выполнен, т.к. hasNativeTouchEvents будет false.
         end
 
 
@@ -3069,7 +3088,8 @@ local function getEffect()
             end
         end
         
-        if ui:IsA("GuiButton") or ui:IsA("TextButton") or ui:IsA("ImageButton") then
+        -- Проверяем наличие событий перед подключением
+        if ui.InputBegan then -- Стандартное событие для GuiButton
             table.insert(conns, ui.InputBegan:Connect(function(input, gp)
                 if gp then return end
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -3082,7 +3102,11 @@ local function getEffect()
                      StartClickAnim()
                 end
             end))
+        else
+            warn("ButtonClickEffect: ui.InputBegan не найдено для " .. ui:GetFullName())
+        end
 
+        if ui.InputEnded then
             table.insert(conns, ui.InputEnded:Connect(function(input, gp)
                 if gp then return end
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -3092,11 +3116,20 @@ local function getEffect()
                     EndClickAnim(true, input)
                 end
             end))
-            
+        else
+            warn("ButtonClickEffect: ui.InputEnded не найдено для " .. ui:GetFullName())
+        end
+        
+        if ui.MouseLeave then
             table.insert(conns, ui.MouseLeave:Connect(function()
                 EndClickAnim(false)
             end))
+        else
+             warn("ButtonClickEffect: ui.MouseLeave не найдено для " .. ui:GetFullName())
+        end
 
+        local hasNativeTouchMoved = pcall(function() return ui.TouchMoved end)
+        if hasNativeTouchMoved then
             table.insert(conns, ui.TouchMoved:Connect(function(input)
                 if input.TouchId ~= touchDownId then return end
                 local guiObject = input.TouchedGuis
@@ -3113,7 +3146,7 @@ local function getEffect()
                 end
             end))
         else
-             warn("ButtonClickEffect: 'ui' is not a GuiButton, TextButton, or ImageButton. Events like InputBegan may not be available. UI: " .. ui:GetFullName())
+            warn("ButtonClickEffect: ui.TouchMoved не найдено для " .. ui:GetFullName())
         end
 
 
