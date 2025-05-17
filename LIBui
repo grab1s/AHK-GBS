@@ -1,7 +1,7 @@
---- START OF FILE uiLIB.txt ---
-
+-- START OF MERGED uiLIB.txt
 local UILibrary = {}
 
+--// objGen from uiLIB(issue).txt (structural changes like ImageButton are kept)
 local function getObjGen()
     local objGen = {}
 
@@ -112,7 +112,7 @@ local function getObjGen()
                 Select_3 = Instance.new("ImageLabel"),
                 Current_3 = Instance.new("TextLabel"),
                 Objects = Instance.new("Folder"),
-                Category = Instance.new("ImageButton"), -- <<< ИЗМЕНЕНО НА ImageButton
+                Category = Instance.new("ImageButton"), -- <<< ИЗМЕНЕНО НА ImageButton (from issue.txt)
                 HoverFrame_5 = Instance.new("Frame"),
                 Content_4 = Instance.new("Frame"),
                 Image = Instance.new("ImageLabel"),
@@ -208,7 +208,7 @@ local function getObjGen()
                 UICorner_18 = Instance.new("UICorner"),
                 Notifications = Instance.new("Frame"),
                 UIListLayout_18 = Instance.new("UIListLayout"),
-                CategoryButton = Instance.new("ImageButton"), -- <<< ИЗМЕНЕНО НА ImageButton
+                CategoryButton = Instance.new("ImageButton"), -- <<< ИЗМЕНЕНО НА ImageButton (from issue.txt)
                 InnerContent = Instance.new("Frame"),
                 UIListLayout_19 = Instance.new("UIListLayout"),
                 Image_2 = Instance.new("ImageLabel"),
@@ -291,7 +291,7 @@ local function getObjGen()
                 Title_Label = Instance.new("TextLabel"),
                 Desc_Label = Instance.new("TextLabel"),
 
-                Objects = Instance.new("Folder")
+                Objects = Instance.new("Folder") -- Kept from issue.txt (was also in good.txt)
             }
 
 
@@ -342,7 +342,7 @@ local function getObjGen()
             Gui.Text.ZIndex = 112
             Gui.Text.Font = Enum.Font.GothamSemibold
             Gui.Text.Text = "BUTTON WITHOUT TITLE OR DESC"
-            Gui.Text.TextColor3 = Color3.fromRGB(181, 181, 181)
+            Gui.Text.TextColor3 = Color3.fromRGB(181, 181, 181) -- from issue.txt
             Gui.Text.TextScaled = true
             Gui.Text.TextSize = 14.000
             Gui.Text.TextWrapped = true
@@ -371,7 +371,7 @@ local function getObjGen()
             Gui.Selection.Name = "Selection"
             Gui.Selection.Parent = Gui.Checkbox
             Gui.Selection.AnchorPoint = Vector2.new(0.5, 0.5)
-            Gui.Selection.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            Gui.Selection.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- from issue.txt (good was 83,87,158)
             Gui.Selection.BackgroundTransparency = 1.000
             Gui.Selection.BorderSizePixel = 0
             Gui.Selection.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -397,7 +397,7 @@ local function getObjGen()
             Gui.HoverFrame_2.ZIndex = 111
 
             Gui.UICorner_4.CornerRadius = UDim.new(0.200000003, 0)
-            Gui.UICorner_4.Parent = Gui.Checkbox
+            Gui.UICorner_4.Parent = Gui.Checkbox -- issue.txt (good.txt was HoverFrame_2)
 
             Gui.Toggle.Name = "Toggle"
             Gui.Toggle.Parent = Gui.Cheats
@@ -537,7 +537,7 @@ local function getObjGen()
             Gui.Text_2.ClearTextOnFocus = false
             Gui.Text_2.Font = Enum.Font.GothamSemibold
             Gui.Text_2.Text = ""
-            Gui.Text_2.TextColor3 = Color3.fromRGB(181, 181, 181)
+            Gui.Text_2.TextColor3 = Color3.fromRGB(181, 181, 181) -- from issue.txt
             Gui.Text_2.TextScaled = true
             Gui.Text_2.TextSize = 14.000
             Gui.Text_2.TextWrapped = true
@@ -587,7 +587,7 @@ local function getObjGen()
             Gui.Text_3.ZIndex = 112
             Gui.Text_3.Font = Enum.Font.GothamSemibold
             Gui.Text_3.Text = "..."
-            Gui.Text_3.TextColor3 = Color3.fromRGB(181, 181, 181)
+            Gui.Text_3.TextColor3 = Color3.fromRGB(181, 181, 181) -- from issue.txt
             Gui.Text_3.TextSize = 14.000
 
             Gui.HoverFrame_4.Name = "HoverFrame"
@@ -662,7 +662,7 @@ local function getObjGen()
             Gui.Label.ZIndex = 112
             Gui.Label.Font = Enum.Font.Gotham
             Gui.Label.Text = ""
-            Gui.Label.TextColor3 = Color3.fromRGB(181, 181, 181)
+            Gui.Label.TextColor3 = Color3.fromRGB(181, 181, 181) -- from issue.txt
             Gui.Label.TextSize = 11.000
             Gui.Label.TextWrapped = true
 
@@ -800,7 +800,7 @@ local function getObjGen()
             Gui.Text_5.ZIndex = 111
             Gui.Text_5.Font = Enum.Font.GothamSemibold
             Gui.Text_5.Text = "10"
-            Gui.Text_5.TextColor3 = Color3.fromRGB(181, 181, 181)
+            Gui.Text_5.TextColor3 = Color3.fromRGB(181, 181, 181) -- from issue.txt
             Gui.Text_5.TextSize = 14.000
             Gui.Text_5.TextScaled = true
             Gui.Text_5.TextWrapped = true
@@ -864,7 +864,7 @@ local function getObjGen()
             Gui.Text_6.ZIndex = 113
             Gui.Text_6.Font = Enum.Font.Gotham
             Gui.Text_6.Text = "None"
-            Gui.Text_6.TextColor3 = Color3.fromRGB(181, 181, 181)
+            Gui.Text_6.TextColor3 = Color3.fromRGB(181, 181, 181) -- from issue.txt
             Gui.Text_6.TextScaled = true
             Gui.Text_6.TextSize = 14.000
             Gui.Text_6.TextWrapped = true
@@ -900,7 +900,7 @@ local function getObjGen()
             Gui.Icon_2.Size = UDim2.new(1, 0, 1, 0)
             Gui.Icon_2.ZIndex = 111
             Gui.Icon_2.Image = "rbxassetid://7072706663"
-            Gui.Icon_2.ImageColor3 = Color3.fromRGB(181, 181, 181)
+            Gui.Icon_2.ImageColor3 = Color3.fromRGB(181, 181, 181) -- from issue.txt
             Gui.Icon_2.ScaleType = Enum.ScaleType.Fit
 
             Gui.UIAspectRatioConstraint_5.Parent = Gui.Holder
@@ -1014,7 +1014,7 @@ local function getObjGen()
             Gui.Select.Size = UDim2.new(1, 0, 1, 0)
             Gui.Select.ZIndex = 120
             Gui.Select.Image = "rbxassetid://7890831727"
-            Gui.Select.ImageColor3 = Color3.fromRGB(255, 255, 255)
+            Gui.Select.ImageColor3 = Color3.fromRGB(255, 255, 255) -- from issue.txt (good was 83,87,158)
             Gui.Select.ImageTransparency = 1.000
             Gui.Select.ScaleType = Enum.ScaleType.Slice
             Gui.Select.SliceCenter = Rect.new(512, 512, 512, 512)
@@ -1051,7 +1051,7 @@ local function getObjGen()
             Gui.Select_2.Size = UDim2.new(1, 0, 1, 0)
             Gui.Select_2.ZIndex = 121
             Gui.Select_2.Image = "rbxassetid://7890925834"
-            Gui.Select_2.ImageColor3 = Color3.fromRGB(255, 255, 255)
+            Gui.Select_2.ImageColor3 = Color3.fromRGB(255, 255, 255) -- from issue.txt (good was 83,87,158)
             Gui.Select_2.ImageTransparency = 1.000
             Gui.Select_2.ScaleType = Enum.ScaleType.Slice
             Gui.Select_2.SliceCenter = Rect.new(512, 512, 512, 512)
@@ -1101,7 +1101,7 @@ local function getObjGen()
             Gui.Select_3.Size = UDim2.new(1, 0, 1, 0)
             Gui.Select_3.ZIndex = 121
             Gui.Select_3.Image = "http://www.roblox.com/asset/?id=8374820043"
-            Gui.Select_3.ImageColor3 = Color3.fromRGB(255, 255, 255)
+            Gui.Select_3.ImageColor3 = Color3.fromRGB(255, 255, 255) -- from issue.txt (good was 83,87,158)
             Gui.Select_3.ImageTransparency = 1.000
             Gui.Select_3.ScaleType = Enum.ScaleType.Slice
             Gui.Select_3.SliceCenter = Rect.new(512, 512, 512, 512)
@@ -1123,11 +1123,11 @@ local function getObjGen()
             Gui.Objects.Name = "Objects"
             Gui.Objects.Parent = Gui.UIObjects
 
-            --[[ Gui.Category = Instance.new("Frame") -- Закомментировано, так как изменено на ImageButton ]]
+            -- Gui.Category (ImageButton specific properties from issue.txt)
             Gui.Category.Name = "Category"
             Gui.Category.Parent = Gui.Objects
-            Gui.Category.AutoButtonColor = false -- Добавлено
-            Gui.Category.Selectable = true -- Добавлено
+            Gui.Category.AutoButtonColor = false -- Added from issue.txt
+            Gui.Category.Selectable = true -- Added from issue.txt
             Gui.Category.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
             Gui.Category.BackgroundTransparency = 1.000
             Gui.Category.BorderSizePixel = 0
@@ -1219,7 +1219,7 @@ local function getObjGen()
             Gui.Watermark.BackgroundTransparency = 1.000
             Gui.Watermark.Size = UDim2.new(0.5, 0, 0.0199999996, 0)
             Gui.Watermark.Font = Enum.Font.Gotham
-            Gui.Watermark.Text = "visuals | nil | nil"
+            Gui.Watermark.Text = "visuals | nil | nil" -- from issue.txt
             Gui.Watermark.TextColor3 = Color3.fromRGB(255, 255, 255)
             Gui.Watermark.TextSize = 14.000
             Gui.Watermark.TextStrokeTransparency = 0.800
@@ -1381,8 +1381,8 @@ local function getObjGen()
             Gui.Logo.LayoutOrder = -5
             Gui.Logo.Size = UDim2.new(1, 0, 0.100000001, 0)
             Gui.Logo.ZIndex = 122
-            Gui.Logo.Image = "rbxassetid://123705956220882"
-            Gui.Logo.ImageColor3 = Color3.fromRGB(255, 255, 255)
+            Gui.Logo.Image = "rbxassetid://123705956220882" -- from issue.txt (good was rbxassetid://8343875413)
+            Gui.Logo.ImageColor3 = Color3.fromRGB(255, 255, 255) -- from issue.txt (good was 134,142,255)
             Gui.Logo.ScaleType = Enum.ScaleType.Fit
             Gui.UIGradient_5.Color =
                 ColorSequence.new {
@@ -1958,11 +1958,11 @@ local function getObjGen()
             Gui.UIListLayout_18.SortOrder = Enum.SortOrder.LayoutOrder
             Gui.UIListLayout_18.VerticalAlignment = Enum.VerticalAlignment.Bottom
 
-            --[[ Gui.CategoryButton = Instance.new("Frame") -- Закомментировано, так как изменено на ImageButton ]]
+            -- Gui.CategoryButton (ImageButton specific properties from issue.txt)
             Gui.CategoryButton.Name = "CategoryButton"
             Gui.CategoryButton.Parent = Gui.Objects
-            Gui.CategoryButton.AutoButtonColor = false -- Добавлено
-            Gui.CategoryButton.Selectable = true -- Добавлено
+            Gui.CategoryButton.AutoButtonColor = false -- Added from issue.txt
+            Gui.CategoryButton.Selectable = true -- Added from issue.txt
             Gui.CategoryButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
             Gui.CategoryButton.BackgroundTransparency = 1.000
             Gui.CategoryButton.BorderSizePixel = 0
@@ -2184,7 +2184,7 @@ local function getObjGen()
             Gui.Text_8.ZIndex = 111
             Gui.Text_8.Font = Enum.Font.GothamSemibold
             Gui.Text_8.Text = "Title"
-            Gui.Text_8.TextColor3 = Color3.fromRGB(181, 181, 181)
+            Gui.Text_8.TextColor3 = Color3.fromRGB(181, 181, 181) -- from issue.txt
             Gui.Text_8.TextSize = 18.000
             Gui.Text_8.TextWrapped = true
             Gui.Text_8.TextXAlignment = Enum.TextXAlignment.Left
@@ -2593,7 +2593,7 @@ end
 
 local objectGenerator = getObjGen()
 
-
+--// initUtils from uiLIB(issue).txt (seems fine, no touch specific logic)
 local function initUtils()
     local utils = {}
     local camera = workspace.Camera.ViewportSize
@@ -2717,29 +2717,35 @@ local function initUtils()
 
 end
 
+--// getDragIt from uiLIB(good).txt
 local function getDragIt()
     local RS = game:GetService("RunService")
     local IsClient = RS:IsClient()
 
     if IsClient then
         local UIS = game:GetService("UserInputService")
+        local TWS = game:GetService("TweenService")
         local Utils = initUtils()
+
         local Player = game.Players.LocalPlayer
         local Mouse = Player:GetMouse()
-
         local drag = {}
         local Events = {}
+        local Holding = false
+        local Hovering = false
+        local camera = workspace.Camera.ViewportSize
+        local centre = Vector2.new(camera.X / 2, camera.Y / 2)
+        local Tween
         local RenderConnection
+
         local GuiObject = {}
         GuiObject.__index = GuiObject
         local Objects = {}
-        local Settings = { Priority = "Snapping" }
-
-        local dragData = {
-            isDragging = false,
-            inputObject = nil,
-            lastPosition = nil,
-            draggedObjectInstance = nil
+        local Settings = {
+            HoverIcon = nil,
+            DraggingIcon = nil,
+            PriorityIcon = nil, 
+            Priority = "Snapping" 
         }
 
         function GuiObject:SetData(Data)
@@ -2753,20 +2759,15 @@ local function getDragIt()
             if Index then
                 if Events[self] then
                     for _, v in ipairs(Events[self]) do
-                        if v then v:Destroy() end
+                        if v then
+                            v:Destroy()
+                        end
                     end
                     Events[self] = nil
                 end
-                if self._InputCheck then self._InputCheck:Disconnect(); self._InputCheck = nil; end
-                if self._InputChangedConnection then self._InputChangedConnection:Disconnect(); self._InputChangedConnection = nil; end
-
-
-                if dragData.draggedObjectInstance == self then
-                    dragData.isDragging = false
-                    dragData.inputObject = nil
-                    dragData.lastPosition = nil
-                    dragData.draggedObjectInstance = nil
-                    if RenderConnection then RenderConnection:Disconnect(); RenderConnection = nil; end
+                if self._InputCheck then
+                    self._InputCheck:Disconnect()
+                    self._InputCheck = nil
                 end
 
                 table.remove(Objects, Index)
@@ -2776,6 +2777,52 @@ local function getDragIt()
                 end
             end
         end
+
+        function GuiObject:GetDistanceFromUI(UI)
+            local aPos = UI.AbsolutePosition - centre
+            local bPos = self.Object.AbsolutePosition - centre
+            local bPos = aPos - bPos
+
+            local Dot = math.deg(math.atan2(bPos.X, bPos.Y))
+
+            local Side = Utils.Side(Dot)
+            if Side == "Up" then
+            elseif Side == "Down" then
+            elseif Side == "Left" then
+            elseif Side == "Right" then
+            end
+        end
+
+        coroutine.wrap(
+            function()
+                while Settings.HoverIcon do
+                    RS.RenderStepped:Wait()
+                    if Settings.PriorityIcon == "Hover" or not Holding then
+                        local CanSet = true
+                        for _, v in ipairs(Objects) do
+                            if v.CanDrag then
+                                CanSet = false
+                                break
+                            end
+                        end
+
+                        if CanSet then
+                            local MousePos = Vector2.new(Mouse.X, Mouse.Y)
+                            local Guis = Player.PlayerGui:GetGuiObjectsAtPosition(MousePos.X, MousePos.Y)
+                            if #Guis >= 1 then
+                                Hovering = true
+                                if Settings.HoverIcon then
+                                    Mouse.Icon = Settings.HoverIcon
+                                end
+                            else
+                                Hovering = false
+                                Mouse.Icon = ""
+                            end
+                        end
+                    end
+                end
+            end
+        )()
 
         drag.Drag = function(Gui, setTo, Boundary, Clippings, AutoClip, ResponseTime, Snappings)
             local self = {}
@@ -2788,188 +2835,234 @@ local function getDragIt()
             self.AutoClip = AutoClip
             self.ResponseTime = (ResponseTime and math.abs(ResponseTime))
             self.Snappings = Snappings
-            self.Snap = nil
+            self.Snapped = nil
 
-            self._InputCheck = setTo.InputBegan:Connect(function(Input)
-                if Input.UserInputType == Enum.UserInputType.MouseButton1 or (Input.UserInputType == Enum.UserInputType.Touch and Input.UserInputState == Enum.UserInputState.Begin) then
-                    local canSetDrag = true
-                    for _, v_check in ipairs(Objects) do
-                        if v_check.isCurrentlyBeingDragged then
-                            canSetDrag = false
-                            break
+            self._InputCheck =
+                setTo.InputBegan:Connect(
+                function(Input)
+                    if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        local CanSet = false
+                        for _, v in ipairs(Objects) do
+                            if v.CanDrag then
+                                CanSet = true
+                                break
+                            end
+                        end
+
+                        local Event = Events[self]
+
+                        if not CanSet then
+                            self.CanDrag = true
+                            Event[1]:Fire()
+
+                            local Connection
+                            Connection =
+                                Input.Changed:Connect(
+                                function()
+                                    if Input.UserInputState == Enum.UserInputState.End then
+                                        self.CanDrag = false
+                                        Event[2]:Fire()
+                                        Connection:Disconnect()
+                                    end
+                                end
+                            )
                         end
                     end
-                    if dragData.isDragging then canSetDrag = false end
-
-
-                    if canSetDrag then
-                        self.CanDrag = true
-                        Events[self][1]:Fire()
-
-                        if self._InputChangedConnection then self._InputChangedConnection:Disconnect() end
-                        self._InputChangedConnection = Input.Changed:Connect(function()
-                            if Input.UserInputState == Enum.UserInputState.End then
-                                self.CanDrag = false
-                                self.isCurrentlyBeingDragged = false
-                                Events[self][2]:Fire()
-                                if self._InputChangedConnection then self._InputChangedConnection:Disconnect(); self._InputChangedConnection = nil; end
-                            end
-                        end)
-                    end
                 end
-            end)
+            )
 
             local DragStart = Instance.new("BindableEvent")
             local DragEnd = Instance.new("BindableEvent")
+
             self.DragStart = DragStart.Event
             self.DragEnd = DragEnd.Event
+
             Events[self] = {DragStart, DragEnd}
+
             setmetatable(self, GuiObject)
+
             table.insert(Objects, self)
+
             return self
         end
 
-        UIS.InputBegan:Connect(function(Input, gp)
-            if gp then return end
-
-            if Input.UserInputType == Enum.UserInputType.MouseButton1 or (Input.UserInputType == Enum.UserInputType.Touch and Input.UserInputState == Enum.UserInputState.Begin) then
-                local objectToDrag = nil
-                for _, v_obj in ipairs(Objects) do
-                    if v_obj.CanDrag then
-                        objectToDrag = v_obj
-                        break
-                    end
+        drag.InputBegan =
+            UIS.InputBegan:Connect(
+            function(Input, gp)
+                if gp then
+                    return
                 end
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    for _, v in ipairs(Objects) do
+                        if v.CanDrag then
+                            v.OldPosition = Vector2.new(Mouse.X, Mouse.Y)
+                        end
+                    end
+                    RenderConnection =
+                        RS.RenderStepped:Connect(
+                        function(DT)
+                            local MousePos = Vector2.new(Mouse.X, Mouse.Y)
+                            local Possible = 0
+                            for _, v in ipairs(Objects) do
+                                if v.CanDrag then
+                                    Possible = Possible + 1
+                                    local Position = v.Object.Position
+                                    local Change = MousePos - v.OldPosition
 
-                if objectToDrag and not dragData.isDragging then
-                    dragData.isDragging = true
-                    dragData.inputObject = Input
-                    dragData.lastPosition = Input.Position
-                    dragData.draggedObjectInstance = objectToDrag
-                    objectToDrag.OldPosition = Input.Position
-                    objectToDrag.isCurrentlyBeingDragged = true
+                                    local ScaleX, ScaleY = Utils.ScaleToOffset({Position.X.Scale, Position.Y.Scale})
+                                    local NewPos =
+                                        UDim2.new(
+                                        0,
+                                        Position.X.Offset + Change.X + ScaleX,
+                                        0,
+                                        Position.Y.Offset + Change.Y + ScaleY
+                                    )
 
+                                    if v.Boundary then
+                                        local X, Y = Utils.CheckBoundary(v.Boundary, v.Object, Change)
+                                        NewPos = UDim2.new(0, X, 0, Y)
+                                    end
+                                    local Alpha
+                                    if v.ResponseTime then
+                                        Alpha = DT * 7 * v.ResponseTime
+                                    else
+                                        Alpha = 1
+                                    end
+                                    v._Target = NewPos
+                                    v.Object.Position = v.Object.Position:Lerp(NewPos, Alpha)
+                                    v.OldPosition = v.OldPosition:Lerp(MousePos, Alpha)
 
-                    if not RenderConnection then
-                        RenderConnection = RS.RenderStepped:Connect(function(DT)
-                            if not dragData.isDragging or not dragData.inputObject or not dragData.draggedObjectInstance then
-                                if RenderConnection then RenderConnection:Disconnect(); RenderConnection = nil; end
-                                return
-                            end
+                                    local Guis = Player.PlayerGui:GetGuiObjectsAtPosition(MousePos.X, MousePos.Y)
+                                    local Sorted = Utils.SortTable(v.Clippings, Guis, v.Object)
+                                    if Sorted then
+                                        v.Clipped = Sorted
+                                    else
+                                        if not v.AutoClip then
+                                            v.Clipped = nil
+                                        end
+                                    end
+                                    if v.Snappings then
+                                        local Closest
+                                        local ChosenSnap
+                                        for _, snap in ipairs(v.Snappings) do
+                                            if not Closest then
+                                                Closest =
+                                                    (v.Object.AbsolutePosition - snap.AbsolutePosition).Magnitude
+                                                ChosenSnap = snap
+                                            else
+                                                local CurrentMag =
+                                                    (v.Object.AbsolutePosition - snap.AbsolutePosition).Magnitude
+                                                if CurrentMag < Closest then
+                                                    Closest = CurrentMag
+                                                    ChosenSnap = snap
+                                                end
+                                            end
+                                        end
+                                        if Closest then
+                                            local X, Y =
+                                                Utils.ScaleToOffset(
+                                                {ChosenSnap.Size.X.Scale, ChosenSnap.Size.Y.Scale}
+                                            )
+                                            X = X + ChosenSnap.Size.X.Offset
+                                            Y = Y + ChosenSnap.Size.X.Offset
 
-                            local currentPointerPosition
-                            if dragData.inputObject.UserInputType == Enum.UserInputType.MouseButton1 then
-                                currentPointerPosition = UIS:GetMouseLocation()
-                            elseif dragData.inputObject.UserInputType == Enum.UserInputType.Touch then
-                                local foundTouch = false
-                                for _, touch in ipairs(UIS:GetTouches()) do
-                                    if touch.TouchId == dragData.inputObject.TouchId then
-                                        currentPointerPosition = touch.Position
-                                        dragData.inputObject = touch
-                                        foundTouch = true
-                                        break
+                                            local Right =
+                                                (v.Object.AbsolutePosition -
+                                                (ChosenSnap.AbsolutePosition + Vector2.new(X))).Magnitude *
+                                                0.0264583333
+                                            local Left =
+                                                (v.Object.AbsolutePosition -
+                                                (ChosenSnap.AbsolutePosition - Vector2.new(X))).Magnitude *
+                                                0.0264583333
+                                            local Top =
+                                                (v.Object.AbsolutePosition -
+                                                (ChosenSnap.AbsolutePosition + Vector2.new(0, Y))).Magnitude *
+                                                0.0264583333
+                                            local Bottom =
+                                                (v.Object.AbsolutePosition -
+                                                (ChosenSnap.AbsolutePosition - Vector2.new(0, Y))).Magnitude *
+                                                0.0264583333
+
+                                            if
+                                                (Closest * 0.0264583333) <= 3.5 or Top <= 2.5 or Right <= 2.5 or
+                                                    Left <= 2.5 and Bottom <= 2.5
+                                                then 
+                                                v.Snap = ChosenSnap
+                                            else
+                                                v.Snap = nil
+                                            end
+                                        end
                                     end
                                 end
-                                if not foundTouch then
-                                    dragData.isDragging = false
-                                    if dragData.draggedObjectInstance then dragData.draggedObjectInstance.isCurrentlyBeingDragged = false end
-                                    if RenderConnection then RenderConnection:Disconnect(); RenderConnection = nil; end
-                                    return
-                                end
-                            else
-                                if RenderConnection then RenderConnection:Disconnect(); RenderConnection = nil; end
-                                return
                             end
-
-                            local v_active = dragData.draggedObjectInstance
-                            local pos_active = v_active.Object.Position
-                            local change_active = currentPointerPosition - v_active.OldPosition
-
-                            local scaleX_active, scaleY_active = Utils.ScaleToOffset({pos_active.X.Scale, pos_active.Y.Scale})
-                            local newPos_active = UDim2.new(
-                                0, pos_active.X.Offset + change_active.X + scaleX_active,
-                                0, pos_active.Y.Offset + change_active.Y + scaleY_active
-                            )
-
-                            if v_active.Boundary then
-                                local X, Y = Utils.CheckBoundary(v_active.Boundary, v_active.Object, change_active)
-                                newPos_active = UDim2.new(0, X, 0, Y)
+                            if
+                                Possible ~= 0 and (Settings.PriorityIcon == "Dragging" or not Hovering) and
+                                    Settings.DraggingIcon
+                                then
+                                Mouse.Icon = Settings.DraggingIcon
                             end
-                            local Alpha_active = v_active.ResponseTime and (DT * 7 * v_active.ResponseTime) or 1
+                        end
+                    )
+                end
+            end
+        )
 
-                            v_active._Target = newPos_active
-                            v_active.Object.Position = v_active.Object.Position:Lerp(newPos_active, Alpha_active)
-                            v_active.OldPosition = v_active.OldPosition:Lerp(currentPointerPosition, Alpha_active)
+        drag.InputEnd =
+            UIS.InputEnded:Connect(
+            function(Input)
+                if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if RenderConnection then
+                        RenderConnection:Disconnect()
+                        RenderConnection = nil
+                        Mouse.Icon = ""
+                        for _, v in ipairs(Objects) do
+                            coroutine.wrap(
+                                function()
+                                    if v.Clipped and (not v.Snap or Settings.Priority == "Clipping") then
+                                        if v.ResponseTime then
+                                            if v.ResponseTime > 0 then
+                                                for i = 1, 10 do
+                                                    RS.RenderStepped:Wait()
+                                                    v.Object.Position =
+                                                        v.Object.Position:Lerp(v.Clipped.Position, i / 10)
+                                                end
+                                            end
+                                        else
+                                            v.Object.Position = v.Clipped.Position
+                                        end
+                                        v.Object.Rotation = v.Clipped.Rotation
+                                    end
+                                    if v.Snap and (not v.Clipped or Settings.Priority == "Snapping") then
+                                        local Target = Utils.Snap(v.Snap, v.Object, v._Target)
+                                        if v.ResponseTime then
+                                            for i = 1, 10 do
+                                                RS.RenderStepped:Wait()
 
-                            local Guis = Player.PlayerGui:GetGuiObjectsAtPosition(currentPointerPosition.X, currentPointerPosition.Y)
-                            local Sorted = Utils.SortTable(v_active.Clippings, Guis, v_active.Object)
-                            if Sorted then v_active.Clipped = Sorted
-                            else if not v_active.AutoClip then v_active.Clipped = nil end end
-
-                            if v_active.Snappings then
-                                local Closest, ChosenSnap
-                                for _, snap in ipairs(v_active.Snappings) do
-                                    local CurrentMag = (v_active.Object.AbsolutePosition - snap.AbsolutePosition).Magnitude
-                                    if not Closest or CurrentMag < Closest then
-                                        Closest = CurrentMag; ChosenSnap = snap;
+                                                v.Object.Position = v.Object.Position:Lerp(Target, i / 10)
+                                            end
+                                        else
+                                            v.Object.Position = Target
+                                        end
+                                        v.Snap = nil
                                     end
                                 end
-                                if Closest and (Closest * 0.0264583333) <= 3.5 then v_active.Snap = ChosenSnap
-                                else v_active.Snap = nil end
+                            )()
+                            if v.CanDrag then
+                                v.OldPosition = nil
                             end
-                        end)
+                        end
                     end
                 end
             end
-        end)
-
-        UIS.InputEnded:Connect(function(Input)
-            if dragData.isDragging and dragData.inputObject and
-               (Input.UserInputType == dragData.inputObject.UserInputType) and
-               (  (Input.UserInputType == Enum.UserInputType.MouseButton1 and Input.UserInputState == Enum.UserInputState.End) or
-                  (Input.UserInputType == Enum.UserInputType.Touch and Input.TouchId == dragData.inputObject.TouchId and Input.UserInputState == Enum.UserInputState.End)
-               )
-            then
-                if RenderConnection then RenderConnection:Disconnect(); RenderConnection = nil; end
-
-                local v_active_end = dragData.draggedObjectInstance
-                if v_active_end then
-                    coroutine.wrap(function()
-                        if v_active_end.Clipped and (not v_active_end.Snap or Settings.Priority == "Clipping") then
-                            local targetPos = v_active_end.Clipped.Position
-                            if v_active_end.ResponseTime and v_active_end.ResponseTime > 0 then
-                                for i = 1, 10 do RS.RenderStepped:Wait(); v_active_end.Object.Position = v_active_end.Object.Position:Lerp(targetPos, i/10) end
-                            else
-                                v_active_end.Object.Position = targetPos
-                            end
-                            v_active_end.Object.Rotation = v_active_end.Clipped.Rotation
-                        end
-                        if v_active_end.Snap and (not v_active_end.Clipped or Settings.Priority == "Snapping") then
-                            local Target = Utils.Snap(v_active_end.Snap, v_active_end.Object, v_active_end._Target)
-                             if v_active_end.ResponseTime and v_active_end.ResponseTime > 0 then
-                                for i = 1, 10 do RS.RenderStepped:Wait(); v_active_end.Object.Position = v_active_end.Object.Position:Lerp(Target, i/10) end
-                            else
-                                v_active_end.Object.Position = Target
-                            end
-                            v_active_end.Snap = nil
-                        end
-                    end)()
-                    v_active_end.OldPosition = nil
-                    v_active_end.isCurrentlyBeingDragged = false
-                end
-
-                dragData.isDragging = false
-                dragData.inputObject = nil
-                dragData.lastPosition = nil
-                dragData.draggedObjectInstance = nil
-            end
-        end)
+        )
         return drag
     end
 end
 
+
 local Draggable = getDragIt()
 
+--// getEffect from uiLIB(issue).txt, cleaned of touch support
 local function getEffect()
     local module = {}
     local TweenService = game:GetService("TweenService")
@@ -2979,12 +3072,12 @@ local function getEffect()
         local HoverEvent = Instance.new("BindableEvent")
         local conns = {}
         local hovering = false
-        local touchActiveId = nil
+        -- local touchActiveId = nil -- REMOVED
 
         local function StartHover()
             if hovering then return end
             hovering = true
-            if ui:FindFirstChild("HoverFrame") then -- Убедимся, что HoverFrame существует
+            if ui:FindFirstChild("HoverFrame") then 
                 TweenService:Create(ui.HoverFrame, TI_effect, { BackgroundTransparency = .5 }):Play()
             end
             HoverEvent:Fire()
@@ -2993,14 +3086,13 @@ local function getEffect()
         local function EndHover()
             if not hovering then return end
             hovering = false
-            touchActiveId = nil
-            if ui:FindFirstChild("HoverFrame") then -- Убедимся, что HoverFrame существует
+            -- touchActiveId = nil -- REMOVED
+            if ui:FindFirstChild("HoverFrame") then 
                 TweenService:Create(ui.HoverFrame, TI_effect, { BackgroundTransparency = 1 }):Play()
             end
         end
 
-        -- Проверяем наличие событий перед подключением
-        if ui.MouseEnter then -- Стандартное событие для GuiButton
+        if ui.MouseEnter then 
             table.insert(conns, ui.MouseEnter:Connect(function()
                 if req and req() == false then return end
                 StartHover()
@@ -3018,49 +3110,7 @@ local function getEffect()
             warn("ButtonHoverEffect: ui.MouseLeave не найдено для " .. ui:GetFullName())
         end
         
-        -- Для сенсорных событий будем использовать UserInputService, если стандартные отсутствуют
-        -- Это более надежно для кастомных интерактивных Frame, но для ImageButton стандартные должны быть.
-        -- Однако, если ошибка "TouchBegan is not a valid member", то стандартных нет.
-        local hasNativeTouchEvents = pcall(function() return ui.TouchBegan end)
-
-        if hasNativeTouchEvents then
-            table.insert(conns, ui.TouchBegan:Connect(function(input)
-                if touchActiveId then return end
-                if req and req() == false then return end
-                touchActiveId = input.TouchId
-                StartHover()
-            end))
-
-            table.insert(conns, ui.TouchEnded:Connect(function(input)
-                if input.TouchId ~= touchActiveId then return end
-                if req and req() == false then return end
-                EndHover()
-            end))
-
-            table.insert(conns, ui.TouchMoved:Connect(function(input)
-                if input.TouchId ~= touchActiveId or not hovering then return end
-                if req and req() == false then return end
-
-                local guiObject = input.TouchedGuis
-                local isStillOver = false
-                for _,g in ipairs(guiObject) do
-                    if g == ui then
-                        isStillOver = true
-                        break
-                    end
-                end
-                if not isStillOver then
-                    EndHover()
-                end
-            end))
-        else
-            warn("ButtonHoverEffect: Стандартные сенсорные события (TouchBegan и др.) не найдены для " .. ui:GetFullName() .. ". Попытка использовать UserInputService.")
-            -- Фоллбэк на UserInputService, если стандартные события отсутствуют
-            -- (Это более сложная логика и может потребовать передачи UserInputService в EffectLib)
-            -- Для простоты пока оставим так, но имейте в виду, что это может не дать ожидаемого эффекта наведения для касаний.
-            -- Если ui - это Frame, то этот блок не будет выполнен, т.к. hasNativeTouchEvents будет false.
-        end
-
+        -- REMOVED ALL TOUCH EVENT HANDLERS (TouchBegan, TouchEnded, TouchMoved)
 
         return {
             Event = HoverEvent.Event,
@@ -3075,7 +3125,7 @@ local function getEffect()
         local ClickEvent = Instance.new("BindableEvent")
         local conns = {}
         local originalTransparency = ui.BackgroundTransparency
-        local touchDownId = nil
+        -- local touchDownId = nil -- REMOVED
 
         local function StartClickAnim()
             TweenService:Create(ui, TI_effect, { BackgroundTransparency = math.max(0, originalTransparency - 0.3) }):Play()
@@ -3088,18 +3138,17 @@ local function getEffect()
             end
         end
         
-        -- Проверяем наличие событий перед подключением
-        if ui.InputBegan then -- Стандартное событие для GuiButton
+        if ui.InputBegan then 
             table.insert(conns, ui.InputBegan:Connect(function(input, gp)
                 if gp then return end
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     if req and req(input) == false then return end
                     StartClickAnim()
-                elseif input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin then
-                     if touchDownId then return end
-                     if req and req(input) == false then return end
-                     touchDownId = input.TouchId
-                     StartClickAnim()
+                -- elseif input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin then -- REMOVED
+                --      if touchDownId then return end
+                --      if req and req(input) == false then return end
+                --      touchDownId = input.TouchId
+                --      StartClickAnim()
                 end
             end))
         else
@@ -3111,9 +3160,9 @@ local function getEffect()
                 if gp then return end
                 if input.UserInputType == Enum.UserInputType.MouseButton1 then
                     EndClickAnim(true, input)
-                elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == touchDownId then
-                    touchDownId = nil
-                    EndClickAnim(true, input)
+                -- elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == touchDownId then -- REMOVED
+                --     touchDownId = nil
+                --     EndClickAnim(true, input)
                 end
             end))
         else
@@ -3128,28 +3177,8 @@ local function getEffect()
              warn("ButtonClickEffect: ui.MouseLeave не найдено для " .. ui:GetFullName())
         end
 
-        local hasNativeTouchMoved = pcall(function() return ui.TouchMoved end)
-        if hasNativeTouchMoved then
-            table.insert(conns, ui.TouchMoved:Connect(function(input)
-                if input.TouchId ~= touchDownId then return end
-                local guiObject = input.TouchedGuis
-                local isStillOver = false
-                for _,g in ipairs(guiObject) do
-                    if g == ui then
-                        isStillOver = true
-                        break
-                    end
-                end
-                if not isStillOver then
-                    touchDownId = nil
-                    EndClickAnim(false)
-                end
-            end))
-        else
-            warn("ButtonClickEffect: ui.TouchMoved не найдено для " .. ui:GetFullName())
-        end
-
-
+        -- REMOVED TouchMoved connection block
+        
         return {
             Event = ClickEvent.Event,
             Disconnect = function()
@@ -3162,7 +3191,10 @@ local function getEffect()
     return module
 end
 
+
 local EffectLib = getEffect()
+
+--// CircleClick from uiLIB(issue).txt (handles optional InputObject, which is good)
 local CircleClick = function(Button, InputObject)
     local circle = Instance.new("Frame");
     Instance.new("UICorner", circle);
@@ -3175,10 +3207,23 @@ local CircleClick = function(Button, InputObject)
     if InputObject and InputObject.Position then
         clickPos = InputObject.Position
     else
-        clickPos = game.Players.LocalPlayer:GetMouse().Hit.Position -- Fallback, но в идеале InputObject всегда должен быть
+        -- Fallback for PC when InputObject might not be passed from older event handlers
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        clickPos = Vector2.new(mouse.X, mouse.Y) 
     end
 
-    circle.Position = UDim2.new(0, clickPos.X - Button.AbsolutePosition.X, 0, clickPos.Y - Button.AbsolutePosition.Y);
+    -- Ensure clickPos is relative to the Button's parent for correct positioning
+    local absoluteClickPos = clickPos 
+    if InputObject and InputObject.Position then -- InputObject.Position is usually screen space
+         absoluteClickPos = clickPos 
+    else -- GetMouse().X/Y is also screen space
+         absoluteClickPos = clickPos
+    end
+    
+    local relativePos = Button.AbsolutePosition
+    local finalPos = UDim2.new(0, absoluteClickPos.X - relativePos.X, 0, absoluteClickPos.Y - relativePos.Y)
+
+    circle.Position = finalPos
     circle.Size = UDim2.new(0, 1, 0, 1);
     circle.Transparency = .8;
     circle.ZIndex = 999
@@ -3194,6 +3239,7 @@ local CircleClick = function(Button, InputObject)
     local tween = game:GetService("TweenService"):Create(circle, TweenInfo.new(.4, Enum.EasingStyle.Exponential, Enum.EasingDirection.Out), finalGoal);
     tween:Play();
 end
+
 
 local function getLayoutOrder(UI)
     local layoutTable = {0}
@@ -3404,7 +3450,7 @@ function UILibrary.Window:Notification(sett)
         if gp then return end
         if input.UserInputType == Enum.UserInputType.MouseMovement then
             TweenService:Create(Notif.Content.Buttons.Close, TI, { ImageColor3 = Color3.fromRGB(181, 181, 181) }):Play()
-        elseif input.UserInputType == Enum.UserInputType.MouseButton1 or (input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin) then
+        elseif input.UserInputType == Enum.UserInputType.MouseButton1 then -- Removed touch
             expire()
         end
     end))
@@ -3557,7 +3603,7 @@ function UILibrary.Window:Prompt(sett)
         if gp then return end
         if input.UserInputType == Enum.UserInputType.MouseMovement then
             TweenService:Create(Close.Button, TI, { ImageColor3 = Color3.fromRGB(181, 181, 181) }):Play()
-        elseif input.UserInputType == Enum.UserInputType.MouseButton1 or (input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin) then
+        elseif input.UserInputType == Enum.UserInputType.MouseButton1 then -- Removed touch
             expire()
         end
     end))
@@ -3573,7 +3619,7 @@ function UILibrary.Window:Prompt(sett)
         if gp then return end
         if input.UserInputType == Enum.UserInputType.MouseMovement then
             TweenService:Create(Accept.Button, TI, { ImageColor3 = Color3.fromRGB(181, 181, 181) }):Play()
-        elseif input.UserInputType == Enum.UserInputType.MouseButton1 or (input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin) then
+        elseif input.UserInputType == Enum.UserInputType.MouseButton1 then -- Removed touch
             selection = true
             expire()
         end
@@ -3633,7 +3679,7 @@ function UILibrary.Window:ChangeCategory(new)
             Object.Content.Image,
             TI,
             {
-                ImageColor3 = Color3.fromRGB(255, 255, 255)
+                ImageColor3 = Color3.fromRGB(255, 255, 255) -- from issue.txt (good.txt was 83,87,158)
             }
         ):Play()
 
@@ -3641,7 +3687,7 @@ function UILibrary.Window:ChangeCategory(new)
             Object.Content.Title,
             TI,
             {
-                TextColor3 = Color3.fromRGB(255, 255, 255)
+                TextColor3 = Color3.fromRGB(255, 255, 255) -- from issue.txt (good.txt was 83,87,158)
             }
         ):Play()
 
@@ -3729,7 +3775,7 @@ function UILibrary.Window:ChangeCategorySelection(name)
             Object.InnerContent.Image,
             TI,
             {
-                ImageColor3 = Color3.fromRGB(255, 255, 255)
+                ImageColor3 = Color3.fromRGB(255, 255, 255) -- from issue.txt (good.txt was 83,87,158)
             }
         ):Play()
 
@@ -3737,7 +3783,7 @@ function UILibrary.Window:ChangeCategorySelection(name)
             Object.InnerContent.Title,
             TI,
             {
-                TextColor3 = Color3.fromRGB(255, 255, 255)
+                TextColor3 = Color3.fromRGB(255, 255, 255) -- from issue.txt (good.txt was 83,87,158)
             }
         ):Play()
 
@@ -3776,7 +3822,7 @@ end
 
 function UILibrary.Window:Category(name, icon)
     local catFolder = self.MainUI.MainUI.Sidebar.ContentHolder.Cheats.CheatHolder
-    local category = objectGenerator.new("Category")
+    local category = objectGenerator.new("Category") -- This is now an ImageButton as per issue.txt
 
     if not (category:IsA("GuiButton") or category:IsA("TextButton") or category:IsA("ImageButton")) then
         warn("UILibrary.Window:Category - ОШИБКА: 'category' ("..category.Name..") не является интерактивным Gui элементом. Эффекты могут не работать. Проверьте шаблон 'Category' в objectGenerator.")
@@ -3802,8 +3848,8 @@ function UILibrary.Window:Category(name, icon)
 
     local Click = EffectLib.ButtonClickEffect(category)
 
-    Click.Event:Connect(function(inputObj)
-        CircleClick(category, inputObj)
+    Click.Event:Connect(function(inputObj) -- inputObj is passed from ButtonClickEffect
+        CircleClick(category, inputObj) -- Use inputObj for CircleClick
         self:ChangeCategory(name)
     end)
 
@@ -3824,7 +3870,7 @@ end
 
 function UILibrary.Category:Button(name, icon)
     local contentholder = self.contentHolder
-    local button = objectGenerator.new("CategoryButton")
+    local button = objectGenerator.new("CategoryButton") -- This is now an ImageButton as per issue.txt
 
     if not (button:IsA("GuiButton") or button:IsA("TextButton") or button:IsA("ImageButton")) then
         warn("UILibrary.Category:Button - ОШИБКА: 'button' ("..button.Name..") не является интерактивным Gui элементом. Эффекты могут не работать. Проверьте шаблон 'CategoryButton' в objectGenerator.")
@@ -3867,8 +3913,8 @@ function UILibrary.Category:Button(name, icon)
 
     local Click = EffectLib.ButtonClickEffect(button)
 
-    Click.Event:Connect(function(inputObj)
-        CircleClick(button, inputObj)
+    Click.Event:Connect(function(inputObj) -- inputObj is passed from ButtonClickEffect
+        CircleClick(button, inputObj) -- Use inputObj for CircleClick
         if self.oldSelf.currentSelection.Name == self.categoryUI.Name then
             self.oldSelf:ChangeCategorySelection(name)
         end
@@ -3890,7 +3936,7 @@ function UILibrary.Category:Button(name, icon)
     }, UILibrary.Button)
 end
 
-function UILibrary.Button:Section(name, side, options)
+function UILibrary.Button:Section(name, side, options) -- options param from issue.txt
     local SectionInstance = objectGenerator.new("Section")
 
     if not SectionInstance then
@@ -3910,6 +3956,7 @@ function UILibrary.Button:Section(name, side, options)
 
     BorderFrame.SectionTitle.Text = name
 
+    -- Height logic from issue.txt
     local minPixelHeight = options and options.MinHeight or 0
     local maxPixelHeight = options and options.MaxHeight or math.huge
 
@@ -3925,7 +3972,7 @@ function UILibrary.Button:Section(name, side, options)
         if not border then return end
         local content = border:FindFirstChild("Content")
         if not content then return end
-        local listLayout = content:FindFirstChild("UIListLayout")
+        local listLayout = content:FindFirstChild("UIListLayout") -- issue.txt used "UIListLayout"
         if not listLayout then return end
 
         local contentHeight = listLayout.AbsoluteContentSize.Y
@@ -3947,7 +3994,7 @@ function UILibrary.Button:Section(name, side, options)
         if not border then return end
         local content = border:FindFirstChild("Content")
         if not content then return end
-        local listLayout = content:FindFirstChild("UIListLayout")
+        local listLayout = content:FindFirstChild("UIListLayout") -- issue.txt used "UIListLayout"
 
         if content then
             content.ChildAdded:Connect(updateSectionHeight)
@@ -3961,6 +4008,7 @@ function UILibrary.Button:Section(name, side, options)
         end
         updateSectionHeight()
     end)
+    -- End of height logic from issue.txt
 
     Section.Parent = self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side]
     Section.LayoutOrder = getLayoutOrder(self.oldSelf.oldSelf.MainUI.MainUI.Content[self.SectionName][side])
@@ -4042,72 +4090,59 @@ local function generateCheatBase(Cheat, sett)
     return cheatBase
 end
 
+--// setupEffects from uiLIB(good).txt (PC only)
 local function setupEffects(ui, hover)
     local ClickEvent = Instance.new("BindableEvent")
-    local uiTweenType = (hover:IsA("ImageLabel") or hover:IsA("ImageButton")) and "ImageTransparency" or "BackgroundTransparency"
-    local originalTransparency = hover[uiTweenType]
-    local touchActiveId = nil
+
+    local uiTweenType =
+        (hover:IsA("ImageLabel") or hover:IsA("ImageButton")) and "ImageTransparency" or "BackgroundTransparency"
 
     local function constructTweenInfo(value)
-        local props = {}
-        props[uiTweenType] = value
-        return props
+        return {
+            [uiTweenType] = value
+        }
     end
 
-    if ui:IsA("GuiButton") or ui:IsA("TextButton") or ui:IsA("ImageButton") then
-        ui.InputBegan:Connect(function(input, gp)
-            if gp then return end
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                TweenService:Create(hover, TI, constructTweenInfo(originalTransparency - 0.5)):Play()
-            elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-                TweenService:Create(hover, TI, constructTweenInfo(originalTransparency - 0.8)):Play()
-            elseif input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin then
-                if touchActiveId then return end
-                touchActiveId = input.TouchId
-                TweenService:Create(hover, TI, constructTweenInfo(originalTransparency - 0.8)):Play()
+    ui.InputBegan:Connect(
+        function(input, gp)
+            if gp then
+                return
             end
-        end)
 
-        ui.InputEnded:Connect(function(input, gp)
-            if gp then return end
             if input.UserInputType == Enum.UserInputType.MouseMovement then
-                TweenService:Create(hover, TI, constructTweenInfo(originalTransparency)):Play()
+                TweenService:Create(hover, TI, constructTweenInfo(.5)):Play()
             elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-                TweenService:Create(hover, TI, constructTweenInfo(originalTransparency - 0.5)):Play()
-                ClickEvent:Fire(input)
-            elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == touchActiveId then
-                touchActiveId = nil
-                TweenService:Create(hover, TI, constructTweenInfo(originalTransparency - 0.5)):Play()
-                ClickEvent:Fire(input)
+                TweenService:Create(hover, TI, constructTweenInfo(.2)):Play()
             end
-        end)
+        end
+    )
 
+    ui.InputEnded:Connect(
+        function(input, gp)
+            if gp then
+                return
+            end
+
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                TweenService:Create(hover, TI, constructTweenInfo(1)):Play()
+            elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+                TweenService:Create(hover, TI, constructTweenInfo(.5)):Play()
+                ClickEvent:Fire(input) -- Pass input object for CircleClick
+            end
+        end
+    )
+    
+    -- Added MouseLeave from uiLIB(issue).txt for completeness, as it was missing in uiLIB(good).txt's setupEffects
+    if ui.MouseLeave then
         ui.MouseLeave:Connect(function()
-            TweenService:Create(hover, TI, constructTweenInfo(originalTransparency)):Play()
+             TweenService:Create(hover, TI, constructTweenInfo(1)):Play()
         end)
-
-        ui.TouchMoved:Connect(function(input)
-            if input.TouchId ~= touchActiveId then return end
-            local guiObject = input.TouchedGuis
-            local isStillOver = false
-            for _,g in ipairs(guiObject) do
-                if g == ui then
-                    isStillOver = true
-                    break
-                end
-            end
-            if not isStillOver then
-                touchActiveId = nil
-                TweenService:Create(hover, TI, constructTweenInfo(originalTransparency)):Play()
-            end
-        end)
-    else
-         warn("setupEffects: 'ui' is not a GuiButton, TextButton, or ImageButton. Events like InputBegan may not be available. UI: " .. ui:GetFullName())
     end
 
 
     return ClickEvent.Event
 end
+
 
 function UILibrary.Section:Button(sett, callback)
     local functions = {}
@@ -4120,8 +4155,8 @@ function UILibrary.Section:Button(sett, callback)
     local element = cheatBase.Content.ElementContent.Button
 
     setupEffects(element, element.HoverFrame):Connect(
-        function(inputObj)
-            callback(inputObj)
+        function(inputObj) -- Receive inputObj
+            callback(inputObj) -- Pass it to the callback if needed (though CircleClick isn't used here directly)
         end
     )
 
@@ -4239,7 +4274,7 @@ function UILibrary.Section:Toggle(sett, callback)
                 element,
                 TI,
                 {
-                    BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Color from issue.txt (good was 134,142,255)
                 }
             ):Play()
         else
@@ -4642,7 +4677,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
 
         local holdingHsv = false
         local holdingSaturation = false
-        local activeTouchId = nil
+        -- local activeTouchId = nil -- REMOVED
 
         local connections = {}
 
@@ -4650,10 +4685,10 @@ function UILibrary.Section:ColorPicker(sett, callback)
             if gp then return end
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 holdingHsv = true
-            elseif input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin then
-                if activeTouchId then return end
-                activeTouchId = input.TouchId
-                holdingHsv = true
+            -- elseif input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin then -- REMOVED
+            --     if activeTouchId then return end
+            --     activeTouchId = input.TouchId
+            --     holdingHsv = true
             end
         end))
 
@@ -4661,9 +4696,9 @@ function UILibrary.Section:ColorPicker(sett, callback)
             if gp then return end
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 holdingHsv = false
-            elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == activeTouchId then
-                holdingHsv = false
-                activeTouchId = nil
+            -- elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == activeTouchId then -- REMOVED
+            --     holdingHsv = false
+            --     activeTouchId = nil
             end
         end))
 
@@ -4671,10 +4706,10 @@ function UILibrary.Section:ColorPicker(sett, callback)
             if gp then return end
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 holdingSaturation = true
-            elseif input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin then
-                 if activeTouchId then return end
-                 activeTouchId = input.TouchId
-                 holdingSaturation = true
+            -- elseif input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin then -- REMOVED
+            --      if activeTouchId then return end
+            --      activeTouchId = input.TouchId
+            --      holdingSaturation = true
             end
         end))
 
@@ -4682,9 +4717,9 @@ function UILibrary.Section:ColorPicker(sett, callback)
             if gp then return end
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 holdingSaturation = false
-            elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == activeTouchId then
-                holdingSaturation = false
-                activeTouchId = nil
+            -- elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == activeTouchId then -- REMOVED
+            --     holdingSaturation = false
+            --     activeTouchId = nil
             end
         end))
 
@@ -4694,20 +4729,20 @@ function UILibrary.Section:ColorPicker(sett, callback)
             RunService.RenderStepped:Connect(
                 function()
                     local mousePos
-                    if activeTouchId then
-                        for _, touch in ipairs(UserInputService:GetTouches()) do
-                            if touch.TouchId == activeTouchId then
-                                mousePos = touch.Position
-                                break
-                            end
-                        end
-                        if not mousePos then
-                            holdingHsv = false; holdingSaturation = false; activeTouchId = nil;
-                            return
-                        end
-                    else
-                         mousePos = UserInputService:GetMouseLocation()
-                    end
+                    -- if activeTouchId then -- REMOVED TOUCH LOGIC
+                    --     for _, touch in ipairs(UserInputService:GetTouches()) do
+                    --         if touch.TouchId == activeTouchId then
+                    --             mousePos = touch.Position
+                    --             break
+                    --         end
+                    --     end
+                    --     if not mousePos then
+                    --         holdingHsv = false; holdingSaturation = false; activeTouchId = nil;
+                    --         return
+                    --     end
+                    -- else
+                    mousePos = UserInputService:GetMouseLocation()
+                    -- end
                     mousePos = mousePos - Vector2.new(0, game:GetService("GuiService"):GetGuiInset().Y)
 
 
@@ -4789,7 +4824,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
 
         table.insert(connections, Content.Buttons.Cancel.InputBegan:Connect(function(input, gp)
             if gp then return end
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or (input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin) then
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then -- Removed touch
                 closeMenu()
             elseif input.UserInputType == Enum.UserInputType.MouseMovement then
                 TweenService:Create(Content.Buttons.Cancel.OtherFill, TI, { ImageColor3 = Color3.fromRGB(150, 69, 71) }):Play()
@@ -4805,7 +4840,7 @@ function UILibrary.Section:ColorPicker(sett, callback)
 
         table.insert(connections, Content.Buttons.Confirm.InputBegan:Connect(function(input, gp)
             if gp then return end
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or (input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin) then
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then -- Removed touch
                 local actual, clr = updateWheel()
                 functions.setValue(actual)
                 closeMenu()
@@ -5018,7 +5053,7 @@ function UILibrary.Section:Slider(sett, callback)
     )
 
     local holding = false
-    local activeTouchId = nil
+    -- local activeTouchId = nil -- REMOVED
 
     local dragRenderStepConnection
     dragRenderStepConnection = RunService.RenderStepped:Connect(function()
@@ -5029,17 +5064,17 @@ function UILibrary.Section:Slider(sett, callback)
                       return
                  end
                 local pointerX
-                if activeTouchId then
-                     for _, touch in ipairs(UserInputService:GetTouches()) do
-                        if touch.TouchId == activeTouchId then
-                            pointerX = touch.Position.X
-                            break
-                        end
-                     end
-                     if not pointerX then holding = false; activeTouchId = nil; return end
-                else
-                    pointerX = UserInputService:GetMouseLocation().X
-                end
+                -- if activeTouchId then -- REMOVED TOUCH LOGIC
+                --      for _, touch in ipairs(UserInputService:GetTouches()) do
+                --         if touch.TouchId == activeTouchId then
+                --             pointerX = touch.Position.X
+                --             break
+                --         end
+                --      end
+                --      if not pointerX then holding = false; activeTouchId = nil; return end
+                -- else
+                pointerX = UserInputService:GetMouseLocation().X
+                -- end
 
                 local sliderPos = dragElement.AbsolutePosition.X
                 local sliderWidth = dragElement.AbsoluteSize.X
@@ -5052,7 +5087,7 @@ function UILibrary.Section:Slider(sett, callback)
             end)
             if not success then
                 warn("Ошибка в RenderStepped для слайдера:", err)
-                holding = false; activeTouchId = nil;
+                holding = false; -- activeTouchId = nil; -- REMOVED
                 if dragRenderStepConnection then dragRenderStepConnection:Disconnect() end
             end
         end
@@ -5062,10 +5097,10 @@ function UILibrary.Section:Slider(sett, callback)
         if gp then return end
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             holding = true
-        elseif input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin then
-            if activeTouchId then return end
-            activeTouchId = input.TouchId
-            holding = true
+        -- elseif input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin then -- REMOVED
+        --     if activeTouchId then return end
+        --     activeTouchId = input.TouchId
+        --     holding = true
         end
     end)
 
@@ -5073,9 +5108,9 @@ function UILibrary.Section:Slider(sett, callback)
         if gp then return end
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             holding = false
-        elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == activeTouchId then
-            holding = false
-            activeTouchId = nil
+        -- elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == activeTouchId then -- REMOVED
+        --     holding = false
+        --     activeTouchId = nil
         end
     end)
 
@@ -5235,7 +5270,7 @@ function UILibrary.Section:Dropdown(sett, callback)
             totalCounter = totalCounter + 1
         end
 
-        for v_name, i_val in pairs(options) do
+        for v_name, i_val in pairs(options) do -- Changed from `for v, i in pairs(options)` to match issue.txt's loop structure for options
             local Option
 
             counter = counter + 1
@@ -5250,14 +5285,14 @@ function UILibrary.Section:Dropdown(sett, callback)
 
             Option.Name = v_name
             Option.Parent = element.OptionHolder.ContentHolder.Content
-            Option.LayoutOrder = counter
-            Option.Size = UDim2.fromScale(1, (totalCounter > 0 and (1 / totalCounter)) or 1) -- Avoid division by zero
+            Option.LayoutOrder = counter -- issue.txt used counter, good.txt used i (which was value from options table, likely wrong)
+            Option.Size = UDim2.fromScale(1, (totalCounter > 0 and (1 / totalCounter)) or 1) 
 
             Option.Current.Text = v_name
 
             table.insert(optionConnections, Option.InputBegan:Connect(function(input, gp)
                 if gp then return end
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or (input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin) then
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then -- Removed touch
                     functions.setValue(v_name, not options[v_name])
                 elseif input.UserInputType == Enum.UserInputType.MouseMovement then
                     TweenService:Create(Option, TI, { ImageColor3 = Color3.fromRGB(20, 20, 20) }):Play()
@@ -5393,7 +5428,7 @@ function UILibrary.Section:Dropdown(sett, callback)
         if gp then return end
         if input.UserInputType == Enum.UserInputType.MouseMovement then
             TweenService:Create(element.MainHolder.Content.Icon.Holder.Icon, TI, { Position = UDim2.fromScale(0, .2), ImageColor3 = Color3.fromRGB(50, 50, 50) }):Play()
-        elseif input.UserInputType == Enum.UserInputType.MouseButton1 or (input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin) then
+        elseif input.UserInputType == Enum.UserInputType.MouseButton1 then -- Removed touch
             functions.openMenu()
         end
     end))
@@ -5401,7 +5436,7 @@ function UILibrary.Section:Dropdown(sett, callback)
     table.insert(conns, element.MainHolder.Content.Icon.InputEnded:Connect(function(input, gp)
         if gp then return end
         if input.UserInputType == Enum.UserInputType.MouseMovement then
-            TweenService:Create(element.MainHolder.Content.Icon.Holder.Icon, TI, { Position = UDim2.fromScale(0, 0), ImageColor3 = Color3.fromRGB(181, 181, 181) }):Play()
+            TweenService:Create(element.MainHolder.Content.Icon.Holder.Icon, TI, { Position = UDim2.fromScale(0, 0), ImageColor3 = Color3.fromRGB(181, 181, 181) }):Play() -- Color from issue.txt
         end
     end))
 
@@ -5488,3 +5523,4 @@ function UILibrary.Section:Label(sett)
 end
 
 return UILibrary
+-- END OF MERGED uiLIB.txt
