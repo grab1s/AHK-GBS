@@ -290,8 +290,6 @@ local function getObjGen()
                 UIPadding_Label = Instance.new("UIPadding"),
                 Title_Label = Instance.new("TextLabel"),
                 Desc_Label = Instance.new("TextLabel"),
-
-                Objects = Instance.new("Folder") -- Kept from issue.txt (was also in good.txt)
             }
 
 
