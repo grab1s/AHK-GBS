@@ -78,16 +78,16 @@ export type Toggle = {
 }
 
 export type Slider = {
-	Name: string,
-	Default: number,
-	Min: number,
-	Max: number,
-	Round: number,
-	Type: string,
-	Callback: (number) -> any,
-	Risky: boolean,
-	Flag: string | nil,
-	Option: boolean
+    Name: string,
+    Default: number,
+    Range: {number}, 
+    Precise: boolean, 
+    Step: number,    
+    Type: string,
+    Callback: (number) -> any,
+    Risky: boolean,
+    Flag: string | nil,
+    Option: boolean
 }
 
 export type Button = {
@@ -2564,18 +2564,20 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		return Respons;
 	end;
 
-	function elements:AddSlider(Config: Slider)
+	function elements:AddSlider(Config)
 		Config = Config or {};
 		Config.Name = Config.Name or "Slider";
 		Config.Type = Config.Type or "";
-		Config.Default = Config.Default or 50;
-		Config.Min = Config.Min or 0;
-		Config.Max = Config.Max or 100;
-		Config.Round = Config.Round or 0;
+		Config.Range = Config.Range or {0, 100};
+		Config.Default = Config.Default or Config.Range[1];
+		Config.Precise = Config.Precise or false;
+		Config.Step = Config.Step or nil;
 		Config.Risky = Config.Risky or false;
 		Config.Option = Config.Option or false;
 		Config.Callback = Config.Callback or function(number) end;
 		Config.Flag = Config.Flag or nil;
+
+		local min, max = Config.Range[1], Config.Range[2];
 
 		local Slider = Instance.new("Frame")
 		local Slider_Name = Instance.new("TextLabel")
@@ -2646,18 +2648,19 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		OptionButton.Visible = Config.Option;
 		OptionButton.ZIndex = ZIndex + 1;
 
+		local initialAlpha = (Config.Default - min) / (max - min)
 		boxli.Name = Fatality:RandomString()
 		boxli.Parent = ValueFrame
 		boxli.BackgroundColor3 = Fatality.Colors.Main
 		boxli.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		boxli.BorderSizePixel = 0
-		boxli.Size = UDim2.new((Config.Default - Config.Min) / (Config.Max - Config.Min), 0, 1, 0)
+		boxli.Size = UDim2.new(initialAlpha, 0, 1, 0)
 		boxli.ZIndex = ZIndex + 3
 
 		UICorner_2.CornerRadius = UDim.new(0, 2)
 		UICorner_2.Parent = boxli
 
-		ValueText.Name = Fatality:RandomString()
+		ValueText.Name = "Information"
 		ValueText.Parent = ValueFrame
 		ValueText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		ValueText.BackgroundTransparency = 1.000
@@ -2723,18 +2726,25 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		local IsHold = false;
 
 		local function update(Input)
-			local SizeScale = math.clamp((((Input.Position.X) - ValueFrame.AbsolutePosition.X) / ValueFrame.AbsoluteSize.X), 0, 1);
-			local Main = ((Config.Max - Config.Min) * SizeScale) + Config.Min;
-			local Value = Fatality:Rounding(Main,Config.Round);
-			local PositionX = UDim2.fromScale(SizeScale, 1);
-			local normalized = (Value - Config.Min) / (Config.Max - Config.Min);
+			local alpha = math.clamp((Input.Position.X - ValueFrame.AbsolutePosition.X) / ValueFrame.AbsoluteSize.X, 0, 1)
+			local Value = min + alpha * (max - min)
 
-			TweenService:Create(boxli , TweenInfo.new(0.2),{
-				Size = UDim2.new(normalized, 0, 1, 0)
-			}):Play();
+			if Config.Step then
+				Value = math.floor(Value / Config.Step + 0.5) * Config.Step
+			elseif not Config.Precise then
+				Value = math.round(Value)
+			end
+			
+			Value = math.clamp(Value, min, max)
+			
+			local normalizedAlpha = (Value - min) / (max - min)
 
-			Config.Default = Value;
-			ValueText.Text = string.format('%s%s',tostring(Config.Default),tostring(Config.Type));
+			TweenService:Create(boxli, TweenInfo.new(0.2), {
+				Size = UDim2.new(normalizedAlpha, 0, 1, 0)
+			}):Play()
+
+			Config.Default = Value
+			ValueText.Text = string.format('%s%s', tostring(Value), tostring(Config.Type))
 
 			Config.Callback(Value)
 		end;
@@ -2749,30 +2759,14 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 			ValueFrame.InputEnded:Connect(function(Input)
 				if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
-					if UserInputService.TouchEnabled then
-						if not Fatality:IsMouseOverFrame(ValueFrame) then
-							IsHold = false
-						end;
-					else
-						IsHold = false
-					end;
+					IsHold = false
 				end
 			end)
 
 			UserInputService.InputChanged:Connect(function(Input)
-				if IsHold then
-					if (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch)  then
-						if UserInputService.TouchEnabled then
-							if not Fatality:IsMouseOverFrame(ValueFrame) then
-								IsHold = false
-							else
-								update(Input)
-							end;
-						else
-							update(Input)
-						end;
-					end;
-				end;
+				if IsHold and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+					update(Input)
+				end
 			end);
 		end;
 
@@ -2786,15 +2780,16 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 			Signal = Event.Event:Connect(OpcToggle),
 			SetValue = function(v)
 				local IsSame = v == Config.Default;
-
+				v = math.clamp(v, min, max)
 				Config.Default = v;
+				
+				local normalizedAlpha = (v - min) / (max - min)
 
-				TweenService:Create(boxli , TweenInfo.new(0.2),{
-					Size = UDim2.new((Config.Default - Config.Min) / (Config.Max - Config.Min), 0, 1, 0)
-				}):Play();
+				TweenService:Create(boxli, TweenInfo.new(0.2), {
+					Size = UDim2.new(normalizedAlpha, 0, 1, 0)
+				}):Play()
 
-				Config.Default = v;
-				ValueText.Text = string.format('%s%s',tostring(Config.Default),tostring(Config.Type));
+				ValueText.Text = string.format('%s%s', tostring(v), tostring(Config.Type))
 
 				if not IsSame then
 					Config.Callback(v);
@@ -3535,6 +3530,167 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		end;
 
 		return Respons;
+	end;
+
+	function elements:AddParagraph(settings)
+		settings = settings or {}
+		settings.Title = settings.Title or "Paragraph"
+		settings.Content = settings.Content or "This is some default content."
+
+		local Paragraph = Instance.new("Frame")
+		Paragraph.Name = Fatality:RandomString()
+		Paragraph.Parent = Parent
+		Paragraph.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Paragraph.BackgroundTransparency = 1.000
+		Paragraph.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		Paragraph.BorderSizePixel = 0
+		Paragraph.Size = UDim2.new(1, -25, 0, 0) 
+		Paragraph.ZIndex = ZIndex + 1
+		Paragraph.ClipsDescendants = true
+		
+		local autoSize = Instance.new("UIAutomaticSize")
+		autoSize.Parent = Paragraph
+
+		local listLayout = Instance.new("UIListLayout")
+		listLayout.Parent = Paragraph
+		listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		listLayout.Padding = UDim.new(0, 3) 
+
+		local TitleLabel = Instance.new("TextLabel")
+		TitleLabel.Name = "Title"
+		TitleLabel.Parent = Paragraph
+		TitleLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		TitleLabel.BackgroundTransparency = 1.000
+		TitleLabel.Size = UDim2.new(1, 0, 0, 15) 
+		TitleLabel.ZIndex = ZIndex + 2
+		TitleLabel.FontFace = Fatality.FontSemiBold
+		TitleLabel.Text = settings.Title
+		TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TitleLabel.TextSize = 13.000
+		TitleLabel.TextTransparency = 1
+		TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+		local ContentLabel = Instance.new("TextLabel")
+		ContentLabel.Name = "Content"
+		ContentLabel.Parent = Paragraph
+		ContentLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		ContentLabel.BackgroundTransparency = 1.000
+		ContentLabel.Size = UDim2.new(1, 0, 0, 0)
+		ContentLabel.AutomaticSize = Enum.AutomaticSize.Y
+		ContentLabel.ZIndex = ZIndex + 2
+		ContentLabel.FontFace = Fatality.FontSemiBold
+		ContentLabel.Text = settings.Content
+		ContentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		ContentLabel.TextSize = 12.000
+		ContentLabel.TextTransparency = 1
+		ContentLabel.TextWrapped = true
+		ContentLabel.TextXAlignment = Enum.TextXAlignment.Left
+		ContentLabel.TextYAlignment = Enum.TextYAlignment.Top
+
+		local OpcToggle = function(value)
+			if value then
+				Fatality:CreateAnimation(TitleLabel, 0.45, { TextTransparency = 0.200 })
+				Fatality:CreateAnimation(ContentLabel, 0.45, { TextTransparency = 0.400 })
+			else
+				Fatality:CreateAnimation(TitleLabel, 0.45, { TextTransparency = 1 })
+				Fatality:CreateAnimation(ContentLabel, 0.45, { TextTransparency = 1 })
+			end
+		end
+
+		OpcToggle(Event:GetAttribute('V'))
+		Event.Event:Connect(OpcToggle)
+		return {}
+	end;
+
+	function elements:AddInput(settings)
+		settings = settings or {}
+		settings.Name = settings.Name or "Input"
+		settings.PlaceholderText = settings.PlaceholderText or "..."
+		settings.Default = settings.Default or ""
+		settings.Callback = settings.Callback or function(text) end
+
+		local InputFrame = Instance.new("Frame")
+		local NameLabel = Instance.new("TextLabel")
+		local TextBoxFrame = Instance.new("Frame")
+		local UICorner = Instance.new("UICorner")
+		local TextBox = Instance.new("TextBox")
+
+		InputFrame.Name = Fatality:RandomString()
+		InputFrame.Parent = Parent
+		InputFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		InputFrame.BackgroundTransparency = 1.000
+		InputFrame.Size = UDim2.new(1, -25, 0, 17)
+		InputFrame.ZIndex = ZIndex + 1
+
+		NameLabel.Name = "NameLabel"
+		NameLabel.Parent = InputFrame
+		NameLabel.AnchorPoint = Vector2.new(0, 0.5)
+		NameLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		NameLabel.BackgroundTransparency = 1.000
+		NameLabel.Position = UDim2.new(0, 0, 0.5, 0)
+		NameLabel.Size = UDim2.new(0.5, 0, 0.8, 0)
+		NameLabel.ZIndex = ZIndex + 2
+		NameLabel.FontFace = Fatality.FontSemiBold
+		NameLabel.Text = settings.Name
+		NameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		NameLabel.TextSize = 13.000
+		NameLabel.TextTransparency = 1
+		NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+		TextBoxFrame.Name = "TextBoxFrame"
+		TextBoxFrame.Parent = InputFrame
+		TextBoxFrame.AnchorPoint = Vector2.new(1, 0.5)
+		TextBoxFrame.BackgroundColor3 = Fatality.Colors.Black
+		TextBoxFrame.Position = UDim2.new(1, -3, 0.5, 0)
+		TextBoxFrame.Size = UDim2.new(0, 85, 0.85, 0)
+		TextBoxFrame.ZIndex = ZIndex + 2
+
+		UICorner.CornerRadius = UDim.new(0, 2)
+		UICorner.Parent = TextBoxFrame
+
+		TextBox.Name = "InputTextBox"
+		TextBox.Parent = TextBoxFrame
+		TextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		TextBox.BackgroundTransparency = 1.000
+		TextBox.Size = UDim2.new(1, -10, 1, 0)
+		TextBox.Position = UDim2.new(0.5, 0, 0.5, 0)
+		TextBox.AnchorPoint = Vector2.new(0.5, 0.5)
+		TextBox.ZIndex = ZIndex + 3
+		TextBox.FontFace = Fatality.FontSemiBold
+		TextBox.Text = settings.Default
+		TextBox.PlaceholderText = settings.PlaceholderText
+		TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TextBox.PlaceholderColor3 = Color3.fromRGB(128, 128, 128)
+		TextBox.TextSize = 11.000
+		TextBox.TextXAlignment = Enum.TextXAlignment.Left
+		TextBox.ClearTextOnFocus = false
+		TextBox.TextTransparency = 1
+
+		TextBox.FocusLost:Connect(function(enterPressed)
+			settings.Callback(TextBox.Text)
+		end)
+
+		local OpcToggle = function(value)
+			if value then
+				Fatality:CreateAnimation(NameLabel, 0.45, { TextTransparency = 0.200 })
+				Fatality:CreateAnimation(TextBoxFrame, 0.45, { BackgroundTransparency = 0 })
+				Fatality:CreateAnimation(TextBox, 0.45, { TextTransparency = 0.400 })
+			else
+				Fatality:CreateAnimation(NameLabel, 0.45, { TextTransparency = 1 })
+				Fatality:CreateAnimation(TextBoxFrame, 0.45, { BackgroundTransparency = 1 })
+				Fatality:CreateAnimation(TextBox, 0.45, { TextTransparency = 1 })
+			end
+		end
+
+		OpcToggle(Event:GetAttribute('V'))
+		Event.Event:Connect(OpcToggle)
+
+		local Response = {
+			Set = function(text)
+				TextBox.Text = tostring(text)
+			end
+		}
+		return Response
 	end;
 
 	return elements;
@@ -4681,28 +4837,21 @@ function Fatality.new(Window: Window)
 		for i,v in next , config do
 			if i ~= "Info" then
 				local Element = Fatality.WindowFlags[Fatalitywin][i];
-
 				if Element then
-
 					local Value = v.Value;
-					local MainValue;
-
-					task.spawn(function()
-						if Value.Type == "String" then
-							Element:SetValue(tostring(Value.Value));
-						elseif Value.Type == "Boolean" then
-							Element:SetValue((typeof(Value.Value) == 'boolean' and Value.Value) or (Value.Value == "true" and true or false));
-						elseif Value.Type == "Number" then
-							Element:SetValue(Value.Value);
-						elseif Value.Type == "Color3" then
-							Element:SetValue(Color3.new(Value.Value.R,Value.Value.G,Value.Value.B) , Value.Value.Transparency);
-						elseif Value.Type == "Table" then
-							Element:SetValue(Value.Value);
-
-						end;
-					end);
+					-- Убираем task.spawn
+					if Value.Type == "String" then
+						Element:SetValue(tostring(Value.Value));
+					elseif Value.Type == "Boolean" then
+						Element:SetValue((typeof(Value.Value) == 'boolean' and Value.Value) or (Value.Value == "true" and true or false));
+					elseif Value.Type == "Number" then
+						Element:SetValue(Value.Value);
+					elseif Value.Type == "Color3" then
+						Element:SetValue(Color3.new(Value.Value.R,Value.Value.G,Value.Value.B) , Value.Value.Transparency);
+					elseif Value.Type == "Table" then
+						Element:SetValue(Value.Value);
+					end;
 				end;
-
 			end;
 		end;
 	end;
