@@ -2725,13 +2725,16 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		local IsHold = false;
 
-		local function update(Input)
+	local function update(Input)
 			local alpha = math.clamp((Input.Position.X - ValueFrame.AbsolutePosition.X) / ValueFrame.AbsoluteSize.X, 0, 1)
 			local Value = min + alpha * (max - min)
 
+			-- ИСПРАВЛЕННАЯ ЛОГИКА ОКРУГЛЕНИЯ
 			if Config.Step then
 				Value = math.floor(Value / Config.Step + 0.5) * Config.Step
-			elseif not Config.Precise then
+			elseif typeof(Config.Precise) == "number" and Config.Precise > 0 then
+				Value = Fatality:Rounding(Value, Config.Precise) -- Используем вашу же функцию для округления
+			elseif not Config.Precise or Config.Precise == 0 then
 				Value = math.round(Value)
 			end
 			
@@ -3532,11 +3535,12 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		return Respons;
 	end;
 
-	function elements:AddParagraph(settings)
+function elements:AddParagraph(settings)
 		settings = settings or {}
 		settings.Title = settings.Title or "Paragraph"
 		settings.Content = settings.Content or "This is some default content."
 
+		-- 1. Создаем главный контейнер
 		local Paragraph = Instance.new("Frame")
 		Paragraph.Name = Fatality:RandomString()
 		Paragraph.Parent = Parent
@@ -3544,24 +3548,28 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		Paragraph.BackgroundTransparency = 1.000
 		Paragraph.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Paragraph.BorderSizePixel = 0
+		-- 2. Устанавливаем размер по Y в 0. Высота будет рассчитана автоматически.
 		Paragraph.Size = UDim2.new(1, -25, 0, 0) 
 		Paragraph.ZIndex = ZIndex + 1
 		Paragraph.ClipsDescendants = true
 		
-		local autoSize = Instance.new("UIAutomaticSize")
-		autoSize.Parent = Paragraph
+		-- 3. ВКЛЮЧАЕМ АВТОМАТИЧЕСКИЙ РАЗМЕР ДЛЯ ГЛАВНОГО КОНТЕЙНЕРА
+		-- Он будет растягиваться по вертикали, чтобы вместить всё содержимое.
+		Paragraph.AutomaticSize = Enum.AutomaticSize.Y
 
+		-- 4. Добавляем UIListLayout, чтобы управлять расположением заголовка и текста
 		local listLayout = Instance.new("UIListLayout")
 		listLayout.Parent = Paragraph
 		listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-		listLayout.Padding = UDim.new(0, 3) 
+		listLayout.Padding = UDim.new(0, 3) -- Небольшой отступ между заголовком и текстом
 
+		-- Создаем заголовок
 		local TitleLabel = Instance.new("TextLabel")
 		TitleLabel.Name = "Title"
 		TitleLabel.Parent = Paragraph
 		TitleLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		TitleLabel.BackgroundTransparency = 1.000
-		TitleLabel.Size = UDim2.new(1, 0, 0, 15) 
+		TitleLabel.Size = UDim2.new(1, 0, 0, 15) -- Фиксированная высота для заголовка
 		TitleLabel.ZIndex = ZIndex + 2
 		TitleLabel.FontFace = Fatality.FontSemiBold
 		TitleLabel.Text = settings.Title
@@ -3570,13 +3578,15 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		TitleLabel.TextTransparency = 1
 		TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
+		-- Создаем основной текст
 		local ContentLabel = Instance.new("TextLabel")
 		ContentLabel.Name = "Content"
 		ContentLabel.Parent = Paragraph
 		ContentLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		ContentLabel.BackgroundTransparency = 1.000
+		-- 5. Устанавливаем высоту в 0 и включаем автоматический размер для самого текста
 		ContentLabel.Size = UDim2.new(1, 0, 0, 0)
-		ContentLabel.AutomaticSize = Enum.AutomaticSize.Y
+		ContentLabel.AutomaticSize = Enum.AutomaticSize.Y -- <- Ключевое свойство
 		ContentLabel.ZIndex = ZIndex + 2
 		ContentLabel.FontFace = Fatality.FontSemiBold
 		ContentLabel.Text = settings.Content
@@ -3587,6 +3597,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		ContentLabel.TextXAlignment = Enum.TextXAlignment.Left
 		ContentLabel.TextYAlignment = Enum.TextYAlignment.Top
 
+		-- Логика анимации остается без изменений
 		local OpcToggle = function(value)
 			if value then
 				Fatality:CreateAnimation(TitleLabel, 0.45, { TextTransparency = 0.200 })
@@ -3599,6 +3610,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		OpcToggle(Event:GetAttribute('V'))
 		Event.Event:Connect(OpcToggle)
+
 		return {}
 	end;
 
