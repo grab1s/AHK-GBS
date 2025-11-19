@@ -4223,6 +4223,11 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 
 			res.ConfigDirectory = cfgPath;
 
+            -- !!! ИСПРАВЛЕНИЕ ЗДЕСЬ !!!
+            -- Принудительно обновляем список конфигов сразу после инициализации папки
+            res:ReloadConfig()
+            -- !!!!!!!!!!!!!!!!!!!!!!!!
+
 			AddConfigButton.MouseButton1Click:Connect(function()
 				local configName = TextBox.Text;
 
