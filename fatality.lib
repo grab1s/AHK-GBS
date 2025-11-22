@@ -2136,9 +2136,6 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 
 	local Toggle = function(value)
 		isOpen = value;
-		
-		-- ХАК: Используем глобальный флаг библиотеки, чтобы предотвратить закрытие 
-		-- родительского меню (Option Menu) при клике по списку.
 		Fatality.GLOBAL_ENVIRONMENT.IS_HOLD_COLOR_PICKER = value;
 
 		if value then
@@ -2148,23 +2145,26 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 				SPAWN_THREAD = nil;
 			end;
 
-			SPAWN_THREAD = task.spawn(function()
-				while isOpen do task.wait()
-					if not Parent or not Parent.Parent then break end
-					
-					local baseSize = UIListLayout.AbsoluteContentSize.Y + 10;
-					
-					-- ИСПРАВЛЕНИЕ ПОЗИЦИИ:
-					-- Смещаем Y на высоту кнопки (Size.Y) + отступ (2 пикселя), чтобы список был СТРОГО ПОД кнопкой
-					DropdownItemFrame.Position = UDim2.fromOffset(
-						Parent.AbsolutePosition.X, 
-						Parent.AbsolutePosition.Y + Parent.AbsoluteSize.Y + 2
-					)
+			-- Используем RenderStepped для плавного следования за окном без задержек
+			SPAWN_THREAD = game:GetService("RunService").RenderStepped:Connect(function()
+				if not Parent or not Parent.Parent or not isOpen then 
+					if SPAWN_THREAD then SPAWN_THREAD:Disconnect() end
+					return 
+				end
+				
+				local baseSize = UIListLayout.AbsoluteContentSize.Y + 10;
+				
+				-- ИСПРАВЛЕННАЯ ЛОГИКА ПОЗИЦИИ:
+				-- Мы берем правый край кнопки (X + Width) и нижний край кнопки (Y + Height)
+				-- AnchorPoint (1, 0) заставит список отрисовываться влево от этой точки
+				local rightEdgeX = Parent.AbsolutePosition.X + Parent.AbsoluteSize.X
+				local bottomEdgeY = Parent.AbsolutePosition.Y + Parent.AbsoluteSize.Y + 3 -- +3 пикселя отступа
 
-					Fatality:CreateAnimation(DropdownItemFrame,0.35,{
-						Size = UDim2.new(0, 175, 0, math.clamp(baseSize,0,200))
-					})
-				end;
+				DropdownItemFrame.Position = UDim2.fromOffset(rightEdgeX, bottomEdgeY)
+
+				Fatality:CreateAnimation(DropdownItemFrame,0.35,{
+					Size = UDim2.new(0, 175, 0, math.clamp(baseSize,0,200))
+				})
 			end)
 
 			Fatality:CreateAnimation(UIStroke,0.35,{
@@ -2176,7 +2176,7 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 			})
 		else
 			if SPAWN_THREAD then
-				task.cancel(SPAWN_THREAD);
+				SPAWN_THREAD:Disconnect(); -- Отключаем RenderStepped
 				SPAWN_THREAD = nil;
 			end;
 
@@ -2198,19 +2198,20 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 		end;
 	end;
 
-	-- Инициализация фрейма
 	DropdownItemFrame.Name = Fatality:RandomString()
 	DropdownItemFrame.Parent = Window
-	DropdownItemFrame.AnchorPoint = Vector2.new(0, 0) -- Якорь в верхнем левом углу
+	-- ВАЖНО: AnchorPoint (1, 0) означает "Верхний Правый угол".
+	-- Это позволяет нам позиционировать правый край списка по правому краю кнопки.
+	DropdownItemFrame.AnchorPoint = Vector2.new(1, 0) 
 	DropdownItemFrame.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
 	DropdownItemFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	DropdownItemFrame.BorderSizePixel = 0
 	DropdownItemFrame.ClipsDescendants = true
-	DropdownItemFrame.Position = UDim2.new(4,0,4,0)
-	DropdownItemFrame.Size = UDim2.new(0, 175, 0, 0) -- Изначально свернут
+	DropdownItemFrame.Position = UDim2.new(0,0,0,0)
+	DropdownItemFrame.Size = UDim2.new(0, 175, 0, 0)
 	DropdownItemFrame.Visible = false
-	DropdownItemFrame.ZIndex = 3000 -- Максимальный слой
-	DropdownItemFrame.Active = true -- ВАЖНО: Блокирует прохождение клика сквозь фрейм
+	DropdownItemFrame.ZIndex = 3000
+	DropdownItemFrame.Active = true
 
 	UICorner.CornerRadius = UDim.new(0, 2)
 	UICorner.Parent = DropdownItemFrame
@@ -2341,6 +2342,7 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 						Callback(v);
 						
 						if not Multiplier then
+							isOpen = false
 							func(false);
 							Toggle(false);
 						end
@@ -2352,25 +2354,25 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 		end,
 	});
 
-	-- Логика кнопки (открыть/закрыть)
 	Fatality:NewInput(Parent,function()
 		if isOpen then
+			isOpen = false;
 			func(false);
 			Toggle(false);
 		else
 			if AutoUpdate then
 				res:refresh();
 			end;
+			isOpen = true;
 			func(true);
 			Toggle(true);
 		end
 	end);
 
-	-- Логика закрытия при клике вне списка
 	UserInputService.InputBegan:Connect(function(Input)
 		if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and isOpen then
-			-- Проверка: мышь НЕ на списке И НЕ на кнопке открытия
 			if not Fatality:IsMouseOverFrame(DropdownItemFrame) and not Fatality:IsMouseOverFrame(Parent) then
+				isOpen = false;
 				func(false);
 				Toggle(false);
 			end;
