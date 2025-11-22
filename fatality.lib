@@ -2119,12 +2119,13 @@ function Fatality:ProtectText(Label: TextLabel,Text: string)
 end;
 
 function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boolean}, Multiplier: boolean, AutoUpdate: boolean,Callback: (data: any) -> any)
-	-- Ищем ScreenGui, чтобы вынести список на самый верхний уровень
+	-- 1. Находим ScreenGui
 	local ScreenGui = Parent:FindFirstAncestorWhichIsA("ScreenGui")
-	local Window = Fatality:GetWindowFromElement(Parent) -- Сохраняем ссылку на окно для стилей
+	local Window = Fatality:GetWindowFromElement(Parent)
 	local Data = {};
 	local Selected = (Multiplier and {}) or nil;
 	local isOpen = false;
+    local GuiService = game:GetService("GuiService") -- Сервис для получения отступа экрана
 
 	local DropdownItemFrame = Instance.new("Frame")
 	local UICorner = Instance.new("UICorner")
@@ -2144,9 +2145,8 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 			DropdownItemFrame.Visible = true
 			if SPAWN_THREAD then SPAWN_THREAD:Disconnect() end
 
-			-- Используем RenderStepped для привязки позиции
+			-- Используем RenderStepped для обновления позиции каждый кадр
 			SPAWN_THREAD = game:GetService("RunService").RenderStepped:Connect(function()
-				-- Если кнопка или UI пропали - закрываемся
 				if not Parent or not Parent.Parent or not Parent.Visible or not isOpen then 
 					if SPAWN_THREAD then SPAWN_THREAD:Disconnect() end
 					DropdownItemFrame.Visible = false
@@ -2155,23 +2155,23 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 				
 				local baseSize = UIListLayout.AbsoluteContentSize.Y + 10;
 				
-				-- === ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ ПОЗИЦИИ ===
-				-- Получаем точные координаты кнопки на экране
+				-- === ИСПРАВЛЕННЫЙ РАСЧЕТ ПОЗИЦИИ ===
 				local btnPos = Parent.AbsolutePosition
 				local btnSize = Parent.AbsoluteSize
+                local topBarOffset = GuiService:GetGuiInset().Y -- Получаем высоту верхней панели (~36px)
 				
-				-- X: Правый край кнопки (BtnX + BtnWidth)
-				-- Y: Нижний край кнопки (BtnY + BtnHeight) + 3px отступа
-				local targetX = btnPos.X + btnSize.X
-				local targetY = btnPos.Y + btnSize.Y + 3
+				-- Расчитываем координаты для верхнего левого угла списка (AnchorPoint 0,0)
+				
+				-- Y: Низ кнопки + отступ + УЧЕТ GuiInset (чтобы не смещалось вверх)
+				local targetY = btnPos.Y + btnSize.Y + 3 + topBarOffset
+				
+				-- X: Правый край кнопки минус ширина списка (выравнивание по правому краю)
+				local targetX = (btnPos.X + btnSize.X) - 175 -- 175 это ширина списка
 
-				-- Устанавливаем позицию. 
-				-- Т.к. AnchorPoint = (1, 0), список "растет" ВЛЕВО и ВНИЗ от этой точки.
 				DropdownItemFrame.Position = UDim2.fromOffset(targetX, targetY)
 
-				-- Анимация высоты
 				Fatality:CreateAnimation(DropdownItemFrame,0.35,{
-					Size = UDim2.new(0, 175, 0, math.clamp(baseSize, 0, 200))
+					Size = UDim2.new(0, 175, 0, math.clamp(baseSize,0,200))
 				})
 			end)
 
@@ -2207,24 +2207,22 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 	end;
 
 	DropdownItemFrame.Name = Fatality:RandomString()
-	-- Выносим список в ScreenGui, чтобы он был поверх всего и не обрезался
-	DropdownItemFrame.Parent = ScreenGui 
+	DropdownItemFrame.Parent = ScreenGui -- Выносим в ScreenGui
 	
-	-- === ВАЖНО: ТОЧКА ПРИВЯЗКИ (Правый Верхний Угол) ===
-	-- (1, 0) означает, что Position указывает на правый верхний угол списка.
-	-- Это заставляет список рисоваться ВЛЕВО от X и ВНИЗ от Y.
-	DropdownItemFrame.AnchorPoint = Vector2.new(1, 0) 
+	-- === СБРОС ANCHOR POINT ===
+	-- Используем стандартный (0,0) - верхний левый угол.
+	-- Это упрощает понимание того, откуда рисуется фрейм.
+	DropdownItemFrame.AnchorPoint = Vector2.new(0, 0) 
 	
 	DropdownItemFrame.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
 	DropdownItemFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	DropdownItemFrame.BorderSizePixel = 0
 	DropdownItemFrame.ClipsDescendants = true
-	-- Начальная позиция (будет обновлена в RenderStepped)
-	DropdownItemFrame.Position = UDim2.fromOffset(0, 0) 
+	DropdownItemFrame.Position = UDim2.fromOffset(0, 0)
 	DropdownItemFrame.Size = UDim2.new(0, 175, 0, 0)
 	DropdownItemFrame.Visible = false
-	DropdownItemFrame.ZIndex = 10000 -- Максимальный слой
-	DropdownItemFrame.Active = true -- Блокирует клики сквозь список
+	DropdownItemFrame.ZIndex = 10000 -- Поверх всего
+	DropdownItemFrame.Active = true
 
 	UICorner.CornerRadius = UDim.new(0, 2)
 	UICorner.Parent = DropdownItemFrame
@@ -2384,11 +2382,7 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 
 	UserInputService.InputBegan:Connect(function(Input)
 		if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and isOpen then
-			-- Используем функцию проверки наведения из библиотеки
-			local isHoveringList = Fatality:IsMouseOverFrame(DropdownItemFrame)
-			local isHoveringButton = Fatality:IsMouseOverFrame(Parent)
-
-			if not isHoveringList and not isHoveringButton then
+			if not Fatality:IsMouseOverFrame(DropdownItemFrame) and not Fatality:IsMouseOverFrame(Parent) then
 				isOpen = false;
 				func(false);
 				Toggle(false);
