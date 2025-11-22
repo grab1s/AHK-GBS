@@ -2141,11 +2141,11 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 		if value then
 			DropdownItemFrame.Visible = true
 			if SPAWN_THREAD then
-				task.cancel(SPAWN_THREAD);
+				SPAWN_THREAD:Disconnect();
 				SPAWN_THREAD = nil;
 			end;
 
-			-- Используем RenderStepped для плавного следования за окном без задержек
+			-- Используем RenderStepped для жесткой привязки позиции каждый кадр
 			SPAWN_THREAD = game:GetService("RunService").RenderStepped:Connect(function()
 				if not Parent or not Parent.Parent or not isOpen then 
 					if SPAWN_THREAD then SPAWN_THREAD:Disconnect() end
@@ -2154,11 +2154,12 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 				
 				local baseSize = UIListLayout.AbsoluteContentSize.Y + 10;
 				
-				-- ИСПРАВЛЕННАЯ ЛОГИКА ПОЗИЦИИ:
-				-- Мы берем правый край кнопки (X + Width) и нижний край кнопки (Y + Height)
-				-- AnchorPoint (1, 0) заставит список отрисовываться влево от этой точки
+				-- === ИСПРАВЛЕНИЕ ПОЗИЦИИ ===
+				-- 1. X: Берем ПРАВЫЙ край кнопки (AbsPos.X + AbsSize.X)
+				-- 2. Y: Берем НИЖНИЙ край кнопки (AbsPos.Y + AbsSize.Y)
+				-- 3. Добавляем отступ +3 пикселя, чтобы список не прилипал вплотную
 				local rightEdgeX = Parent.AbsolutePosition.X + Parent.AbsoluteSize.X
-				local bottomEdgeY = Parent.AbsolutePosition.Y + Parent.AbsoluteSize.Y + 3 -- +3 пикселя отступа
+				local bottomEdgeY = Parent.AbsolutePosition.Y + Parent.AbsoluteSize.Y + 3
 
 				DropdownItemFrame.Position = UDim2.fromOffset(rightEdgeX, bottomEdgeY)
 
@@ -2176,7 +2177,7 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 			})
 		else
 			if SPAWN_THREAD then
-				SPAWN_THREAD:Disconnect(); -- Отключаем RenderStepped
+				SPAWN_THREAD:Disconnect();
 				SPAWN_THREAD = nil;
 			end;
 
@@ -2200,8 +2201,10 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 
 	DropdownItemFrame.Name = Fatality:RandomString()
 	DropdownItemFrame.Parent = Window
-	-- ВАЖНО: AnchorPoint (1, 0) означает "Верхний Правый угол".
-	-- Это позволяет нам позиционировать правый край списка по правому краю кнопки.
+	-- === ВАЖНОЕ ИСПРАВЛЕНИЕ ANCHOR POINT ===
+	-- X = 1 (Правый край фрейма списка привязан к позиции)
+	-- Y = 0 (ВЕРХНИЙ край фрейма списка привязан к позиции)
+	-- Это гарантирует, что список будет расти ВНИЗ от заданной точки Y.
 	DropdownItemFrame.AnchorPoint = Vector2.new(1, 0) 
 	DropdownItemFrame.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
 	DropdownItemFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
