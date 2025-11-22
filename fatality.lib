@@ -2122,7 +2122,7 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 	local Window = Fatality:GetWindowFromElement(Parent);
 	local Data = {};
 	local Selected = (Multiplier and {}) or nil;
-	local isOpen = false; -- Добавлена переменная состояния
+	local isOpen = false;
 
 	local DropdownItemFrame = Instance.new("Frame")
 	local UICorner = Instance.new("UICorner")
@@ -2135,22 +2135,31 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 	Fatality:AddDragBlacklist(DropdownItemFrame);
 
 	local Toggle = function(value)
-		isOpen = value; -- Обновляем состояние
+		isOpen = value;
+		
+		-- ХАК: Используем глобальный флаг библиотеки, чтобы предотвратить закрытие 
+		-- родительского меню (Option Menu) при клике по списку.
+		Fatality.GLOBAL_ENVIRONMENT.IS_HOLD_COLOR_PICKER = value;
 
 		if value then
+			DropdownItemFrame.Visible = true
 			if SPAWN_THREAD then
 				task.cancel(SPAWN_THREAD);
 				SPAWN_THREAD = nil;
 			end;
 
 			SPAWN_THREAD = task.spawn(function()
-				while isOpen do task.wait() -- Проверка isOpen для остановки цикла
-					if not Parent or not Parent.Parent then break end -- Защита от удаления
+				while isOpen do task.wait()
+					if not Parent or not Parent.Parent then break end
 					
 					local baseSize = UIListLayout.AbsoluteContentSize.Y + 10;
 					
-					-- Позиционирование относительно кнопки
-					DropdownItemFrame.Position = UDim2.fromOffset(Parent.AbsolutePosition.X, Parent.AbsolutePosition.Y + Parent.AbsoluteSize.Y + 5)
+					-- ИСПРАВЛЕНИЕ ПОЗИЦИИ:
+					-- Смещаем Y на высоту кнопки (Size.Y) + отступ (2 пикселя), чтобы список был СТРОГО ПОД кнопкой
+					DropdownItemFrame.Position = UDim2.fromOffset(
+						Parent.AbsolutePosition.X, 
+						Parent.AbsolutePosition.Y + Parent.AbsoluteSize.Y + 2
+					)
 
 					Fatality:CreateAnimation(DropdownItemFrame,0.35,{
 						Size = UDim2.new(0, 175, 0, math.clamp(baseSize,0,200))
@@ -2182,23 +2191,26 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 			Fatality:CreateAnimation(DropShadow,0.35,{
 				ImageTransparency = 1
 			})
+			
+			task.delay(0.35, function()
+				if not isOpen then DropdownItemFrame.Visible = false end
+			end)
 		end;
 	end;
 
-	Toggle(false);
-
+	-- Инициализация фрейма
 	DropdownItemFrame.Name = Fatality:RandomString()
 	DropdownItemFrame.Parent = Window
-	DropdownItemFrame.AnchorPoint = Vector2.new(0, 0)
+	DropdownItemFrame.AnchorPoint = Vector2.new(0, 0) -- Якорь в верхнем левом углу
 	DropdownItemFrame.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
 	DropdownItemFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	DropdownItemFrame.BorderSizePixel = 0
 	DropdownItemFrame.ClipsDescendants = true
 	DropdownItemFrame.Position = UDim2.new(4,0,4,0)
-	DropdownItemFrame.Size = UDim2.new(0, 175, 0, 100)
-	
-	-- ИСПРАВЛЕНИЕ 1: Очень высокий ZIndex, чтобы перекрывать всё остальное
-	DropdownItemFrame.ZIndex = 3000 
+	DropdownItemFrame.Size = UDim2.new(0, 175, 0, 0) -- Изначально свернут
+	DropdownItemFrame.Visible = false
+	DropdownItemFrame.ZIndex = 3000 -- Максимальный слой
+	DropdownItemFrame.Active = true -- ВАЖНО: Блокирует прохождение клика сквозь фрейм
 
 	UICorner.CornerRadius = UDim.new(0, 2)
 	UICorner.Parent = DropdownItemFrame
@@ -2214,7 +2226,7 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 	DropShadow.Position = UDim2.new(0.5, 0, 0.5, 0)
 	DropShadow.Rotation = 0.001
 	DropShadow.Size = UDim2.new(1, 47, 1, 47)
-	DropShadow.ZIndex = 2999 -- Чуть ниже фрейма
+	DropShadow.ZIndex = 2999
 	DropShadow.Image = "rbxassetid://6014261993"
 	DropShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
 	DropShadow.ImageTransparency = 0.750
@@ -2231,7 +2243,7 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 	ScrollingFrame.ClipsDescendants = false
 	ScrollingFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 	ScrollingFrame.Size = UDim2.new(1, -5, 1, -5)
-	ScrollingFrame.ZIndex = 3005 -- Выше фона списка
+	ScrollingFrame.ZIndex = 3005
 	ScrollingFrame.ScrollBarThickness = 0
 
 	UIListLayout.Parent = ScrollingFrame
@@ -2251,7 +2263,7 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 		db_selected.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		db_selected.BorderSizePixel = 0
 		db_selected.Size = UDim2.new(1, 0, 0, 10)
-		db_selected.ZIndex = 3010 -- Самый высокий слой для текста
+		db_selected.ZIndex = 3010
 		db_selected.FontFace = Fatality.FontSemiBold
 		db_selected.TextColor3 = Fatality.Colors.Main
 		db_selected.TextSize = 12.000
@@ -2328,9 +2340,7 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 
 						Callback(v);
 						
-						-- Закрываем после выбора (опционально, уберите если нужно выбирать несколько)
 						if not Multiplier then
-                            isOpen = false
 							func(false);
 							Toggle(false);
 						end
@@ -2342,36 +2352,25 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 		end,
 	});
 
-	-- ИСПРАВЛЕНИЕ 2: Логика переключения (Открыть/Закрыть)
+	-- Логика кнопки (открыть/закрыть)
 	Fatality:NewInput(Parent,function()
 		if isOpen then
-			-- Если открыто -> закрываем
-			isOpen = false;
 			func(false);
 			Toggle(false);
 		else
-			-- Если закрыто -> обновляем и открываем
 			if AutoUpdate then
 				res:refresh();
 			end;
-			isOpen = true;
 			func(true);
 			Toggle(true);
 		end
 	end);
 
-	-- ИСПРАВЛЕНИЕ 3: Закрытие при клике вне списка, но ИГНОРИРОВАНИЕ клика по самой кнопке
-	-- (чтобы не было конфликта: клик вне -> закрыть + клик по кнопке -> открыть = моргание)
+	-- Логика закрытия при клике вне списка
 	UserInputService.InputBegan:Connect(function(Input)
 		if (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) and isOpen then
-			-- Проверяем, наведена ли мышь на выпадающий список
-			local mouseOverDropdown = Fatality:IsMouseOverFrame(DropdownItemFrame)
-			-- Проверяем, наведена ли мышь на саму кнопку открытия (Parent)
-			local mouseOverButton = Fatality:IsMouseOverFrame(Parent)
-
-			-- Если клик НЕ по списку И НЕ по кнопке, тогда закрываем
-			if not mouseOverDropdown and not mouseOverButton then
-				isOpen = false;
+			-- Проверка: мышь НЕ на списке И НЕ на кнопке открытия
+			if not Fatality:IsMouseOverFrame(DropdownItemFrame) and not Fatality:IsMouseOverFrame(Parent) then
 				func(false);
 				Toggle(false);
 			end;
