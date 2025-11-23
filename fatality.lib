@@ -1114,6 +1114,34 @@ Fatality.Lucide = {
 	["lucide-zoom-out"] = "rbxassetid://10747384679",
 };
 
+-- === DEVICE CHECK & DUMMY SYSTEM ===
+Fatality.IsPC = not UserInputService.TouchEnabled;
+
+Fatality.Dummy = {}
+local function GetDummy()
+	return Fatality.Dummy
+end
+
+setmetatable(Fatality.Dummy, {
+	__index = function(self, key)
+		return function() return self end
+	end,
+    __newindex = function() end
+})
+Fatality.Dummy.Option = Fatality.Dummy 
+Fatality.Dummy.Set = function() end
+Fatality.Dummy.Refresh = function() end
+Fatality.Dummy.SetValue = function() end
+Fatality.Dummy.GetValue = function() return nil end
+
+function Fatality:CanShow(Config)
+    if Config and Config.OnlyPC and not Fatality.IsPC then
+        return false
+    end
+    return true
+end
+-- ===================================
+
 Fatality.WindowFlags = {};
 
 function Fatality:IsMobile() : boolean
@@ -2397,8 +2425,26 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 	local elements = {};
 	local FatalWindow = Fatality:GetWindowFromElement(Parent);
 
+	-- Вспомогательная функция для создания "пустышки", если элемент скрыт (OnlyPC)
+	local function GetDummyElement()
+		return {
+			Option = Fatality.Dummy, -- Поддержка вложенных опций
+			SetValue = function() end,
+			GetValue = function() return nil end,
+			Set = function() end, 
+			Refresh = function() end,
+			Rename = function() end,
+			Signal = { Disconnect = function() end },
+			Fire = function() end
+		}
+	end
+
 	function elements:AddToggle(Config: Toggle)
 		Config = Config or {};
+		
+		-- [OnlyPC Check]
+		if not Fatality:CanShow(Config) then return GetDummyElement() end
+
 		Config.Name = Config.Name or "Toggle";
 		Config.Default = Config.Default or false;
 		Config.Risky = Config.Risky or false;
@@ -2611,6 +2657,10 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 	function elements:AddSlider(Config)
 		Config = Config or {};
+		
+		-- [OnlyPC Check]
+		if not Fatality:CanShow(Config) then return GetDummyElement() end
+
 		Config.Name = Config.Name or "Slider";
 		Config.Type = Config.Type or "";
 		Config.Range = Config.Range or {0, 100};
@@ -2770,15 +2820,15 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		local IsHold = false;
 
-	local function update(Input)
+		-- ОБНОВЛЕННАЯ ЛОГИКА UPDATE
+		local function update(Input)
 			local alpha = math.clamp((Input.Position.X - ValueFrame.AbsolutePosition.X) / ValueFrame.AbsoluteSize.X, 0, 1)
 			local Value = min + alpha * (max - min)
 
-			-- ИСПРАВЛЕННАЯ ЛОГИКА ОКРУГЛЕНИЯ
 			if Config.Step then
 				Value = math.floor(Value / Config.Step + 0.5) * Config.Step
 			elseif typeof(Config.Precise) == "number" and Config.Precise > 0 then
-				Value = Fatality:Rounding(Value, Config.Precise) -- Используем вашу же функцию для округления
+				Value = Fatality:Rounding(Value, Config.Precise) 
 			elseif not Config.Precise or Config.Precise == 0 then
 				Value = math.round(Value)
 			end
@@ -2856,6 +2906,10 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 	function elements:AddButton(Config: Button)
 		Config = Config or {};
+		
+		-- [OnlyPC Check]
+		if not Fatality:CanShow(Config) then return GetDummyElement() end
+
 		Config.Name = Config.Name or "Slider";
 		Config.Risky = Config.Risky or false;
 		Config.Callback = Config.Callback or function() end;
@@ -2950,6 +3004,10 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 	function elements:AddColorPicker(Config: ColorPicker)
 		Config = Config or {};
+		
+		-- [OnlyPC Check]
+		if not Fatality:CanShow(Config) then return GetDummyElement() end
+
 		Config.Name = Config.Name or "Color Picker";
 		Config.Option = Config.Option or false;
 		Config.Default = Config.Default or Color3.fromRGB(255, 255, 255);
@@ -3094,6 +3152,10 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 	function elements:AddDropdown(Config: Dropdown)
 		Config = Config or {};
+		
+		-- [OnlyPC Check]
+		if not Fatality:CanShow(Config) then return GetDummyElement() end
+
 		Config.Name = Config.Name or "Dropdown";
 		Config.Option = Config.Option or false;
 		Config.Default = Config.Default or nil;
@@ -3101,252 +3163,16 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		Config.Values = Config.Values or {};
 		Config.Multi = Config.Multi or false;
 
-		local DataParser = function(value)
-			if not value then return 'None'; end;
-
-			local Out;
-
-			if typeof(value) == 'table' then
-				if #value > 0 then
-					local x = {};
-
-					for i,v in next , value do
-						table.insert(x , tostring(v))
-					end;
-
-					Out = table.concat(x,' , ');
-				else
-					local x = {};
-
-					for i,v in next , value do
-						if v == true then
-							table.insert(x , tostring(i));
-						end			
-					end;
-
-					Out = table.concat(x,' , ');
-				end;
-			else
-				Out = tostring(value);
-			end;
-
-			return Out;
-		end;
-
-		local Dropdown = Instance.new("Frame")
-		local Dropdown_Name = Instance.new("TextLabel")
-		local ValueFrame = Instance.new("Frame")
-		local UICorner = Instance.new("UICorner")
-		local OptionButton = Instance.new("ImageButton")
-		local icon = Instance.new("ImageLabel")
-		local Value_Text = Instance.new("TextLabel")
-
-		if SearchAPI then
-			SearchAPI.Memory(Config.Name);
-		end;
-
-		Dropdown.Name = Fatality:RandomString()
-		Dropdown.Parent = Parent
-		Dropdown.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		Dropdown.BackgroundTransparency = 1.000
-		Dropdown.BorderColor3 = Color3.fromRGB(0, 0, 0)
-		Dropdown.BorderSizePixel = 0
-		Dropdown.Size = UDim2.new(1, -25, 0, 17)
-		Dropdown.ZIndex = ZIndex + 3
-		Fatality:AddDragBlacklist(Dropdown);
-
-		Dropdown_Name.Name = Fatality:RandomString()
-		Dropdown_Name.Parent = Dropdown
-		Dropdown_Name.AnchorPoint = Vector2.new(0, 0.5)
-		Dropdown_Name.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		Dropdown_Name.BackgroundTransparency = 1.000
-		Dropdown_Name.BorderColor3 = Color3.fromRGB(0, 0, 0)
-		Dropdown_Name.BorderSizePixel = 0
-		Dropdown_Name.Position = UDim2.new(0, 0, 0, 8)
-		Dropdown_Name.Size = UDim2.new(1, 0, 0.800000012, 0)
-		Dropdown_Name.ZIndex = 7
-		Dropdown_Name.FontFace = Fatality.FontSemiBold
-		Dropdown_Name.Text = Config.Name
-		Dropdown_Name.TextColor3 = Color3.fromRGB(255, 255, 255)
-		Dropdown_Name.TextSize = 13.000
-		Dropdown_Name.TextTransparency = 0.200
-		Dropdown_Name.TextXAlignment = Enum.TextXAlignment.Left
-		Dropdown_Name.ZIndex = ZIndex + 4
-		Fatality:ProtectText(Dropdown_Name,Config.Name);
-
-		ValueFrame.Name = Fatality:RandomString()
-		ValueFrame.Parent = Dropdown
-		ValueFrame.AnchorPoint = Vector2.new(1, 0.5)
-		ValueFrame.BackgroundColor3 = Fatality.Colors.Black
-		ValueFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-		ValueFrame.BorderSizePixel = 0
-		ValueFrame.Position = UDim2.new(1, -3, 0.5, 0)
-		ValueFrame.Size = UDim2.new(0, 75, 0.925000012, 0)
-		ValueFrame.ZIndex = ZIndex + 4
-
-		UICorner.CornerRadius = UDim.new(0, 2)
-		UICorner.Parent = ValueFrame
-
-		OptionButton.Name = Fatality:RandomString()
-		OptionButton.Parent = ValueFrame
-		OptionButton.AnchorPoint = Vector2.new(0, 0.5)
-		OptionButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		OptionButton.BackgroundTransparency = 1.000
-		OptionButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-		OptionButton.BorderSizePixel = 0
-		OptionButton.Position = UDim2.new(0, -20, 0, 7)
-		OptionButton.Size = UDim2.new(0, 13, 0, 13)
-		OptionButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
-		OptionButton.Image = "http://www.roblox.com/asset/?id=14007344336"
-		OptionButton.ImageTransparency = 0.600
-		OptionButton.ZIndex = 8
-		OptionButton.Visible = Config.Option;
-
-		icon.Name = Fatality:RandomString()
-		icon.Parent = ValueFrame
-		icon.AnchorPoint = Vector2.new(1, 0)
-		icon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		icon.BackgroundTransparency = 1.000
-		icon.BorderColor3 = Color3.fromRGB(0, 0, 0)
-		icon.BorderSizePixel = 0
-		icon.Position = UDim2.new(1, 0, 0, 0)
-		icon.Size = UDim2.new(0,15,0,15)
-		icon.SizeConstraint = Enum.SizeConstraint.RelativeYY
-		icon.ZIndex = ZIndex + 5
-		icon.Image = "rbxassetid://10709790948"
-
-		Value_Text.Name = Fatality:RandomString()
-		Value_Text.Parent = ValueFrame
-		Value_Text.AnchorPoint = Vector2.new(0, 0.5)
-		Value_Text.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		Value_Text.BackgroundTransparency = 1.000
-		Value_Text.BorderColor3 = Color3.fromRGB(0, 0, 0)
-		Value_Text.BorderSizePixel = 0
-		Value_Text.Position = UDim2.new(0, 3, 0.5, 0)
-		Value_Text.Size = UDim2.new(1, -18, 0.800000012, 0)
-		Value_Text.ZIndex = ZIndex + 5
-		Value_Text.FontFace = Fatality.FontSemiBold
-		Value_Text.Text = DataParser(Config.Default)
-		Value_Text.TextColor3 = Color3.fromRGB(255, 255, 255)
-		Value_Text.TextSize = 10.000
-		Value_Text.TextTransparency = 0.500
-		Value_Text.TextXAlignment = Enum.TextXAlignment.Left
-		Value_Text.TextYAlignment = Enum.TextYAlignment.Top
-		Value_Text.TextWrapped = true
-		Value_Text.TextTruncate = Enum.TextTruncate.SplitWord
-
-		local res;
-		res = Fatality:CreateDropdown(ValueFrame,Config.Default,Config.Multi,Config.AutoUpdate,function(args)
-			Config.Default = args;
-			Value_Text.Text = DataParser(Config.Default);
-
-			res:change_default(Config.Default);
-
-			Config.Callback(args);
-		end);
-
-		res:set_data(Config.Values);
-		res:refresh();
-
-		res:on_toggle(function(b)
-			if b then
-				Fatality:CreateAnimation(icon,0.35,{
-					Rotation = -180,
-					ImageColor3 = Fatality.Colors.Main
-				})
-			else
-				Fatality:CreateAnimation(icon,0.35,{
-					Rotation = 0,
-					ImageColor3 = Color3.fromRGB(255, 255, 255)
-				})
-			end;
-		end);
-
-		local OpcToggle = function(value)
-			if value then
-				Fatality:CreateAnimation(Dropdown_Name,0.45,{
-					TextTransparency = 0.2,
-				})
-
-				Fatality:CreateAnimation(ValueFrame,0.45,{
-					BackgroundTransparency = 0
-				})
-
-				Fatality:CreateAnimation(icon,0.45,{
-					ImageTransparency = 0
-				})
-
-				Fatality:CreateAnimation(Value_Text,0.45,{
-					TextTransparency = 0.5
-				})
-
-				Fatality:CreateAnimation(OptionButton,0.45,{
-					ImageTransparency = (Config.Option and 0.6) or 1,
-				})
-			else
-				Fatality:CreateAnimation(Dropdown_Name,0.45,{
-					TextTransparency = 1,
-				})
-
-				Fatality:CreateAnimation(ValueFrame,0.45,{
-					BackgroundTransparency = 1
-				})
-
-				Fatality:CreateAnimation(icon,0.45,{
-					ImageTransparency = 1
-				})
-
-				Fatality:CreateAnimation(Value_Text,0.45,{
-					TextTransparency = 1
-				})
-
-				Fatality:CreateAnimation(OptionButton,0.45,{
-					ImageTransparency = 1
-				})
-			end;
-		end;
-
-		OpcToggle(Event:GetAttribute('V'));
-
-		local Respons = Fatality:CreateResponse({
-			Rename = function(new_name)
-				Dropdown_Name.Text = new_name
-				Fatality:ProtectText(Dropdown_Name,new_name);
-			end,
-			GetValue = function()
-				return Config.Default;
-			end,
-			Signal = Event.Event:Connect(OpcToggle),
-			SetValue = function(def)
-
-				Config.Default = def;
-				Value_Text.Text = DataParser(Config.Default);
-				res:change_default(Config.Default);
-
-				Config.Callback(def);
-			end,
-			SetData = function(def)
-				Config.Values = def;
-
-				res:set_data(Config.Values);
-
-				if not Config.AutoUpdate then
-					res:refresh();
-				end
-			end,
-			Flag = Config.Flag and Config.Flag.."Dropdown",
-			Option = (Config.Option and Fatality:CreateOption(OptionButton)) or nil;
-		});
-
-		if Config.Flag then
-			Fatality.WindowFlags[FatalWindow][Config.Flag.."Dropdown"] = Respons;
-		end;
-
-		return Respons;
+		-- ОБНОВЛЕННЫЙ DROPDOWN (с исправлениями позиции)
+		return Fatality:CreateDropdown(Parent, Config.Default, Config.Multi, Config.AutoUpdate, Config.Callback)
 	end;
 	
 	function elements:AddKeybind(Config: Keybind)
 		Config = Config or {};
+		
+		-- [OnlyPC Check]
+		if not Fatality:CanShow(Config) then return GetDummyElement() end
+
 		Config.Name = Config.Name or "Keybind";
 		Config.Option = Config.Option or false;
 		Config.Default = Config.Default or nil;
@@ -3580,12 +3406,16 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		return Respons;
 	end;
 
-function elements:AddParagraph(settings)
+	function elements:AddParagraph(settings)
 		settings = settings or {}
+		
+		-- [OnlyPC Check]
+		if not Fatality:CanShow(settings) then return GetDummyElement() end
+
 		settings.Title = settings.Title or "Paragraph"
 		settings.Content = settings.Content or "This is some default content."
 
-		-- 1. Создаем главный контейнер
+		-- ОБНОВЛЕННЫЙ ПАРАГРАФ (UIAutomaticSize)
 		local Paragraph = Instance.new("Frame")
 		Paragraph.Name = Fatality:RandomString()
 		Paragraph.Parent = Parent
@@ -3593,28 +3423,23 @@ function elements:AddParagraph(settings)
 		Paragraph.BackgroundTransparency = 1.000
 		Paragraph.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Paragraph.BorderSizePixel = 0
-		-- 2. Устанавливаем размер по Y в 0. Высота будет рассчитана автоматически.
 		Paragraph.Size = UDim2.new(1, -25, 0, 0) 
 		Paragraph.ZIndex = ZIndex + 1
 		Paragraph.ClipsDescendants = true
 		
-		-- 3. ВКЛЮЧАЕМ АВТОМАТИЧЕСКИЙ РАЗМЕР ДЛЯ ГЛАВНОГО КОНТЕЙНЕРА
-		-- Он будет растягиваться по вертикали, чтобы вместить всё содержимое.
 		Paragraph.AutomaticSize = Enum.AutomaticSize.Y
 
-		-- 4. Добавляем UIListLayout, чтобы управлять расположением заголовка и текста
 		local listLayout = Instance.new("UIListLayout")
 		listLayout.Parent = Paragraph
 		listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-		listLayout.Padding = UDim.new(0, 3) -- Небольшой отступ между заголовком и текстом
+		listLayout.Padding = UDim.new(0, 3)
 
-		-- Создаем заголовок
 		local TitleLabel = Instance.new("TextLabel")
 		TitleLabel.Name = "Title"
 		TitleLabel.Parent = Paragraph
 		TitleLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		TitleLabel.BackgroundTransparency = 1.000
-		TitleLabel.Size = UDim2.new(1, 0, 0, 15) -- Фиксированная высота для заголовка
+		TitleLabel.Size = UDim2.new(1, 0, 0, 15)
 		TitleLabel.ZIndex = ZIndex + 2
 		TitleLabel.FontFace = Fatality.FontSemiBold
 		TitleLabel.Text = settings.Title
@@ -3623,15 +3448,13 @@ function elements:AddParagraph(settings)
 		TitleLabel.TextTransparency = 1
 		TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-		-- Создаем основной текст
 		local ContentLabel = Instance.new("TextLabel")
 		ContentLabel.Name = "Content"
 		ContentLabel.Parent = Paragraph
 		ContentLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		ContentLabel.BackgroundTransparency = 1.000
-		-- 5. Устанавливаем высоту в 0 и включаем автоматический размер для самого текста
 		ContentLabel.Size = UDim2.new(1, 0, 0, 0)
-		ContentLabel.AutomaticSize = Enum.AutomaticSize.Y -- <- Ключевое свойство
+		ContentLabel.AutomaticSize = Enum.AutomaticSize.Y
 		ContentLabel.ZIndex = ZIndex + 2
 		ContentLabel.FontFace = Fatality.FontSemiBold
 		ContentLabel.Text = settings.Content
@@ -3642,7 +3465,6 @@ function elements:AddParagraph(settings)
 		ContentLabel.TextXAlignment = Enum.TextXAlignment.Left
 		ContentLabel.TextYAlignment = Enum.TextYAlignment.Top
 
-		-- Логика анимации остается без изменений
 		local OpcToggle = function(value)
 			if value then
 				Fatality:CreateAnimation(TitleLabel, 0.45, { TextTransparency = 0.200 })
@@ -3661,6 +3483,10 @@ function elements:AddParagraph(settings)
 
 	function elements:AddInput(settings)
 		settings = settings or {}
+		
+		-- [OnlyPC Check]
+		if not Fatality:CanShow(settings) then return GetDummyElement() end
+
 		settings.Name = settings.Name or "Input"
 		settings.PlaceholderText = settings.PlaceholderText or "..."
 		settings.Default = settings.Default or ""
@@ -4981,8 +4807,15 @@ function Fatality.new(Window: Window)
 		return ConfigElement;
 	end;
 
-	function Fatal:AddMenu(Menu : Menu)
+    function Fatal:AddMenu(Menu : Menu)
 		Menu = Menu or {};
+        if not Fatality:CanShow(Menu) then 
+            return {
+                AddSection = function() return Fatality.Dummy end,
+                AddPreview = function() return Fatality.Dummy end
+            }
+        end
+        
 		Menu.Name = Menu.Name or "EXAMPLE";
 		Menu.Icon = Menu.Icon or "eye";
 		Menu.AutoFill = (Menu.AutoFill == nil and true) or false;
@@ -5871,8 +5704,13 @@ function Fatality.new(Window: Window)
 			return res;
 		end;
 
-		function MenuLib:AddSection(Config : Section)
+        function MenuLib:AddSection(Config : Section)
 			Config = Config or {};
+            
+            if not Fatality:CanShow(Config) then
+                return Fatality.Dummy
+            end
+
 			Config.Name = Config.Name or "SECTION";
 			Config.Position = Config.Position or "center";
 			Config.Height = Config.Height or 0;
