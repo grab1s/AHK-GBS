@@ -1289,6 +1289,14 @@ function Fatality:CreateAnimation(Instance: Instance , Time: number , Style : En
 		end;
 	end;
 
+	for key, value in pairs(Property) do
+		if typeof(value) == "ColorSequence" then
+			if value.Keypoints and value.Keypoints[1] then
+				Property[key] = value.Keypoints[1].Value
+			end
+		end
+	end
+
 	local Tween: Tween = TweenService:Create(Instance,TweenInfo.new(Time or 1 , Style or Enum.EasingStyle.Quint),Property);
 
 	Tween:Play();
