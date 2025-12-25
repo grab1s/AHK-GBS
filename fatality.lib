@@ -287,12 +287,93 @@ Fatality.GLOBAL_ENVIRONMENT = {};
 Fatality.Windows = {};
 Fatality.FontSemiBold = Font.new('rbxasset://fonts/families/GothamSSm.json',Enum.FontWeight.SemiBold,Enum.FontStyle.Normal);
 Fatality.Flags = {};
-Fatality.Colors = {
-	Black = Color3.fromRGB(16, 16, 16),
-	Main = Color3.fromRGB(255, 106, 133)
-};
 Fatality.DragBlacklist = {};
-Fatality.Version = '1.6';
+Fatality.Version = '1.7 - Theme Engine';
+
+-- === [THEME SYSTEM START] ===
+Fatality.CurrentTheme = {
+	-- main clrs
+	Main       = Color3.fromRGB(255, 106, 133), 
+	Background = Color3.fromRGB(19, 19, 19),    
+	Container  = Color3.fromRGB(24, 24, 24),    
+	Element    = Color3.fromRGB(16, 16, 16),    
+	
+	Text       = Color3.fromRGB(255, 255, 255),
+	TextDark   = Color3.fromRGB(150, 150, 150),
+	Stroke     = Color3.fromRGB(29, 29, 29),    
+	Outline    = Color3.fromRGB(0, 0, 0),    
+};
+
+Fatality.Colors = Fatality.CurrentTheme; 
+
+Fatality.ThemeRegistry = {}; 
+
+function Fatality:Register(Object, Category, Property)
+	if not Object then return end
+	Property = Property or "BackgroundColor3"
+	
+	table.insert(Fatality.ThemeRegistry, {
+		Object = Object,
+		Category = Category,
+		Property = Property
+	})
+	
+	local val = Fatality.CurrentTheme[Category]
+	if val then
+		if typeof(val) == "ColorSequence" then
+			local grad = Object:FindFirstChildOfClass("UIGradient") or Instance.new("UIGradient", Object)
+			grad.Color = val
+			Object[Property] = Color3.fromRGB(255,255,255) -- Белый фон для градиента
+		else
+			Object[Property] = val
+			local grad = Object:FindFirstChildOfClass("UIGradient")
+			if grad then grad.Enabled = false end
+		end
+	end
+end
+
+function Fatality:SetTheme(NewTheme)
+	for key, val in pairs(NewTheme) do
+		Fatality.CurrentTheme[key] = val
+	end
+	Fatality.Colors = Fatality.CurrentTheme -- Синхронизация
+	
+	local Sequence = {
+		"Background",
+		"Container", "Element", "Stroke", "Outline",
+		"Text", "TextDark",
+		"Main"
+	}
+	
+	local TS = game:GetService("TweenService")
+	
+	task.spawn(function()
+		for i, phaseCategory in ipairs(Sequence) do
+			for _, item in pairs(Fatality.ThemeRegistry) do
+				if item.Object and item.Object.Parent and (item.Category == phaseCategory or (phaseCategory == "Container" and (item.Category == "Element" or item.Category == "Stroke"))) then
+					
+					local newVal = Fatality.CurrentTheme[item.Category]
+					
+					if typeof(newVal) == "Color3" then
+						TS:Create(item.Object, TweenInfo.new(0.3), {[item.Property] = newVal}):Play()
+						
+						local grad = item.Object:FindFirstChildOfClass("UIGradient")
+						if grad then grad.Enabled = false end
+						
+					elseif typeof(newVal) == "ColorSequence" then
+						local grad = item.Object:FindFirstChildOfClass("UIGradient") or Instance.new("UIGradient", item.Object)
+						grad.Enabled = true
+						grad.Color = newVal
+						item.Object[item.Property] = Color3.fromRGB(255,255,255)
+					end
+				end
+			end
+			task.wait(0.05)
+		end
+	end)
+end
+-- === [THEME SYSTEM END] ===
+
 Fatality.Lucide = {
 	["lucide-accessibility"] = "rbxassetid://10709751939",
 	["lucide-activity"] = "rbxassetid://10709752035",
@@ -1335,7 +1416,7 @@ function Fatality:CreateOption(OptionButton: ImageButton): Elements
 	ExtElementFrame.Name = Fatality:RandomString()
 	ExtElementFrame.Parent = OwnWindow
 	ExtElementFrame.AnchorPoint = Vector2.new(0.5, 0)
-	ExtElementFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+	Fatality:Register(ExtElementFrame, "Container") -- [THEME]
 	ExtElementFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	ExtElementFrame.BorderSizePixel = 0
 	ExtElementFrame.ClipsDescendants = true
@@ -1347,6 +1428,7 @@ function Fatality:CreateOption(OptionButton: ImageButton): Elements
 	UICorner.Parent = ExtElementFrame
 
 	UIStroke.Color = Color3.fromRGB(29, 29, 29)
+	Fatality:Register(UIStroke, "Stroke", "Color") -- [THEME]
 	UIStroke.Parent = ExtElementFrame
 
 	DropShadow.Name = Fatality:RandomString()
@@ -1359,7 +1441,7 @@ function Fatality:CreateOption(OptionButton: ImageButton): Elements
 	DropShadow.Size = UDim2.new(1, 47, 1, 47)
 	DropShadow.ZIndex = 99
 	DropShadow.Image = "rbxassetid://6014261993"
-	DropShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+	Fatality:Register(DropShadow, "Outline", "ImageColor3") -- [THEME]
 	DropShadow.ImageTransparency = 0.750
 	DropShadow.ScaleType = Enum.ScaleType.Slice
 	DropShadow.SliceCenter = Rect.new(49, 49, 450, 450)
@@ -1701,7 +1783,7 @@ function Fatality:CreateColorPicker(ColorBox: Frame,Transparency, Callback)
 	ColorPickerFrame.Name = Fatality:RandomString()
 	ColorPickerFrame.Parent = OwnWindow
 	ColorPickerFrame.AnchorPoint = Vector2.new(0.5, 0)
-	ColorPickerFrame.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
+	Fatality:Register(ColorPickerFrame, "Background") -- [THEME]
 	ColorPickerFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	ColorPickerFrame.BorderSizePixel = 0
 	ColorPickerFrame.ClipsDescendants = true
@@ -1714,6 +1796,7 @@ function Fatality:CreateColorPicker(ColorBox: Frame,Transparency, Callback)
 	UICorner.Parent = ColorPickerFrame
 
 	UIStroke.Color = Color3.fromRGB(29, 29, 29)
+	Fatality:Register(UIStroke, "Stroke", "Color") -- [THEME]
 	UIStroke.Parent = ColorPickerFrame
 
 	DropShadow.Name = Fatality:RandomString()
@@ -1726,7 +1809,7 @@ function Fatality:CreateColorPicker(ColorBox: Frame,Transparency, Callback)
 	DropShadow.Size = UDim2.new(1, 47, 1, 47)
 	DropShadow.ZIndex = 199
 	DropShadow.Image = "rbxassetid://6014261993"
-	DropShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+	Fatality:Register(DropShadow, "Outline", "ImageColor3") -- [THEME]
 	DropShadow.ImageTransparency = 0.750
 	DropShadow.ScaleType = Enum.ScaleType.Slice
 	DropShadow.SliceCenter = Rect.new(49, 49, 450, 450)
@@ -1757,6 +1840,7 @@ function Fatality:CreateColorPicker(ColorBox: Frame,Transparency, Callback)
 	UICorner_2.Parent = ColorPickBox
 
 	UIStroke_2.Color = Color3.fromRGB(29, 29, 29)
+	Fatality:Register(UIStroke_2, "Stroke", "Color") -- [THEME]
 	UIStroke_2.Parent = ColorPickBox
 
 	ColorRedGreenBlue.Name = Fatality:RandomString()
@@ -1788,6 +1872,7 @@ function Fatality:CreateColorPicker(ColorBox: Frame,Transparency, Callback)
 
 	UIStroke_3.Transparency = 0.750
 	UIStroke_3.Color = Color3.fromRGB(29, 29, 29)
+	Fatality:Register(UIStroke_3, "Stroke", "Color") -- [THEME]
 	UIStroke_3.Parent = ColorRGBSlide
 
 	ColorOpc.Name = Fatality:RandomString()
@@ -1815,12 +1900,14 @@ function Fatality:CreateColorPicker(ColorBox: Frame,Transparency, Callback)
 
 	UIStroke_4.Transparency = 0.750
 	UIStroke_4.Color = Color3.fromRGB(29, 29, 29)
+	Fatality:Register(UIStroke_4, "Stroke", "Color") -- [THEME]
 	UIStroke_4.Parent = ColorOptSlide
 
 	UIGradient_2.Transparency = NumberSequence.new{NumberSequenceKeypoint.new(0.00, 1.00), NumberSequenceKeypoint.new(1.00, 0.00)}
 	UIGradient_2.Parent = ColorOpc
 
 	UIStroke_5.Color = Color3.fromRGB(29, 29, 29)
+	Fatality:Register(UIStroke_5, "Stroke", "Color") -- [THEME]
 	UIStroke_5.Parent = ColorOpc
 
 	ColorOpt.Name = Fatality:RandomString()
@@ -1848,6 +1935,7 @@ function Fatality:CreateColorPicker(ColorBox: Frame,Transparency, Callback)
 	PasteButton.ZIndex = 209
 	PasteButton.Image = "rbxassetid://10709799288"
 	PasteButton.ImageTransparency = 0.450
+	Fatality:Register(PasteButton, "Text", "ImageColor3") -- [THEME]
 
 	CopyButton.Name = Fatality:RandomString()
 	CopyButton.Parent = ColorOpt
@@ -1861,10 +1949,11 @@ function Fatality:CreateColorPicker(ColorBox: Frame,Transparency, Callback)
 	CopyButton.ZIndex = 209
 	CopyButton.Image = "rbxassetid://10709798682"
 	CopyButton.ImageTransparency = 0.450
+	Fatality:Register(CopyButton, "Text", "ImageColor3") -- [THEME]
 
 	hexCode.Name = Fatality:RandomString()
 	hexCode.Parent = ColorOpt
-	hexCode.BackgroundColor3 = Fatality.Colors.Black
+	Fatality:Register(hexCode, "Element") -- [THEME]
 	hexCode.BackgroundTransparency = 0.400
 	hexCode.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	hexCode.BorderSizePixel = 0
@@ -1887,7 +1976,7 @@ function Fatality:CreateColorPicker(ColorBox: Frame,Transparency, Callback)
 	HexCodeText.ZIndex = 209
 	HexCodeText.FontFace = Fatality.FontSemiBold
 	HexCodeText.Text = "#fff"
-	HexCodeText.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Fatality:Register(HexCodeText, "Text", "TextColor3") -- [THEME]
 	HexCodeText.TextSize = 13.000
 	HexCodeText.TextTransparency = 0.450
 	HexCodeText.TextXAlignment = Enum.TextXAlignment.Left;
@@ -2183,18 +2272,12 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 				
 				local baseSize = UIListLayout.AbsoluteContentSize.Y + 10;
 				
-				-- === ИСПРАВЛЕННЫЙ РАСЧЕТ ПОЗИЦИИ ===
 				local btnPos = Parent.AbsolutePosition
 				local btnSize = Parent.AbsoluteSize
-                local topBarOffset = GuiService:GetGuiInset().Y -- Получаем высоту верхней панели (~36px)
+                local topBarOffset = GuiService:GetGuiInset().Y
 				
-				-- Расчитываем координаты для верхнего левого угла списка (AnchorPoint 0,0)
-				
-				-- Y: Низ кнопки + отступ + УЧЕТ GuiInset (чтобы не смещалось вверх)
 				local targetY = btnPos.Y + btnSize.Y + 3 + topBarOffset
-				
-				-- X: Правый край кнопки минус ширина списка (выравнивание по правому краю)
-				local targetX = (btnPos.X + btnSize.X) - 175 -- 175 это ширина списка
+				local targetX = (btnPos.X + btnSize.X) - 175
 
 				DropdownItemFrame.Position = UDim2.fromOffset(targetX, targetY)
 
@@ -2235,27 +2318,24 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 	end;
 
 	DropdownItemFrame.Name = Fatality:RandomString()
-	DropdownItemFrame.Parent = ScreenGui -- Выносим в ScreenGui
+	DropdownItemFrame.Parent = ScreenGui 
 	
-	-- === СБРОС ANCHOR POINT ===
-	-- Используем стандартный (0,0) - верхний левый угол.
-	-- Это упрощает понимание того, откуда рисуется фрейм.
 	DropdownItemFrame.AnchorPoint = Vector2.new(0, 0) 
-	
-	DropdownItemFrame.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
+	Fatality:Register(DropdownItemFrame, "Container") -- [THEME] (фон дропдауна)
 	DropdownItemFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	DropdownItemFrame.BorderSizePixel = 0
 	DropdownItemFrame.ClipsDescendants = true
 	DropdownItemFrame.Position = UDim2.fromOffset(0, 0)
 	DropdownItemFrame.Size = UDim2.new(0, 175, 0, 0)
 	DropdownItemFrame.Visible = false
-	DropdownItemFrame.ZIndex = 10000 -- Поверх всего
+	DropdownItemFrame.ZIndex = 10000 
 	DropdownItemFrame.Active = true
 
 	UICorner.CornerRadius = UDim.new(0, 2)
 	UICorner.Parent = DropdownItemFrame
 
 	UIStroke.Color = Color3.fromRGB(29, 29, 29)
+	Fatality:Register(UIStroke, "Stroke", "Color") -- [THEME]
 	UIStroke.Parent = DropdownItemFrame
 
 	DropShadow.Name = Fatality:RandomString()
@@ -2268,7 +2348,7 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 	DropShadow.Size = UDim2.new(1, 47, 1, 47)
 	DropShadow.ZIndex = 9999
 	DropShadow.Image = "rbxassetid://6014261993"
-	DropShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+	Fatality:Register(DropShadow, "Outline", "ImageColor3") -- [THEME]
 	DropShadow.ImageTransparency = 0.750
 	DropShadow.ScaleType = Enum.ScaleType.Slice
 	DropShadow.SliceCenter = Rect.new(49, 49, 450, 450)
@@ -2305,7 +2385,8 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 		db_selected.Size = UDim2.new(1, 0, 0, 10)
 		db_selected.ZIndex = 10010
 		db_selected.FontFace = Fatality.FontSemiBold
-		db_selected.TextColor3 = Fatality.Colors.Main
+		-- Изначально ставим цвет, но логика смены ниже
+		db_selected.TextColor3 = Fatality.CurrentTheme.Main
 		db_selected.TextSize = 12.000
 		db_selected.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -2342,9 +2423,9 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 				if Multiplier then
 					if (typeof(Default) == 'table' and (Default[v] or table.find(Default,v))) or Default == v then
 						Selected[v] = true
-						bth.TextColor3 = Fatality.Colors.Main;
+						bth.TextColor3 = Fatality.CurrentTheme.Main;
 					else
-						bth.TextColor3 = Color3.fromRGB(255, 255, 255);
+						bth.TextColor3 = Fatality.CurrentTheme.Text;
 						Selected[v] = false
 					end
 
@@ -2352,9 +2433,9 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 						Selected[v] = not Selected[v];
 
 						if Selected[v] then
-							bth.TextColor3 = Fatality.Colors.Main;
+							bth.TextColor3 = Fatality.CurrentTheme.Main;
 						else
-							bth.TextColor3 = Color3.fromRGB(255, 255, 255);
+							bth.TextColor3 = Fatality.CurrentTheme.Text;
 						end;
 
 						Callback(Selected);
@@ -2364,17 +2445,17 @@ function Fatality:CreateDropdown(Parent: Frame, Default: string | {[string]: boo
 						selectedmem = bth;
 						Selected = v;
 
-						bth.TextColor3 = Fatality.Colors.Main;
+						bth.TextColor3 = Fatality.CurrentTheme.Main;
 					else
-						bth.TextColor3 = Color3.fromRGB(255, 255, 255);
+						bth.TextColor3 = Fatality.CurrentTheme.Text;
 					end;
 
 					bth.MouseButton1Click:Connect(function()
 						if selectedmem then
-							selectedmem.TextColor3 = Color3.fromRGB(255, 255, 255);
+							selectedmem.TextColor3 = Fatality.CurrentTheme.Text;
 						end;
 
-						bth.TextColor3 = Fatality.Colors.Main;
+						bth.TextColor3 = Fatality.CurrentTheme.Main;
 						selectedmem = bth;
 						Selected = v;
 
@@ -2425,10 +2506,9 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 	local elements = {};
 	local FatalWindow = Fatality:GetWindowFromElement(Parent);
 
-	-- Вспомогательная функция для создания "пустышки", если элемент скрыт (OnlyPC)
 	local function GetDummyElement()
 		return {
-			Option = Fatality.Dummy, -- Поддержка вложенных опций
+			Option = Fatality.Dummy, 
 			SetValue = function() end,
 			GetValue = function() return nil end,
 			Set = function() end, 
@@ -2442,7 +2522,6 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 	function elements:AddToggle(Config: Toggle)
 		Config = Config or {};
 		
-		-- [OnlyPC Check]
 		if not Fatality:CanShow(Config) then return GetDummyElement() end
 
 		Config.Name = Config.Name or "Toggle";
@@ -2465,7 +2544,8 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		Toggle.Name = Fatality:RandomString()
 		Toggle.Parent = Parent
-		Toggle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		-- Регистрируем фон как элемент (темный)
+		Fatality:Register(Toggle, "Element") -- [THEME]
 		Toggle.BackgroundTransparency = 1.000
 		Toggle.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Toggle.BorderSizePixel = 0
@@ -2484,7 +2564,14 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		Toggle_Name.Size = UDim2.new(1, 0, 0.800000012, 0)
 		Toggle_Name.ZIndex = ZIndex + 2
 		Toggle_Name.FontFace = Fatality.FontSemiBold;
-		Toggle_Name.TextColor3 = (Config.Risky and Color3.fromRGB(255, 160, 92)) or Color3.fromRGB(255, 255, 255)
+		
+		-- Логика цвета текста (Risky или обычный)
+		if Config.Risky then
+			Toggle_Name.TextColor3 = Color3.fromRGB(255, 160, 92)
+		else
+			Fatality:Register(Toggle_Name, "Text", "TextColor3") -- [THEME]
+		end
+		
 		Toggle_Name.TextSize = 13.000
 		Toggle_Name.TextTransparency = 1
 		Toggle_Name.TextXAlignment = Enum.TextXAlignment.Left;
@@ -2494,7 +2581,8 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		ValueFrame.Name = Fatality:RandomString()
 		ValueFrame.Parent = Toggle
 		ValueFrame.AnchorPoint = Vector2.new(1, 0.5)
-		ValueFrame.BackgroundColor3 = Fatality.Colors.Black
+		-- Чекбокс должен быть цвета контейнера
+		Fatality:Register(ValueFrame, "Element") -- [THEME]
 		ValueFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		ValueFrame.BorderSizePixel = 0
 		ValueFrame.Position = UDim2.new(1, -3, 0.5, 0)
@@ -2518,6 +2606,9 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		ValueIcon.ZIndex = ZIndex + 2
 		ValueIcon.Image = "rbxassetid://10709790644"
 		ValueIcon.ImageTransparency = 1;
+		
+		-- Регистрируем галочку как Accent (Main color)
+		Fatality:Register(ValueIcon, "Main", "ImageColor3") -- [THEME]
 
 		OptionButton.Name = Fatality:RandomString()
 		OptionButton.Parent = Toggle
@@ -2533,19 +2624,21 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		OptionButton.ImageTransparency = 1
 		OptionButton.ZIndex = ZIndex + 4
 		OptionButton.Visible = Config.Option;
+		Fatality:Register(OptionButton, "Text", "ImageColor3") -- [THEME]
 
 		local toggleImg = function(value)
 			if value then
 				Fatality:CreateAnimation(ValueIcon,0.45,{
 					ImageTransparency = 0,
-					ImageColor3 = Fatality.Colors.Main,
+					-- Используем CurrentTheme для анимаций
+					ImageColor3 = Fatality.CurrentTheme.Main,
 					Size = UDim2.new(0.8, 0, 0.8, 0),
 					Rotation = 0,
 				})
 			else
 				Fatality:CreateAnimation(ValueIcon,0.45,{
 					ImageTransparency = 1,
-					ImageColor3 = Color3.fromRGB(255, 255, 255),
+					ImageColor3 = Fatality.CurrentTheme.Text,
 					Size = UDim2.new(0.699999988, 0, 0.699999988, 0),
 					Rotation = 15
 				})
@@ -2603,14 +2696,14 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 				if b then
 					Fatality:CreateAnimation(ValueIcon,0.45,{
 						ImageTransparency = 0.5,
-						ImageColor3 = Color3.fromRGB(255, 255, 255),
+						ImageColor3 = Fatality.CurrentTheme.Text,
 						Size = UDim2.new(0.7, 0, 0.7, 0),
 						Rotation = 0
 					})
 				else
 					Fatality:CreateAnimation(ValueIcon,0.45,{
 						ImageTransparency = 1,
-						ImageColor3 = Color3.fromRGB(255, 255, 255),
+						ImageColor3 = Fatality.CurrentTheme.Text,
 						Size = UDim2.new(0.699999988, 0, 0.699999988, 0),
 						Rotation = 15
 					})
@@ -2658,7 +2751,6 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 	function elements:AddSlider(Config)
 		Config = Config or {};
 		
-		-- [OnlyPC Check]
 		if not Fatality:CanShow(Config) then return GetDummyElement() end
 
 		Config.Name = Config.Name or "Slider";
@@ -2689,7 +2781,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		Slider.Name = Fatality:RandomString()
 		Slider.Parent = Parent
-		Slider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(Slider, "Element") -- [THEME]
 		Slider.BackgroundTransparency = 1.000
 		Slider.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Slider.BorderSizePixel = 0
@@ -2710,7 +2802,13 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		Slider_Name.ZIndex = ZIndex + 2
 		Slider_Name.FontFace = Fatality.FontSemiBold
 		Slider_Name.Text = Config.Name
-		Slider_Name.TextColor3 = (Config.Risky and Color3.fromRGB(255, 160, 92)) or Color3.fromRGB(255, 255, 255)
+		
+		if Config.Risky then
+			Slider_Name.TextColor3 = Color3.fromRGB(255, 160, 92)
+		else
+			Fatality:Register(Slider_Name, "Text", "TextColor3") -- [THEME]
+		end
+		
 		Slider_Name.TextSize = 13.000
 		Slider_Name.TextTransparency = 0.200
 		Slider_Name.TextXAlignment = Enum.TextXAlignment.Left
@@ -2718,7 +2816,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		ValueFrame.Name = Fatality:RandomString()
 		ValueFrame.Parent = Slider
 		ValueFrame.AnchorPoint = Vector2.new(1, 0.5)
-		ValueFrame.BackgroundColor3 = Fatality.Colors.Black
+		Fatality:Register(ValueFrame, "Element") -- [THEME]
 		ValueFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		ValueFrame.BorderSizePixel = 0
 		ValueFrame.Position = UDim2.new(1, -3, 0.5, 0)
@@ -2742,11 +2840,13 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		OptionButton.ImageTransparency = 0.600
 		OptionButton.Visible = Config.Option;
 		OptionButton.ZIndex = ZIndex + 1;
+		Fatality:Register(OptionButton, "Text", "ImageColor3") -- [THEME]
 
 		local initialAlpha = (Config.Default - min) / (max - min)
 		boxli.Name = Fatality:RandomString()
 		boxli.Parent = ValueFrame
-		boxli.BackgroundColor3 = Fatality.Colors.Main
+		-- Полоска слайдера - Accent
+		Fatality:Register(boxli, "Main") -- [THEME]
 		boxli.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		boxli.BorderSizePixel = 0
 		boxli.Size = UDim2.new(initialAlpha, 0, 1, 0)
@@ -2765,7 +2865,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		ValueText.ZIndex = ZIndex + 4
 		ValueText.FontFace = Fatality.FontSemiBold
 		ValueText.Text = string.format('%s%s',tostring(Config.Default),tostring(Config.Type));
-		ValueText.TextColor3 = Color3.fromRGB(255, 255, 255)
+		ValueText.TextColor3 = Color3.fromRGB(255, 255, 255) -- Текст внутри слайдера обычно белый
 		ValueText.TextSize = 9.000
 		ValueText.TextStrokeTransparency = 0.850;
 		ValueText.TextTransparency = 0;
@@ -2820,7 +2920,6 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		local IsHold = false;
 
-		-- ОБНОВЛЕННАЯ ЛОГИКА UPDATE
 		local function update(Input)
 			local alpha = math.clamp((Input.Position.X - ValueFrame.AbsolutePosition.X) / ValueFrame.AbsoluteSize.X, 0, 1)
 			local Value = min + alpha * (max - min)
@@ -2907,7 +3006,6 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 	function elements:AddButton(Config: Button)
 		Config = Config or {};
 		
-		-- [OnlyPC Check]
 		if not Fatality:CanShow(Config) then return GetDummyElement() end
 
 		Config.Name = Config.Name or "Slider";
@@ -2924,7 +3022,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		Button.Name = Fatality:RandomString()
 		Button.Parent = Parent
-		Button.BackgroundColor3 = Fatality.Colors.Black
+		Fatality:Register(Button, "Element") -- [THEME]
 		Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Button.BorderSizePixel = 0
 		Button.Size = UDim2.new(1, -25, 0, 25)
@@ -2943,7 +3041,13 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		Button_Name.ZIndex = ZIndex + 2
 		Button_Name.FontFace = Fatality.FontSemiBold
 		Button_Name.Text = Config.Name
-		Button_Name.TextColor3 = (Config.Risky and Color3.fromRGB(255, 160, 92)) or Color3.fromRGB(255, 255, 255)
+		
+		if Config.Risky then
+			Button_Name.TextColor3 = Color3.fromRGB(255, 160, 92)
+		else
+			Fatality:Register(Button_Name, "Text", "TextColor3") -- [THEME]
+		end
+		
 		Button_Name.TextSize = 12.000
 		Button_Name.TextTransparency = 0.400
 		Fatality:ProtectText(Button_Name,Config.Name);
@@ -2975,12 +3079,13 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		Fatality:CreateHover(Button,function(value)
 			if value then
+				-- При наведении делаем чуть светлее или темнее
 				Fatality:CreateAnimation(Button,0.45,{
-					BackgroundColor3 = Color3.fromRGB(14, 14, 14)
+					BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Хардкод для ховера, или можно придумать логику
 				})
 			else
 				Fatality:CreateAnimation(Button,0.45,{
-					BackgroundColor3 = Fatality.Colors.Black
+					BackgroundColor3 = Fatality.CurrentTheme.Element -- Возвращаем к теме
 				})
 			end;
 		end)
@@ -3005,7 +3110,6 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 	function elements:AddColorPicker(Config: ColorPicker)
 		Config = Config or {};
 		
-		-- [OnlyPC Check]
 		if not Fatality:CanShow(Config) then return GetDummyElement() end
 
 		Config.Name = Config.Name or "Color Picker";
@@ -3027,7 +3131,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		ColorPicker.Name = Fatality:RandomString()
 		ColorPicker.Parent = Parent
-		ColorPicker.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(ColorPicker, "Element") -- [THEME]
 		ColorPicker.BackgroundTransparency = 1.000
 		ColorPicker.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		ColorPicker.BorderSizePixel = 0
@@ -3047,7 +3151,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		ColorPicker_Name.ZIndex = ZIndex + 2
 		ColorPicker_Name.FontFace = Fatality.FontSemiBold
 		ColorPicker_Name.Text = Config.Name
-		ColorPicker_Name.TextColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(ColorPicker_Name, "Text", "TextColor3") -- [THEME]
 		ColorPicker_Name.TextSize = 13.000
 		ColorPicker_Name.TextTransparency = 0.200
 		ColorPicker_Name.TextXAlignment = Enum.TextXAlignment.Left
@@ -3079,6 +3183,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		OptionButton.Image = "http://www.roblox.com/asset/?id=14007344336"
 		OptionButton.ImageTransparency = 0.600
 		OptionButton.ZIndex = 7;
+		Fatality:Register(OptionButton, "Text", "ImageColor3") -- [THEME]
 
 		local res = Fatality:CreateColorPicker(ValueFrame,Config.Transparency,function(rgb,opc)
 			ValueFrame.BackgroundColor3 = rgb;
@@ -3153,7 +3258,6 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 function elements:AddDropdown(Config: Dropdown)
 		Config = Config or {};
 		
-		-- [OnlyPC Check]
 		if not Fatality:CanShow(Config) then return GetDummyElement() end
 
 		Config.Name = Config.Name or "Dropdown";
@@ -3163,7 +3267,6 @@ function elements:AddDropdown(Config: Dropdown)
 		Config.Values = Config.Values or {};
 		Config.Multi = Config.Multi or false;
 
-		-- Вспомогательная функция для красивого отображения текста (особенно для Multi)
 		local DataParser = function(value)
 			if not value then return 'None'; end;
 			local Out;
@@ -3183,7 +3286,6 @@ function elements:AddDropdown(Config: Dropdown)
 			return Out;
 		end;
 
-		-- 1. Создание визуальной части (Сама строка в меню)
 		local Dropdown = Instance.new("Frame")
 		local Dropdown_Name = Instance.new("TextLabel")
 		local ValueFrame = Instance.new("Frame")
@@ -3196,7 +3298,7 @@ function elements:AddDropdown(Config: Dropdown)
 
 		Dropdown.Name = Fatality:RandomString()
 		Dropdown.Parent = Parent
-		Dropdown.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(Dropdown, "Element") -- [THEME]
 		Dropdown.BackgroundTransparency = 1.000
 		Dropdown.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Dropdown.BorderSizePixel = 0
@@ -3216,7 +3318,7 @@ function elements:AddDropdown(Config: Dropdown)
 		Dropdown_Name.ZIndex = 7
 		Dropdown_Name.FontFace = Fatality.FontSemiBold
 		Dropdown_Name.Text = Config.Name
-		Dropdown_Name.TextColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(Dropdown_Name, "Text", "TextColor3") -- [THEME]
 		Dropdown_Name.TextSize = 13.000
 		Dropdown_Name.TextTransparency = 0.200
 		Dropdown_Name.TextXAlignment = Enum.TextXAlignment.Left
@@ -3226,7 +3328,7 @@ function elements:AddDropdown(Config: Dropdown)
 		ValueFrame.Name = Fatality:RandomString()
 		ValueFrame.Parent = Dropdown
 		ValueFrame.AnchorPoint = Vector2.new(1, 0.5)
-		ValueFrame.BackgroundColor3 = Fatality.Colors.Black
+		Fatality:Register(ValueFrame, "Element") -- [THEME]
 		ValueFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		ValueFrame.BorderSizePixel = 0
 		ValueFrame.Position = UDim2.new(1, -3, 0.5, 0)
@@ -3250,6 +3352,7 @@ function elements:AddDropdown(Config: Dropdown)
 		OptionButton.ImageTransparency = 0.600
 		OptionButton.ZIndex = 8
 		OptionButton.Visible = Config.Option;
+		Fatality:Register(OptionButton, "Text", "ImageColor3") -- [THEME]
 
 		icon.Name = Fatality:RandomString()
 		icon.Parent = ValueFrame
@@ -3263,6 +3366,7 @@ function elements:AddDropdown(Config: Dropdown)
 		icon.SizeConstraint = Enum.SizeConstraint.RelativeYY
 		icon.ZIndex = ZIndex + 5
 		icon.Image = "rbxassetid://10709790948"
+		Fatality:Register(icon, "Text", "ImageColor3") -- [THEME]
 
 		Value_Text.Name = Fatality:RandomString()
 		Value_Text.Parent = ValueFrame
@@ -3284,10 +3388,7 @@ function elements:AddDropdown(Config: Dropdown)
 		Value_Text.TextWrapped = true
 		Value_Text.TextTruncate = Enum.TextTruncate.SplitWord
 
-		-- 2. Создание логики выпадающего списка
 		local res;
-		-- ВАЖНО: Передаем ValueFrame (маленькую кнопку), а не Parent (всю строку)
-		-- Это нужно для правильного позиционирования списка
 		res = Fatality:CreateDropdown(ValueFrame, Config.Default, Config.Multi, Config.AutoUpdate, function(args)
 			Config.Default = args;
 			Value_Text.Text = DataParser(Config.Default);
@@ -3295,26 +3396,23 @@ function elements:AddDropdown(Config: Dropdown)
 			Config.Callback(args);
 		end);
 
-		-- 3. Загрузка данных в список
 		res:set_data(Config.Values);
 		res:refresh();
 
-		-- Анимация стрелочки
 		res:on_toggle(function(b)
 			if b then
 				Fatality:CreateAnimation(icon,0.35,{
 					Rotation = -180,
-					ImageColor3 = Fatality.Colors.Main
+					ImageColor3 = Fatality.CurrentTheme.Main
 				})
 			else
 				Fatality:CreateAnimation(icon,0.35,{
 					Rotation = 0,
-					ImageColor3 = Color3.fromRGB(255, 255, 255)
+					ImageColor3 = Fatality.CurrentTheme.Text
 				})
 			end;
 		end);
 
-		-- Анимация скрытия/показа элемента (для поиска или скрытия)
 		local OpcToggle = function(value)
 			if value then
 				Fatality:CreateAnimation(Dropdown_Name,0.45,{
@@ -3353,7 +3451,6 @@ function elements:AddDropdown(Config: Dropdown)
 
 		OpcToggle(Event:GetAttribute('V'));
 
-		-- 4. Возврат правильного объекта (Wrapper), а не самого Dropdown-контроллера
 		local Respons = Fatality:CreateResponse({
 			Rename = function(new_name)
 				Dropdown_Name.Text = new_name
@@ -3390,7 +3487,6 @@ function elements:AddDropdown(Config: Dropdown)
 	function elements:AddKeybind(Config: Keybind)
 		Config = Config or {};
 		
-		-- [OnlyPC Check]
 		if not Fatality:CanShow(Config) then return GetDummyElement() end
 
 		Config.Name = Config.Name or "Keybind";
@@ -3399,35 +3495,10 @@ function elements:AddDropdown(Config: Dropdown)
 		Config.Callback = Config.Callback or function(any) end;
 
 		local Keys = {
-			One = '1',
-			Two = '2',
-			Three = '3',
-			Four = '4',
-			Five = '5',
-			Six = '6',
-			Seven = '7',
-			Eight = '8',
-			Nine = '9',
-			Zero = '0',
-			['Minus'] = "-",
-			['Plus'] = "+",
-			BackSlash = "\\",
-			Slash = "/",
-			Period = '.',
-			Semicolon = ';',
-			Colon = ":",
-			LeftControl = "LCtrl",
-			RightControl = "RCtrl",
-			LeftShift = "LShift",
-			RightShift = "RShift",
-			Return = "Enter",
-			LeftBracket = "[",
-			RightBracket = "]",
-			Quote = "'",
-			Comma = ",",
-			Equals = "=",
-			LeftSuper = "Super",
-			RightSuper = "Super"
+			One = '1', Two = '2', Three = '3', Four = '4', Five = '5', Six = '6', Seven = '7', Eight = '8', Nine = '9', Zero = '0',
+			['Minus'] = "-", ['Plus'] = "+", BackSlash = "\\", Slash = "/", Period = '.', Semicolon = ';', Colon = ":",
+			LeftControl = "LCtrl", RightControl = "RCtrl", LeftShift = "LShift", RightShift = "RShift", Return = "Enter",
+			LeftBracket = "[", RightBracket = "]", Quote = "'", Comma = ",", Equals = "=", LeftSuper = "Super", RightSuper = "Super"
 		};
 
 		local GetItem = function(item)
@@ -3455,7 +3526,7 @@ function elements:AddDropdown(Config: Dropdown)
 
 		Keybind.Name = Fatality:RandomString()
 		Keybind.Parent = Parent
-		Keybind.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(Keybind, "Element") -- [THEME]
 		Keybind.BackgroundTransparency = 1.000
 		Keybind.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Keybind.BorderSizePixel = 0
@@ -3475,7 +3546,7 @@ function elements:AddDropdown(Config: Dropdown)
 		Keybind_Name.ZIndex = ZIndex + 2
 		Keybind_Name.FontFace = Fatality.FontSemiBold
 		Keybind_Name.Text = Config.Name
-		Keybind_Name.TextColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(Keybind_Name, "Text", "TextColor3") -- [THEME]
 		Keybind_Name.TextSize = 13.000
 		Keybind_Name.TextTransparency = 0.200
 		Keybind_Name.TextXAlignment = Enum.TextXAlignment.Left
@@ -3484,7 +3555,7 @@ function elements:AddDropdown(Config: Dropdown)
 		ValueFrame.Name = Fatality:RandomString()
 		ValueFrame.Parent = Keybind
 		ValueFrame.AnchorPoint = Vector2.new(1, 0.5)
-		ValueFrame.BackgroundColor3 = Fatality.Colors.Black
+		Fatality:Register(ValueFrame, "Element") -- [THEME]
 		ValueFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		ValueFrame.BorderSizePixel = 0
 		ValueFrame.Position = UDim2.new(1, -3, 0.5, 0)
@@ -3507,6 +3578,7 @@ function elements:AddDropdown(Config: Dropdown)
 		OptionButton.Image = "http://www.roblox.com/asset/?id=14007344336"
 		OptionButton.ImageTransparency = 0.600
 		OptionButton.Visible = Config.Option or false;
+		Fatality:Register(OptionButton, "Text", "ImageColor3") -- [THEME]
 
 		ValueText.Name = Fatality:RandomString()
 		ValueText.Parent = ValueFrame
@@ -3629,17 +3701,15 @@ function elements:AddDropdown(Config: Dropdown)
 	function elements:AddParagraph(settings)
 		settings = settings or {}
 		
-		-- [OnlyPC Check]
 		if not Fatality:CanShow(settings) then return GetDummyElement() end
 
 		settings.Title = settings.Title or "Paragraph"
 		settings.Content = settings.Content or "This is some default content."
 
-		-- ОБНОВЛЕННЫЙ ПАРАГРАФ (UIAutomaticSize)
 		local Paragraph = Instance.new("Frame")
 		Paragraph.Name = Fatality:RandomString()
 		Paragraph.Parent = Parent
-		Paragraph.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(Paragraph, "Element") -- [THEME]
 		Paragraph.BackgroundTransparency = 1.000
 		Paragraph.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Paragraph.BorderSizePixel = 0
@@ -3663,7 +3733,7 @@ function elements:AddDropdown(Config: Dropdown)
 		TitleLabel.ZIndex = ZIndex + 2
 		TitleLabel.FontFace = Fatality.FontSemiBold
 		TitleLabel.Text = settings.Title
-		TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(TitleLabel, "Text", "TextColor3") -- [THEME]
 		TitleLabel.TextSize = 13.000
 		TitleLabel.TextTransparency = 1
 		TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -3678,7 +3748,7 @@ function elements:AddDropdown(Config: Dropdown)
 		ContentLabel.ZIndex = ZIndex + 2
 		ContentLabel.FontFace = Fatality.FontSemiBold
 		ContentLabel.Text = settings.Content
-		ContentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(ContentLabel, "TextDark", "TextColor3") -- [THEME] (Content потемнее)
 		ContentLabel.TextSize = 12.000
 		ContentLabel.TextTransparency = 1
 		ContentLabel.TextWrapped = true
@@ -3704,7 +3774,6 @@ function elements:AddDropdown(Config: Dropdown)
 	function elements:AddInput(settings)
 		settings = settings or {}
 		
-		-- [OnlyPC Check]
 		if not Fatality:CanShow(settings) then return GetDummyElement() end
 
 		settings.Name = settings.Name or "Input"
@@ -3720,7 +3789,7 @@ function elements:AddDropdown(Config: Dropdown)
 
 		InputFrame.Name = Fatality:RandomString()
 		InputFrame.Parent = Parent
-		InputFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(InputFrame, "Element") -- [THEME]
 		InputFrame.BackgroundTransparency = 1.000
 		InputFrame.Size = UDim2.new(1, -25, 0, 17)
 		InputFrame.ZIndex = ZIndex + 1
@@ -3735,7 +3804,7 @@ function elements:AddDropdown(Config: Dropdown)
 		NameLabel.ZIndex = ZIndex + 2
 		NameLabel.FontFace = Fatality.FontSemiBold
 		NameLabel.Text = settings.Name
-		NameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(NameLabel, "Text", "TextColor3") -- [THEME]
 		NameLabel.TextSize = 13.000
 		NameLabel.TextTransparency = 1
 		NameLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -3743,7 +3812,7 @@ function elements:AddDropdown(Config: Dropdown)
 		TextBoxFrame.Name = "TextBoxFrame"
 		TextBoxFrame.Parent = InputFrame
 		TextBoxFrame.AnchorPoint = Vector2.new(1, 0.5)
-		TextBoxFrame.BackgroundColor3 = Fatality.Colors.Black
+		Fatality:Register(TextBoxFrame, "Element") -- [THEME]
 		TextBoxFrame.Position = UDim2.new(1, -3, 0.5, 0)
 		TextBoxFrame.Size = UDim2.new(0, 85, 0.85, 0)
 		TextBoxFrame.ZIndex = ZIndex + 2
@@ -3762,7 +3831,7 @@ function elements:AddDropdown(Config: Dropdown)
 		TextBox.FontFace = Fatality.FontSemiBold
 		TextBox.Text = settings.Default
 		TextBox.PlaceholderText = settings.PlaceholderText
-		TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(TextBox, "Text", "TextColor3") -- [THEME]
 		TextBox.PlaceholderColor3 = Color3.fromRGB(128, 128, 128)
 		TextBox.TextSize = 11.000
 		TextBox.TextXAlignment = Enum.TextXAlignment.Left
@@ -3953,7 +4022,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	ConfigWindowFrame.Name = "ConfigWindowFrame"
 	ConfigWindowFrame.Parent = Root
 	ConfigWindowFrame.AnchorPoint = Vector2.new(0,1)
-	ConfigWindowFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+	Fatality:Register(ConfigWindowFrame, "Container") -- [THEME]
 	ConfigWindowFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	ConfigWindowFrame.BorderSizePixel = 0
 	ConfigWindowFrame.ClipsDescendants = true
@@ -3965,6 +4034,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	UICorner.Parent = ConfigWindowFrame
 
 	UIStroke.Color = Color3.fromRGB(29, 29, 29)
+	Fatality:Register(UIStroke, "Stroke", "Color") -- [THEME]
 	UIStroke.Parent = ConfigWindowFrame
 
 	DropShadow.Name = "DropShadow"
@@ -3977,14 +4047,14 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	DropShadow.Size = UDim2.new(1, 47, 1, 47)
 	DropShadow.ZIndex = 205
 	DropShadow.Image = "rbxassetid://6014261993"
-	DropShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+	Fatality:Register(DropShadow, "Outline", "ImageColor3") -- [THEME]
 	DropShadow.ImageTransparency = 0.750
 	DropShadow.ScaleType = Enum.ScaleType.Slice
 	DropShadow.SliceCenter = Rect.new(49, 49, 450, 450)
 
 	ScrollingFrame.Parent = ConfigWindowFrame
 	ScrollingFrame.Active = true
-	ScrollingFrame.BackgroundColor3 = Fatality.Colors.Black
+	Fatality:Register(ScrollingFrame, "Element") -- [THEME]
 	ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	ScrollingFrame.BorderSizePixel = 0
 	ScrollingFrame.Position = UDim2.new(0, 8, 0, 8)
@@ -3997,6 +4067,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 
 	UIStroke_2.Transparency = 0.750
 	UIStroke_2.Color = Color3.fromRGB(29, 29, 29)
+	Fatality:Register(UIStroke_2, "Stroke", "Color") -- [THEME]
 	UIStroke_2.Parent = ScrollingFrame
 
 	UIListLayout.Parent = ScrollingFrame
@@ -4014,7 +4085,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	InputFrame.Name = "InputFrame"
 	InputFrame.Parent = ConfigWindowFrame
 	InputFrame.AnchorPoint = Vector2.new(0, 1)
-	InputFrame.BackgroundColor3 = Fatality.Colors.Black
+	Fatality:Register(InputFrame, "Element") -- [THEME]
 	InputFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	InputFrame.BorderSizePixel = 0
 	InputFrame.Position = UDim2.new(0, 8, 1, -9)
@@ -4023,6 +4094,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 
 	UIStroke_3.Transparency = 0.750
 	UIStroke_3.Color = Color3.fromRGB(29, 29, 29)
+	Fatality:Register(UIStroke_3, "Stroke", "Color") -- [THEME]
 	UIStroke_3.Parent = InputFrame
 
 	UICorner_3.CornerRadius = UDim.new(0, 3)
@@ -4039,7 +4111,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	TextBox.ZIndex = 209
 	TextBox.FontFace = Fatality.FontSemiBold
 	TextBox.Text = ""
-	TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Fatality:Register(TextBox, "Text", "TextColor3") -- [THEME]
 	TextBox.TextSize = 10.000
 	TextBox.TextTransparency = 0.500
 	TextBox.TextXAlignment = Enum.TextXAlignment.Left
@@ -4056,6 +4128,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	AddConfigButton.ZIndex = 209
 	AddConfigButton.Image = "rbxassetid://10734923868"
 	AddConfigButton.ImageTransparency = 0.500
+	Fatality:Register(AddConfigButton, "Text", "ImageColor3") -- [THEME]
 
 	UICorner_4.CornerRadius = UDim.new(1, 0)
 	UICorner_4.Parent = AddConfigButton
@@ -4070,8 +4143,9 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	GetConfigButton.Position = UDim2.new(1, -8, 0, 10)
 	GetConfigButton.Size = UDim2.new(0, 15, 0, 15)
 	GetConfigButton.ZIndex = 209
-	GetConfigButton.Image = "rbxassetid://10723387265"
+	GetConfigButton.Image = "rbxassetid://10723387721"
 	GetConfigButton.ImageTransparency = 0.500
+	Fatality:Register(GetConfigButton, "Text", "ImageColor3") -- [THEME]
 
 	UICorner_5.CornerRadius = UDim.new(1, 0)
 	UICorner_5.Parent = GetConfigButton
@@ -4088,6 +4162,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	SaveConfigButton.ZIndex = 209
 	SaveConfigButton.Image = "rbxassetid://10734941499"
 	SaveConfigButton.ImageTransparency = 0.500
+	Fatality:Register(SaveConfigButton, "Text", "ImageColor3") -- [THEME]
 
 	UICorner_6.CornerRadius = UDim.new(1, 0)
 	UICorner_6.Parent = SaveConfigButton
@@ -4103,7 +4178,8 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	DeleteButton.Size = UDim2.new(0, 15, 0, 15)
 	DeleteButton.ZIndex = 209
 	DeleteButton.Image = "rbxassetid://10747362393"
-	DeleteButton.ImageColor3 = Fatality.Colors.Main
+	-- Кнопка удаления красная (Main), либо можно сделать ее всегда красной
+	Fatality:Register(DeleteButton, "Main", "ImageColor3") -- [THEME]
 	DeleteButton.ImageTransparency = 0.250
 
 	UICorner_7.CornerRadius = UDim.new(1, 0)
@@ -4180,7 +4256,8 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 		db_selected.Size = UDim2.new(1, 0, 0, 10)
 		db_selected.ZIndex = 220
 		db_selected.FontFace = Fatality.FontSemiBold
-		db_selected.TextColor3 = Color3.fromRGB(150, 150, 150)
+		-- По умолчанию TextDark (неактивный)
+		db_selected.TextColor3 = Fatality.CurrentTheme.TextDark
 		db_selected.TextSize = 12.000
 		db_selected.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -4221,19 +4298,22 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 				if tostring(import.Name) == tostring(v) or import.Name == v then
 					import.Element = button;
 					import.Name = v;
-					import.Element.TextColor3 = Fatality.Colors.Main;
+					-- Активный элемент - Main color
+					button.TextColor3 = Fatality.CurrentTheme.Main;
 					button.Text = "  "..tostring(v);
 				end;
 
 				button.MouseButton1Click:Connect(function()
 					if import.Element then
-						import.Element.TextColor3 = Color3.fromRGB(150, 150, 150);
+						-- Возвращаем неактивный цвет
+						import.Element.TextColor3 = Fatality.CurrentTheme.TextDark;
 						import.Element.Text = " "..import.Name;
 					end;
 
 					import.Element = button;
 					import.Name = v;
-					button.TextColor3 = Fatality.Colors.Main;
+					-- Ставим активный цвет
+					button.TextColor3 = Fatality.CurrentTheme.Main;
 					button.Text = "  "..tostring(v);
 				end);
 			end;
@@ -4403,7 +4483,7 @@ function Fatality.new(Window: Window)
 	Window.Keybind = Window.Keybind or "Insert";
 	Window.Expire = Window.Expire or "never";
 
-	-- [NEW] Переменная для бинда
+	local OriginalSize = Window.Scale
 	local CurrentKeybind = Window.Keybind
 
 	local Fatal = {
@@ -4419,10 +4499,10 @@ function Fatality.new(Window: Window)
 	local Fatalitywin = Instance.new("ScreenGui")
 	local FatalFrame = Instance.new("Frame")
 	
-	-- [NEW] UIScale для корректного масштабирования всего содержимого
+	-- Масштабирование
 	local MainScale = Instance.new("UIScale")
 	MainScale.Parent = FatalFrame
-	MainScale.Scale = 1 -- По дефолту 100%
+	MainScale.Scale = 1 
 
 	local UICorner = Instance.new("UICorner")
 	local DropShadow = Instance.new("ImageLabel")
@@ -4469,7 +4549,6 @@ function Fatality.new(Window: Window)
 		Fatal.Signal:Fire(bool);
 
 		if bool then
-			-- [ОТКРЫТИЕ] С анимациями
 			for i,v in next , Fatal.Menus do
 				v.ValueSelect(false);
 			end;
@@ -4508,15 +4587,13 @@ function Fatality.new(Window: Window)
 
 			Fatality:CreateAnimation(DropShadow,0.35,{ ImageTransparency = 0.75 })
 		else
-			-- [ЗАКРЫТИЕ] Мгновенное (без анимаций, как ты просил)
-			
+			-- Мгновенное закрытие
 			table.clear(Fatality.DragBlacklist);
 
 			for i,v in next , Fatal.Menus do
 				v.ValueSelect(false);
 			end;
 
-			-- Сброс позиций
 			SaveButton.Position = UDim2.new(0,35,1, 20)
 			SearchButton.Position = UDim2.new(0,10,1, 20)
 			InfoButton.Position = UDim2.new(1, -5,1, 20)
@@ -4537,14 +4614,10 @@ function Fatality.new(Window: Window)
 			HeaderText.TextTransparency = 1
 			
 			HeaderLineShadow_2.BackgroundTransparency = 1
-			
 			InfoButton.ImageTransparency = 1
 			SearchButton.ImageTransparency = 1
 			SaveButton.ImageTransparency = 1
-			
 			HeaderLineShadow.BackgroundTransparency = 1
-			
-			-- Мгновенное скрытие фона
 			FatalFrame.BackgroundTransparency = 1
 			Header.BackgroundTransparency = 1
 			HeaderLine.BackgroundTransparency = 1
@@ -4568,7 +4641,7 @@ function Fatality.new(Window: Window)
 	FatalFrame.Name = Fatality:RandomString()
 	FatalFrame.Parent = Fatalitywin
 	FatalFrame.AnchorPoint = Vector2.new(0.5, 0)
-	FatalFrame.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
+	Fatality:Register(FatalFrame, "Background") -- [THEME]
 	FatalFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	FatalFrame.BorderSizePixel = 0
 	FatalFrame.Position = UDim2.new(0.5, 0, 0.2);
@@ -4587,7 +4660,7 @@ function Fatality.new(Window: Window)
 	DropShadow.Size = UDim2.new(1, 47, 1, 47)
 	DropShadow.ZIndex = -1
 	DropShadow.Image = "rbxassetid://6014261993"
-	DropShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+	Fatality:Register(DropShadow, "Outline", "ImageColor3") -- [THEME]
 	DropShadow.ImageTransparency = 1
 	DropShadow.ScaleType = Enum.ScaleType.Slice
 	DropShadow.SliceCenter = Rect.new(49, 49, 450, 450)
@@ -4596,7 +4669,7 @@ function Fatality.new(Window: Window)
 	Header.Name = Fatality:RandomString()
 	Header.Parent = FatalFrame
 	Header.Active = true
-	Header.BackgroundColor3 = Color3.fromRGB(21, 21, 21)
+	Fatality:Register(Header, "Container") -- [THEME]
 	Header.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	Header.BorderSizePixel = 0
 	Header.Size = UDim2.new(1, 0, 0, 40)
@@ -4605,7 +4678,7 @@ function Fatality.new(Window: Window)
 	HeaderLine.Name = Fatality:RandomString()
 	HeaderLine.Parent = Header
 	HeaderLine.AnchorPoint = Vector2.new(0, 1)
-	HeaderLine.BackgroundColor3 = Color3.fromRGB(29, 29, 29)
+	Fatality:Register(HeaderLine, "Stroke") -- [THEME]
 	HeaderLine.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	HeaderLine.BorderSizePixel = 0
 	HeaderLine.Position = UDim2.new(0, 0, 1, 0)
@@ -4627,7 +4700,7 @@ function Fatality.new(Window: Window)
 	HeaderText.ZIndex = 4
 	HeaderText.Font = Enum.Font.GothamBold
 	HeaderText.Text = Window.Name
-	HeaderText.TextColor3 = Color3.fromRGB(229, 229, 229)
+	Fatality:Register(HeaderText, "Text", "TextColor3") -- [THEME]
 	HeaderText.TextSize = 21.000
 	HeaderText.TextStrokeColor3 = Color3.fromRGB(205, 67, 218)
 	HeaderText.TextStrokeTransparency = 0.640
@@ -4708,7 +4781,7 @@ function Fatality.new(Window: Window)
 	User_name.ZIndex = 4
 	User_name.Font = Enum.Font.GothamMedium
 	User_name.Text = Client.DisplayName;
-	User_name.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Fatality:Register(User_name, "Text", "TextColor3") -- [THEME]
 	User_name.TextSize = 13.000
 	User_name.TextStrokeTransparency = 0.700
 	User_name.TextXAlignment = Enum.TextXAlignment.Right
@@ -4724,8 +4797,9 @@ function Fatality.new(Window: Window)
 	expire_days.Size = UDim2.new(0, 200, 0, 15)
 	expire_days.ZIndex = 4
 	expire_days.Font = Enum.Font.GothamMedium
+	-- Используем TextDark для неактивного текста (expires)
+	Fatality:Register(expire_days, "Text", "TextColor3") -- [THEME]
 	expire_days.Text = string.format("<font transparency=\"0.5\">expires:</font> <font color=\"#f53174\">%s</font>",Window.Expire)
-	expire_days.TextColor3 = Color3.fromRGB(255, 255, 255)
 	expire_days.TextSize = 12.000
 	expire_days.TextStrokeTransparency = 0.700
 	expire_days.TextXAlignment = Enum.TextXAlignment.Right
@@ -4747,6 +4821,7 @@ function Fatality.new(Window: Window)
 
 	MenuFrame.Name = Fatality:RandomString()
 	MenuFrame.Parent = FatalFrame
+	-- MenuFrame прозрачный, ему тема не нужна, но нужен его детям (Left, Center, Right)
 	MenuFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	MenuFrame.BackgroundTransparency = 1.000
 	MenuFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -4758,7 +4833,7 @@ function Fatality.new(Window: Window)
 	Bottom.Parent = FatalFrame
 	Bottom.Active = true
 	Bottom.AnchorPoint = Vector2.new(0, 1)
-	Bottom.BackgroundColor3 = Color3.fromRGB(21, 21, 21)
+	Fatality:Register(Bottom, "Container") -- [THEME]
 	Bottom.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	Bottom.BorderSizePixel = 0
 	Bottom.Position = UDim2.new(0, 0, 1, 0)
@@ -4767,7 +4842,7 @@ function Fatality.new(Window: Window)
 
 	HeaderLine_2.Name = Fatality:RandomString()
 	HeaderLine_2.Parent = Bottom
-	HeaderLine_2.BackgroundColor3 = Color3.fromRGB(29, 29, 29)
+	Fatality:Register(HeaderLine_2, "Stroke") -- [THEME]
 	HeaderLine_2.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	HeaderLine_2.BorderSizePixel = 0
 	HeaderLine_2.Size = UDim2.new(1, 0, 0, 1)
@@ -4829,10 +4904,7 @@ function Fatality.new(Window: Window)
 		expire_days.Text = string.format("<font transparency=\"0.5\">expires:</font> <font color=\"#f53174\">%s</font>",str)
 	end;
 
-	-- [UPDATED] Скейлинг через UIScale
 	function Fatal:SetScale(percent: number)
-		-- percent приходит от 50 до 150
-		-- UIScale.Scale принимает значение от 0.5 до 1.5
 		MainScale.Scale = percent / 100
 	end
 
@@ -4859,6 +4931,8 @@ function Fatality.new(Window: Window)
 		ConfigButton.ZIndex = 4
 		ConfigButton.Image = "rbxassetid://10723387721"
 		ConfigButton.ImageTransparency = 0.500;
+		-- Для иконок обычно используем белый цвет (Text), чтобы их было видно
+		Fatality:Register(ConfigButton, "Text", "ImageColor3") -- [THEME]
 
 		Fatality:CreateHover(ConfigButton,function(bool)
 			if bool then
@@ -4985,7 +5059,8 @@ function Fatality.new(Window: Window)
 
 		MenuButton.Name = Fatality:RandomString()
 		MenuButton.Parent = tbc;
-		MenuButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+		-- Регистрируем фон кнопки как "Container" (темный по умолчанию)
+		Fatality:Register(MenuButton, "Container") -- [THEME]
 		MenuButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		MenuButton.BorderSizePixel = 0
 		MenuButton.Size = UDim2.new(0, 90, 0.85, 0)
@@ -5009,7 +5084,8 @@ function Fatality.new(Window: Window)
 		Icon.SizeConstraint = Enum.SizeConstraint.RelativeYY
 		Icon.ZIndex = 5
 		Icon.Image = Fatality:GetIcon(Menu.Icon);
-		Icon.ImageColor3 = Fatality.Colors.Main
+		-- Регистрируем иконку как "Text" (белая по умолчанию)
+		Fatality:Register(Icon, "Text", "ImageColor3") -- [THEME]
 		Icon.ScaleType = Enum.ScaleType.Crop
 
 		UICorner_2.CornerRadius = UDim.new(1, 0)
@@ -5027,7 +5103,7 @@ function Fatality.new(Window: Window)
 		menu_name.ZIndex = 5
 		menu_name.Font = Enum.Font.GothamBold
 		menu_name.Text = Menu.Name
-		menu_name.TextColor3 = Color3.fromRGB(255, 255, 255)
+		Fatality:Register(menu_name, "Text", "TextColor3") -- [THEME]
 		menu_name.TextSize = 13.000
 		menu_name.TextStrokeTransparency = 0.900
 		menu_name.TextTransparency = 0.150
@@ -5193,7 +5269,8 @@ function Fatality.new(Window: Window)
 
 				Fatality:CreateAnimation(Icon,0.5,{
 					ImageTransparency = 0.15,
-					ImageColor3 = Fatality.Colors.Main
+					-- Используем CurrentTheme для активного состояния
+					ImageColor3 = Fatality.CurrentTheme.Main
 				});
 
 				Fatality:CreateAnimation(menu_name,0.5,{
@@ -5214,7 +5291,7 @@ function Fatality.new(Window: Window)
 
 				Fatality:CreateAnimation(Icon,0.5,{
 					ImageTransparency = 0.5,
-					ImageColor3 = Color3.fromRGB(255, 255, 255)
+					ImageColor3 = Fatality.CurrentTheme.Text -- Возвращаем к цвету текста
 				});
 
 				Fatality:CreateAnimation(MenuButton,0.5,{
@@ -5248,7 +5325,7 @@ function Fatality.new(Window: Window)
 				if bool then
 					Fatality:CreateAnimation(Icon,0.5,{
 						ImageTransparency = 0.2,
-						ImageColor3 = Color3.fromRGB(255, 255, 255)
+						ImageColor3 = Fatality.CurrentTheme.Text
 					});
 
 					Fatality:CreateAnimation(MenuButton,0.5,{
@@ -5261,7 +5338,7 @@ function Fatality.new(Window: Window)
 				else
 					Fatality:CreateAnimation(Icon,0.5,{
 						ImageTransparency = 0.5,
-						ImageColor3 = Color3.fromRGB(255, 255, 255)
+						ImageColor3 = Fatality.CurrentTheme.Text
 					});
 
 					Fatality:CreateAnimation(MenuButton,0.5,{
@@ -5302,7 +5379,8 @@ function Fatality.new(Window: Window)
 
 			Preview.Name = "Preview"
 			Preview.Parent = (string.lower(Config.Position) == 'left' and Left) or (string.lower(Config.Position) == 'center' and Center) or Right;
-			Preview.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
+			Fatality:Register(Preview, "Background") -- Может быть и прозрачным, но для порядка
+			Preview.BackgroundTransparency = 1 -- Превью обычно контейнер
 			Preview.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Preview.BorderSizePixel = 0
 			Preview.ClipsDescendants = true
@@ -5320,7 +5398,7 @@ function Fatality.new(Window: Window)
 			PreviewName.ZIndex = 19
 			PreviewName.FontFace = Fatality.FontSemiBold
 			PreviewName.Text = Config.Name
-			PreviewName.TextColor3 = Color3.fromRGB(255, 255, 255)
+			Fatality:Register(PreviewName, "Text", "TextColor3") -- [THEME]
 			PreviewName.TextSize = 15.000
 			PreviewName.TextStrokeTransparency = 0.750
 			PreviewName.TextXAlignment = Enum.TextXAlignment.Left
@@ -5328,7 +5406,7 @@ function Fatality.new(Window: Window)
 			Main.Name = "Main"
 			Main.Parent = Preview
 			Main.AnchorPoint = Vector2.new(0.5, 1)
-			Main.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+			Fatality:Register(Main, "Container") -- [THEME]
 			Main.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Main.BorderSizePixel = 0
 			Main.Position = UDim2.new(0.5, 0, 1, -1)
@@ -5336,6 +5414,7 @@ function Fatality.new(Window: Window)
 			Main.ZIndex = 17
 
 			UIStroke.Color = Color3.fromRGB(29, 29, 29)
+			Fatality:Register(UIStroke, "Stroke", "Color") -- [THEME]
 			UIStroke.Parent = Main
 
 			UICorner.CornerRadius = UDim.new(0, 2)
@@ -5355,7 +5434,7 @@ function Fatality.new(Window: Window)
 			local Toggle = function(v)
 				if v then
 					Fatality:CreateAnimation(Preview,0.5,{
-						BackgroundTransparency = 0
+						BackgroundTransparency = 0 -- Тут осторожно, если Preview контейнер
 					})
 
 					Fatality:CreateAnimation(PreviewName,0.5,{
@@ -5439,7 +5518,7 @@ function Fatality.new(Window: Window)
 
 			ListBox.Name = Fatality:RandomString()
 			ListBox.Parent = (string.lower(Config.Position) == 'left' and Left) or (string.lower(Config.Position) == 'center' and Center) or Right;
-			ListBox.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
+			Fatality:Register(ListBox, "Background") -- [THEME]
 			ListBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			ListBox.BorderSizePixel = 0
 			ListBox.ClipsDescendants = true
@@ -5452,7 +5531,7 @@ function Fatality.new(Window: Window)
 			Elements.Name = Fatality:RandomString()
 			Elements.Parent = ListBox
 			Elements.AnchorPoint = Vector2.new(0.5, 1)
-			Elements.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+			Fatality:Register(Elements, "Container") -- [THEME]
 			Elements.BackgroundTransparency = 0
 			Elements.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Elements.BorderSizePixel = 0
@@ -5461,6 +5540,7 @@ function Fatality.new(Window: Window)
 			Elements.ZIndex = 10
 
 			UIStroke.Color = Color3.fromRGB(29, 29, 29)
+			Fatality:Register(UIStroke, "Stroke", "Color") -- [THEME]
 			UIStroke.Parent = Elements
 
 			UICorner.CornerRadius = UDim.new(0, 2)
@@ -5468,7 +5548,7 @@ function Fatality.new(Window: Window)
 
 			SearchBox.Name = Fatality:RandomString()
 			SearchBox.Parent = Elements
-			SearchBox.BackgroundColor3 = Fatality.Colors.Black
+			Fatality:Register(SearchBox, "Element") -- [THEME] (фон поиска)
 			SearchBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			SearchBox.BorderSizePixel = 0
 			SearchBox.ClipsDescendants = true
@@ -5477,7 +5557,7 @@ function Fatality.new(Window: Window)
 			SearchBox.ZIndex = 10
 
 			TextBox.Parent = SearchBox
-			TextBox.BackgroundColor3 = Fatality.Colors.Black
+			Fatality:Register(TextBox, "Element") -- [THEME]
 			TextBox.BackgroundTransparency = 1.000
 			TextBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			TextBox.BorderSizePixel = 0
@@ -5488,7 +5568,7 @@ function Fatality.new(Window: Window)
 			TextBox.FontFace = Fatality.FontSemiBold
 			TextBox.PlaceholderText = "Start typing..."
 			TextBox.Text = ""
-			TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+			Fatality:Register(TextBox, "Text", "TextColor3") -- [THEME]
 			TextBox.TextSize = 11.000
 			TextBox.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -5497,6 +5577,7 @@ function Fatality.new(Window: Window)
 
 			UIStroke_2.Transparency = 0.750
 			UIStroke_2.Color = Color3.fromRGB(29, 29, 29)
+			Fatality:Register(UIStroke_2, "Stroke", "Color") -- [THEME]
 			UIStroke_2.Parent = SearchBox
 
 			OptionButton.Name = Fatality:RandomString()
@@ -5517,7 +5598,7 @@ function Fatality.new(Window: Window)
 			ScrollingFrame.Parent = Elements
 			ScrollingFrame.Active = true
 			ScrollingFrame.AnchorPoint = Vector2.new(0.5, 0)
-			ScrollingFrame.BackgroundColor3 = Fatality.Colors.Black
+			Fatality:Register(ScrollingFrame, "Element") -- [THEME]
 			ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			ScrollingFrame.BorderSizePixel = 0
 			ScrollingFrame.Position = UDim2.new(0.5, 0, 0, 40)
@@ -5530,6 +5611,7 @@ function Fatality.new(Window: Window)
 
 			UIStroke_3.Transparency = 0.750
 			UIStroke_3.Color = Color3.fromRGB(29, 29, 29)
+			Fatality:Register(UIStroke_3, "Stroke", "Color") -- [THEME]
 			UIStroke_3.Parent = ScrollingFrame
 
 			UIListLayout.Parent = ScrollingFrame
@@ -5568,7 +5650,7 @@ function Fatality.new(Window: Window)
 			ListName.ZIndex = 10
 			ListName.FontFace = Fatality.FontSemiBold
 			ListName.Text = Config.Name
-			ListName.TextColor3 = Color3.fromRGB(255, 255, 255)
+			Fatality:Register(ListName, "Text", "TextColor3") -- [THEME]
 			ListName.TextSize = 15.000
 			ListName.TextStrokeTransparency = 0.750
 			ListName.TextXAlignment = Enum.TextXAlignment.Left
@@ -5584,7 +5666,7 @@ function Fatality.new(Window: Window)
 				db_selected.Size = UDim2.new(1, 0, 0, 10)
 				db_selected.ZIndex = 15
 				db_selected.FontFace = Fatality.FontSemiBold
-				db_selected.TextColor3 = Fatality.Colors.Main
+				db_selected.TextColor3 = Fatality.CurrentTheme.Main -- Начальный цвет
 				db_selected.TextSize = 12.000
 				db_selected.TextTransparency = 0.5;
 				db_selected.TextXAlignment = Enum.TextXAlignment.Left
@@ -5744,11 +5826,11 @@ function Fatality.new(Window: Window)
 						if Config.Multi then
 							if (typeof(Config.Default) == 'table' and (Config.Default[v] or table.find(Config.Default,v))) or Config.Default == v then
 								Config.Default[v] = true
-								bth.TextColor3 = Fatality.Colors.Main;
+								bth.TextColor3 = Fatality.CurrentTheme.Main;
 								bth.TextTransparency = 0;
 
 							else
-								bth.TextColor3 = Color3.fromRGB(255, 255, 255);
+								bth.TextColor3 = Fatality.CurrentTheme.Text;
 								bth.TextTransparency = 0.5;
 
 								Config.Default[v] = false
@@ -5772,11 +5854,11 @@ function Fatality.new(Window: Window)
 								Config.Default[v] = not Config.Default[v];
 
 								if Config.Default[v] then
-									bth.TextColor3 = Fatality.Colors.Main;
+									bth.TextColor3 = Fatality.CurrentTheme.Main;
 									bth.TextTransparency = 0;
 
 								else
-									bth.TextColor3 = Color3.fromRGB(255, 255, 255);
+									bth.TextColor3 = Fatality.CurrentTheme.Text;
 									bth.TextTransparency = 0.5;
 								end;
 
@@ -5787,11 +5869,11 @@ function Fatality.new(Window: Window)
 								selectedmem = bth;
 								Config.Default = v;
 
-								bth.TextColor3 = Fatality.Colors.Main;
+								bth.TextColor3 = Fatality.CurrentTheme.Main;
 								bth.TextTransparency = 0;
 
 							else
-								bth.TextColor3 = Color3.fromRGB(255, 255, 255);
+								bth.TextColor3 = Fatality.CurrentTheme.Text;
 								bth.TextTransparency = 0.5;
 							end;
 
@@ -5811,12 +5893,12 @@ function Fatality.new(Window: Window)
 
 							bth.MouseButton1Click:Connect(function()
 								if selectedmem then
-									selectedmem.TextColor3 = Color3.fromRGB(255, 255, 255);
+									selectedmem.TextColor3 = Fatality.CurrentTheme.Text;
 									selectedmem.TextTransparency = 0.5;
 								end;
 
 								bth.TextTransparency = 0;
-								bth.TextColor3 = Fatality.Colors.Main;
+								bth.TextColor3 = Fatality.CurrentTheme.Main;
 								selectedmem = bth;
 								Config.Default = v;
 
@@ -5916,7 +5998,7 @@ function Fatality.new(Window: Window)
 
 			Section.Name = Fatality:RandomString()
 			Section.Parent = (string.lower(Config.Position) == 'left' and Left) or (string.lower(Config.Position) == 'center' and Center) or Right;
-			Section.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
+			Fatality:Register(Section, "Background") -- [THEME]
 			Section.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Section.BorderSizePixel = 0
 			Section.ClipsDescendants = true
@@ -5925,7 +6007,7 @@ function Fatality.new(Window: Window)
 			Elements.Name = Fatality:RandomString()
 			Elements.Parent = Section
 			Elements.AnchorPoint = Vector2.new(0.5, 1)
-			Elements.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+			Fatality:Register(Elements, "Container") -- [THEME]
 			Elements.BackgroundTransparency = 0
 			Elements.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Elements.BorderSizePixel = 0
@@ -5933,6 +6015,7 @@ function Fatality.new(Window: Window)
 			Elements.Size = UDim2.new(1, -5, 1, -10)
 
 			UIStroke.Color = Color3.fromRGB(29, 29, 29)
+			Fatality:Register(UIStroke, "Stroke", "Color") -- [THEME]
 			UIStroke.Parent = Elements
 
 			UICorner.CornerRadius = UDim.new(0, 2)
@@ -5960,7 +6043,7 @@ function Fatality.new(Window: Window)
 			SectionName.Size = UDim2.new(1, 0, 0, 15)
 			SectionName.FontFace = Fatality.FontSemiBold;
 			SectionName.Text = Config.Name
-			SectionName.TextColor3 = Color3.fromRGB(255, 255, 255)
+			Fatality:Register(SectionName, "Text", "TextColor3") -- [THEME]
 			SectionName.TextSize = 15.000
 			SectionName.TextStrokeTransparency = 0.750
 			SectionName.TextXAlignment = Enum.TextXAlignment.Left
@@ -6546,7 +6629,7 @@ function Fatality.new(Window: Window)
 	ToggleUI(true);
 
 	return Fatal;
-end; -- ezezez
+end;
 
 function Fatality:Loader(Config: Loader)
 	Config = Config or {};
@@ -6822,7 +6905,7 @@ function Fatality:CreateNotifier(): Notifier
 			notify_block.Name = Fatality:RandomString()
 			notify_block.Parent = notify
 			notify_block.AnchorPoint = Vector2.new(0.5, 0)
-			notify_block.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
+			Fatality:Register(notify_block, "Container") -- [THEME]
 			notify_block.BackgroundTransparency = 1
 			notify_block.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			notify_block.BorderSizePixel = 0
@@ -6836,18 +6919,18 @@ function Fatality:CreateNotifier(): Notifier
 
 			UIStroke.Thickness = 1
 			UIStroke.Transparency = 1
+			Fatality:Register(UIStroke, "Stroke", "Color") -- [THEME]
 			UIStroke.Parent = notify_block
 
 			Icon.Name = Fatality:RandomString()
 			Icon.Parent = notify_block
-			Icon.BackgroundColor3 = Fatality.Colors.Main
+			Fatality:Register(Icon, "Main") -- [THEME] (иконка цветная)
 			Icon.BackgroundTransparency = 1.000
 			Icon.BorderColor3 = Color3.fromRGB(0, 0, 0)
 			Icon.BorderSizePixel = 0
 			Icon.Position = UDim2.new(0, 7, 0, 7)
 			Icon.Size = UDim2.new(0, 18, 0, 18)
 			Icon.Image = Fatality:GetIcon(Config.Icon);
-			Icon.ImageColor3 = Fatality.Colors.Main
 			Icon.ImageTransparency = 1
 			Icon.ZIndex = 55
 
@@ -6862,7 +6945,7 @@ function Fatality:CreateNotifier(): Notifier
 			HeaderText.ZIndex = 55
 			HeaderText.FontFace = Fatality.FontSemiBold
 			HeaderText.Text = Config.Title
-			HeaderText.TextColor3 = Fatality.Colors.Main
+			Fatality:Register(HeaderText, "Main", "TextColor3") -- [THEME] (Заголовок цветной)
 			HeaderText.TextSize = 13.000
 			HeaderText.TextTransparency = 1
 			HeaderText.TextXAlignment = Enum.TextXAlignment.Left
@@ -6879,7 +6962,7 @@ function Fatality:CreateNotifier(): Notifier
 			BodyText.ZIndex = 55
 			BodyText.FontFace = Fatality.FontSemiBold
 			BodyText.Text = Config.Content or "";
-			BodyText.TextColor3 = Color3.fromRGB(255, 255, 255)
+			Fatality:Register(BodyText, "Text", "TextColor3") -- [THEME]
 			BodyText.TextSize = 12.000
 			BodyText.TextTransparency = 1
 			BodyText.TextWrapped = true
