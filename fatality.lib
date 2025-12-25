@@ -290,18 +290,19 @@ Fatality.Flags = {};
 Fatality.DragBlacklist = {};
 Fatality.Version = '1.7 - Theme Engine';
 
--- === [THEME SYSTEM START] ===
+-- === [THEME SYSTEM START (FIXED)] ===
 Fatality.CurrentTheme = {
-	-- main clrs
 	Main       = Color3.fromRGB(255, 106, 133), 
 	Background = Color3.fromRGB(19, 19, 19),    
 	Container  = Color3.fromRGB(24, 24, 24),    
-	Element    = Color3.fromRGB(16, 16, 16),    
+	Element    = Color3.fromRGB(16, 16, 16),
+	
+	Black      = Color3.fromRGB(16, 16, 16), -- Это спасет от ошибки!
 	
 	Text       = Color3.fromRGB(255, 255, 255),
 	TextDark   = Color3.fromRGB(150, 150, 150),
 	Stroke     = Color3.fromRGB(29, 29, 29),    
-	Outline    = Color3.fromRGB(0, 0, 0),    
+	Outline    = Color3.fromRGB(0, 0, 0),       
 };
 
 Fatality.Colors = Fatality.CurrentTheme; 
