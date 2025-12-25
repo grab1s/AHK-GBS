@@ -6188,15 +6188,17 @@ function Fatality.new(Window: Window)
 
 		-- 1. Main Window
 		AboutFrame.Name = "AboutWindow"
-		AboutFrame.Parent = Fatalitywin -- Важно: поверх всего
+		AboutFrame.Parent = Fatalitywin
 		AboutFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 		AboutFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 		AboutFrame.Size = UDim2.new(0, 220, 0, 260)
-		-- Используем цвет Element (самый темный) для фона
-		Fatality:Register(AboutFrame, "Element") 
+		Fatality:Register(AboutFrame, "Background") 
 		AboutFrame.BorderSizePixel = 0
 		AboutFrame.Visible = false
 		AboutFrame.ZIndex = 200
+		
+		-- [FIX] Active = true предотвращает клики сквозь окно в игру
+		AboutFrame.Active = true 
 		
 		-- Dragging
 		Fatality:AddDragBlacklist(AboutFrame)
@@ -6232,7 +6234,6 @@ function Fatality.new(Window: Window)
 		HeaderText.ZIndex = 201
 		HeaderText.Font = Enum.Font.GothamBold
 		HeaderText.Text = "About"
-		-- Заголовок всегда красный/акцентный в Fatality
 		Fatality:Register(HeaderText, "Main", "TextColor3") 
 		HeaderText.TextSize = 14
 		HeaderText.TextXAlignment = Enum.TextXAlignment.Left
@@ -6245,7 +6246,7 @@ function Fatality.new(Window: Window)
 		CloseButton.ZIndex = 202
 		CloseButton.Font = Enum.Font.GothamBold
 		CloseButton.Text = "x"
-		CloseButton.TextColor3 = Color3.fromRGB(150, 150, 150) -- TextDark
+		CloseButton.TextColor3 = Color3.fromRGB(150, 150, 150)
 		CloseButton.TextSize = 14
 		
 		-- Hover effect for Close
@@ -6265,7 +6266,7 @@ function Fatality.new(Window: Window)
 		ContentFrame.Size = UDim2.new(1, -20, 1, -45)
 		ContentFrame.ZIndex = 201
 
-		-- 3.1 GLITCH LOGO ("VANTALITY)
+		-- 3.1 GLITCH LOGO ("VANTALITY")
 		LogoContainer.Name = "Logo"
 		LogoContainer.Parent = ContentFrame
 		LogoContainer.BackgroundTransparency = 1
@@ -6278,7 +6279,7 @@ function Fatality.new(Window: Window)
 			l.BackgroundTransparency = 1
 			l.Size = UDim2.new(1, 0, 1, 0)
 			l.Position = UDim2.new(0, offset, 0, 0)
-			l.Font = Enum.Font.GothamBlack -- Жирный шрифт
+			l.Font = Enum.Font.GothamBlack
 			l.Text = "VANTALITY"
 			l.TextColor3 = color
 			l.TextSize = 22
@@ -6304,11 +6305,6 @@ function Fatality.new(Window: Window)
 		CreditsText.TextYAlignment = Enum.TextYAlignment.Top
 		CreditsText.RichText = true
 		
-		local c_gray = 'Start <font color="#666666">'
-		local c_end = '</font>'
-		local c_white = '<b>'
-		local c_white_end = '</b>'
-		
 		CreditsText.Text = table.concat({
 			'<font color="#666666">// developed by</font>',
 			'<b>grabis</b>', 
@@ -6325,7 +6321,7 @@ function Fatality.new(Window: Window)
 		-- 3.3 LINK BUTTON ("Public Software")
 		LinkButton.Name = "LinkButton"
 		LinkButton.Parent = ContentFrame
-		LinkButton.BackgroundColor3 = Color3.fromRGB(12, 12, 12) -- Чуть темнее фона
+		LinkButton.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 		LinkButton.Position = UDim2.new(0, 0, 1, -25)
 		LinkButton.Size = UDim2.new(1, 0, 0, 25)
 		LinkButton.ZIndex = 202
@@ -6340,10 +6336,8 @@ function Fatality.new(Window: Window)
 		
 		UIStroke_Btn.Color = Color3.fromRGB(29, 29, 29)
 		UIStroke_Btn.Parent = LinkButton
-		-- Регистрируем обводку кнопки, чтобы менялась с темой
 		Fatality:Register(UIStroke_Btn, "Stroke", "Color")
 
-		-- Hover Effect для кнопки
 		Fatality:CreateHover(LinkButton, function(hover) 
 			local TS = game:GetService("TweenService")
 			if hover then
@@ -6353,11 +6347,9 @@ function Fatality.new(Window: Window)
 			end
 		end)
 
-		-- LOGIC: Toggle Window on (i) click
 		InfoButton.MouseButton1Click:Connect(function()
 			AboutFrame.Visible = not AboutFrame.Visible
 			if AboutFrame.Visible then
-				-- Эффект появления
 				AboutFrame.Size = UDim2.new(0, 220, 0, 240)
 				AboutFrame.BackgroundTransparency = 1
 				for _, v in pairs(AboutFrame:GetDescendants()) do
@@ -6365,7 +6357,6 @@ function Fatality.new(Window: Window)
 					if v:IsA("UIStroke") then v.Transparency = 1 end
 				end
 				
-				-- Анимация
 				local TS = game:GetService("TweenService")
 				local info = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 				
@@ -6382,10 +6373,8 @@ function Fatality.new(Window: Window)
 			end
 		end)
 
-		-- LOGIC: AddInfo connect to internal button
 		function Fatal:AddInfo(callback)
 			LinkButton.MouseButton1Click:Connect(function()
-				-- Простая анимация клика
 				LinkButton.TextSize = 11
 				task.wait(0.05)
 				LinkButton.TextSize = 12
