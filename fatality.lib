@@ -6265,7 +6265,7 @@ function Fatality.new(Window: Window)
 		ContentFrame.Size = UDim2.new(1, -20, 1, -45)
 		ContentFrame.ZIndex = 201
 
-		-- 3.1 GLITCH LOGO ("FATALITY")
+		-- 3.1 GLITCH LOGO ("VANTALITY)
 		LogoContainer.Name = "Logo"
 		LogoContainer.Parent = ContentFrame
 		LogoContainer.BackgroundTransparency = 1
@@ -6279,7 +6279,7 @@ function Fatality.new(Window: Window)
 			l.Size = UDim2.new(1, 0, 1, 0)
 			l.Position = UDim2.new(0, offset, 0, 0)
 			l.Font = Enum.Font.GothamBlack -- Жирный шрифт
-			l.Text = "FATALITY"
+			l.Text = "VANTALITY"
 			l.TextColor3 = color
 			l.TextSize = 22
 			l.ZIndex = 202 + z
@@ -6304,8 +6304,6 @@ function Fatality.new(Window: Window)
 		CreditsText.TextYAlignment = Enum.TextYAlignment.Top
 		CreditsText.RichText = true
 		
-		-- Форматируем текст как на скриншоте
-		-- Серый цвет для //, Белый для имен
 		local c_gray = 'Start <font color="#666666">'
 		local c_end = '</font>'
 		local c_white = '<b>'
@@ -6313,15 +6311,15 @@ function Fatality.new(Window: Window)
 		
 		CreditsText.Text = table.concat({
 			'<font color="#666666">// developed by</font>',
-			'<b>ahk_gbs (grab1s)</b>', -- Твой ник
+			'<b>grabis</b>', 
 			' ',
 			'<font color="#666666">// ui base by</font>',
 			'<b>4lpaca</b>',
 			' ',
 			'<font color="#666666">// special thanks</font>',
-			'<b>ScriptRobox, ScriptDLC</b>',
+			'<b>Mepilok, Tetraquark, ahk_lzt</b>',
 			' ',
-			'<font color="#666666">// copyright © 2025</font> <font color="#ff4a68">FATALITY</font>'
+			'<font color="#666666">// copyright © 2025</font> <font color="#ff4a68">VANTALITY</font>'
 		}, "<br />")
 
 		-- 3.3 LINK BUTTON ("Public Software")
