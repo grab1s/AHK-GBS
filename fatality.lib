@@ -4403,9 +4403,7 @@ function Fatality.new(Window: Window)
 	Window.Keybind = Window.Keybind or "Insert";
 	Window.Expire = Window.Expire or "never";
 
-	-- [NEW] Сохраняем исходный размер для масштабирования
-	local OriginalSize = Window.Scale
-	-- [NEW] Текущий бинд в переменной для возможности смены
+	-- [NEW] Переменная для бинда
 	local CurrentKeybind = Window.Keybind
 
 	local Fatal = {
@@ -4420,6 +4418,12 @@ function Fatality.new(Window: Window)
 
 	local Fatalitywin = Instance.new("ScreenGui")
 	local FatalFrame = Instance.new("Frame")
+	
+	-- [NEW] UIScale для корректного масштабирования всего содержимого
+	local MainScale = Instance.new("UIScale")
+	MainScale.Parent = FatalFrame
+	MainScale.Scale = 1 -- По дефолту 100%
+
 	local UICorner = Instance.new("UICorner")
 	local DropShadow = Instance.new("ImageLabel")
 	local Header = Instance.new("Frame")
@@ -4465,7 +4469,7 @@ function Fatality.new(Window: Window)
 		Fatal.Signal:Fire(bool);
 
 		if bool then
-			-- [OPENING] Animation Logic (Kept as is for smooth open)
+			-- [ОТКРЫТИЕ] С анимациями
 			for i,v in next , Fatal.Menus do
 				v.ValueSelect(false);
 			end;
@@ -4474,10 +4478,8 @@ function Fatality.new(Window: Window)
 				Fatal.MenuSelected.ValueSelect(true)
 			end
 
-			-- Восстанавливаем размер при открытии (важно для скейлинга)
-			-- FatalFrame.Size устанавливается анимацией, но целевой размер берется из текущего (возможно измененного) Window.Scale
 			Fatality:CreateAnimation(FatalFrame,0.15,{
-				Size = Window.Scale, -- Используем актуальный Window.Scale
+				Size = Window.Scale,
 				BackgroundTransparency = 0,
 			})
 
@@ -4506,9 +4508,7 @@ function Fatality.new(Window: Window)
 
 			Fatality:CreateAnimation(DropShadow,0.35,{ ImageTransparency = 0.75 })
 		else
-			-- [CLOSING] Instant Logic (No Animation)
-			-- Мы устанавливаем прозрачность сразу в 1.
-			-- Сигнал FatalFrame.BackgroundTransparency >= 0.99 отключит ScreenGui мгновенно.
+			-- [ЗАКРЫТИЕ] Мгновенное (без анимаций, как ты просил)
 			
 			table.clear(Fatality.DragBlacklist);
 
@@ -4516,7 +4516,7 @@ function Fatality.new(Window: Window)
 				v.ValueSelect(false);
 			end;
 
-			-- Мгновенный сброс позиций (чтобы при открытии анимация играла заново)
+			-- Сброс позиций
 			SaveButton.Position = UDim2.new(0,35,1, 20)
 			SearchButton.Position = UDim2.new(0,10,1, 20)
 			InfoButton.Position = UDim2.new(1, -5,1, 20)
@@ -4544,7 +4544,7 @@ function Fatality.new(Window: Window)
 			
 			HeaderLineShadow.BackgroundTransparency = 1
 			
-			-- Главные элементы
+			-- Мгновенное скрытие фона
 			FatalFrame.BackgroundTransparency = 1
 			Header.BackgroundTransparency = 1
 			HeaderLine.BackgroundTransparency = 1
@@ -4795,10 +4795,8 @@ function Fatality.new(Window: Window)
 
 	Fatality:Drag(FatalFrame,FatalFrame,0.1);
 
-	-- [NEW] Обновленный биндер с использованием CurrentKeybind
 	UserInputService.InputBegan:Connect(function(input,istyping)
 		if not istyping then
-			-- Проверяем CurrentKeybind (может быть строкой или Enum.KeyCode)
 			local keyPressed = input.KeyCode
 			local isMatch = false
 			
@@ -4831,23 +4829,13 @@ function Fatality.new(Window: Window)
 		expire_days.Text = string.format("<font transparency=\"0.5\">expires:</font> <font color=\"#f53174\">%s</font>",str)
 	end;
 
-	-- [NEW] Функция для динамического изменения размера окна
+	-- [UPDATED] Скейлинг через UIScale
 	function Fatal:SetScale(percent: number)
-		-- Процент: 50..150
-		local multiplier = percent / 100
-		local newX = OriginalSize.X.Offset * multiplier
-		local newY = OriginalSize.Y.Offset * multiplier
-		
-		-- Обновляем текущий Scale в конфиге окна, чтобы анимация открытия использовала новый размер
-		Window.Scale = UDim2.new(0, newX, 0, newY)
-		
-		-- Если меню открыто, применяем размер сразу
-		if Fatal.Toggle then
-			FatalFrame.Size = Window.Scale
-		end
+		-- percent приходит от 50 до 150
+		-- UIScale.Scale принимает значение от 0.5 до 1.5
+		MainScale.Scale = percent / 100
 	end
 
-	-- [NEW] Функция для смены бинда
 	function Fatal:SetKeybind(key)
 		CurrentKeybind = key
 	end
@@ -6558,7 +6546,7 @@ function Fatality.new(Window: Window)
 	ToggleUI(true);
 
 	return Fatal;
-end;
+end; -- ezezez
 
 function Fatality:Loader(Config: Loader)
 	Config = Config or {};
