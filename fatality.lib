@@ -4314,10 +4314,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 
 			res.ConfigDirectory = cfgPath;
 
-            -- !!! ИСПРАВЛЕНИЕ ЗДЕСЬ !!!
-            -- Принудительно обновляем список конфигов сразу после инициализации папки
             res:ReloadConfig()
-            -- !!!!!!!!!!!!!!!!!!!!!!!!
 
 			AddConfigButton.MouseButton1Click:Connect(function()
 				local configName = TextBox.Text;
@@ -4406,6 +4403,11 @@ function Fatality.new(Window: Window)
 	Window.Keybind = Window.Keybind or "Insert";
 	Window.Expire = Window.Expire or "never";
 
+	-- [NEW] Сохраняем исходный размер для масштабирования
+	local OriginalSize = Window.Scale
+	-- [NEW] Текущий бинд в переменной для возможности смены
+	local CurrentKeybind = Window.Keybind
+
 	local Fatal = {
 		Menus = {},
 		ElementContents = {},
@@ -4463,6 +4465,7 @@ function Fatality.new(Window: Window)
 		Fatal.Signal:Fire(bool);
 
 		if bool then
+			-- [OPENING] Animation Logic (Kept as is for smooth open)
 			for i,v in next , Fatal.Menus do
 				v.ValueSelect(false);
 			end;
@@ -4471,174 +4474,83 @@ function Fatality.new(Window: Window)
 				Fatal.MenuSelected.ValueSelect(true)
 			end
 
+			-- Восстанавливаем размер при открытии (важно для скейлинга)
+			-- FatalFrame.Size устанавливается анимацией, но целевой размер берется из текущего (возможно измененного) Window.Scale
 			Fatality:CreateAnimation(FatalFrame,0.15,{
-				Size = Window.Scale,
+				Size = Window.Scale, -- Используем актуальный Window.Scale
 				BackgroundTransparency = 0,
 			})
 
-			Fatality:CreateAnimation(Header,0.5,{
-				BackgroundTransparency = 0,
-			})
+			Fatality:CreateAnimation(Header,0.5,{ BackgroundTransparency = 0 })
+			Fatality:CreateAnimation(HeaderLine,0.5,{ BackgroundTransparency = 0 })
+			Fatality:CreateAnimation(Bottom,0.5,{ BackgroundTransparency = 0 })
+			Fatality:CreateAnimation(HeaderLine_2,0.5,{ BackgroundTransparency = 0 })
+			Fatality:CreateAnimation(HeaderLineShadow,0.5,{ BackgroundTransparency = 0.5 })
+			Fatality:CreateAnimation(HeaderLineShadow_2,0.5,{ BackgroundTransparency = 0.5 })
 
-			Fatality:CreateAnimation(HeaderLine,0.5,{
-				BackgroundTransparency = 0,
-			})
+			Fatality:CreateAnimation(InfoButton,0.25,{ ImageTransparency = 0.5 })
+			Fatality:CreateAnimation(SearchButton,0.25,{ ImageTransparency = 0.5 })
+			Fatality:CreateAnimation(SaveButton,0.25,{ ImageTransparency = 0.5 })
 
-			Fatality:CreateAnimation(Bottom,0.5,{
-				BackgroundTransparency = 0,
-			})
+			Fatality:CreateAnimation(HeaderText,0.35,{ TextStrokeTransparency = 0.640, TextTransparency = 0 })
 
-			Fatality:CreateAnimation(HeaderLine_2,0.5,{
-				BackgroundTransparency = 0,
-			})
+			Fatality:CreateAnimation(UserIcon,0.45,{ ImageTransparency = 0, Position = UDim2.new(1, -10,0.5, 0) })
+			Fatality:CreateAnimation(User_name,0.35,{ TextTransparency = 0, Position = UDim2.new(1, -40,0, 3) })
+			Fatality:CreateAnimation(expire_days,0.5,{ TextTransparency = 0, Position = UDim2.new(1, -40,0, 16) })
 
-			Fatality:CreateAnimation(HeaderLineShadow,0.5,{
-				BackgroundTransparency = 0.5,
-			})
+			Fatality:CreateAnimation(UIStroke,0.35,{ Thickness = 2.500, Transparency = 0.900 })
 
-			Fatality:CreateAnimation(HeaderLineShadow_2,0.5,{
-				BackgroundTransparency = 0.5,
-			})
+			Fatality:CreateAnimation(InfoButton,0.1,Enum.EasingStyle.Back,{ Position = UDim2.new(1, -5,0.5, 0) })
+			Fatality:CreateAnimation(SearchButton,0.1,Enum.EasingStyle.Back,{ Position = UDim2.new(0,10,0.5, 0) })
+			Fatality:CreateAnimation(SaveButton,0.1,Enum.EasingStyle.Back,{ Position = UDim2.new(0,35,0.5, 0) })
 
-			Fatality:CreateAnimation(InfoButton,0.25,{
-				ImageTransparency = 0.5
-			})
-
-			Fatality:CreateAnimation(SearchButton,0.25,{
-				ImageTransparency = 0.5
-			})
-
-			Fatality:CreateAnimation(SaveButton,0.25,{
-				ImageTransparency = 0.5
-			})
-
-			Fatality:CreateAnimation(HeaderText,0.35,{
-				TextStrokeTransparency = 0.640,
-				TextTransparency = 0
-			})
-
-			Fatality:CreateAnimation(UserIcon,0.45,{
-				ImageTransparency = 0,
-				Position = UDim2.new(1, -10,0.5, 0)
-			})
-
-			Fatality:CreateAnimation(User_name,0.35,{
-				TextTransparency = 0,
-				Position = UDim2.new(1, -40,0, 3)
-			})
-
-			Fatality:CreateAnimation(expire_days,0.5,{
-				TextTransparency = 0,
-				Position = UDim2.new(1, -40,0, 16)
-			})
-
-			Fatality:CreateAnimation(UIStroke,0.35,{
-				Thickness = 2.500,
-				Transparency = 0.900
-			})
-
-			Fatality:CreateAnimation(InfoButton,0.1,Enum.EasingStyle.Back,{
-				Position = UDim2.new(1, -5,0.5, 0)
-			})
-
-			Fatality:CreateAnimation(SearchButton,0.1,Enum.EasingStyle.Back,{
-				Position = UDim2.new(0,10,0.5, 0)
-			})
-
-			Fatality:CreateAnimation(SaveButton,0.1,Enum.EasingStyle.Back,{
-				Position = UDim2.new(0,35,0.5, 0)
-			})
-
-			Fatality:CreateAnimation(DropShadow,0.35,{
-				ImageTransparency = 0.75
-			})
+			Fatality:CreateAnimation(DropShadow,0.35,{ ImageTransparency = 0.75 })
 		else
+			-- [CLOSING] Instant Logic (No Animation)
+			-- Мы устанавливаем прозрачность сразу в 1.
+			-- Сигнал FatalFrame.BackgroundTransparency >= 0.99 отключит ScreenGui мгновенно.
+			
 			table.clear(Fatality.DragBlacklist);
 
 			for i,v in next , Fatal.Menus do
 				v.ValueSelect(false);
 			end;
 
-			Fatality:CreateAnimation(SaveButton,0.35,{
-				Position = UDim2.new(0,35,1, 20)
-			})
-
-			Fatality:CreateAnimation(SearchButton,0.35,{
-				Position = UDim2.new(0,10,1, 20)
-			})
-
-			Fatality:CreateAnimation(InfoButton,0.35,{
-				Position = UDim2.new(1, -5,1, 20)
-			})
-
-			Fatality:CreateAnimation(UIStroke,0.35,{
-				Thickness = 0,
-				Transparency = 1
-			})
-
-			Fatality:CreateAnimation(UserIcon,0.35,{
-				ImageTransparency = 1,
-				Position = UDim2.new(1, -10,0.5, 0)
-			})
-
-			Fatality:CreateAnimation(User_name,0.35,{
-				TextTransparency = 1,
-				Position = UDim2.new(1, -40,0, 3)
-			})
-
-			Fatality:CreateAnimation(expire_days,0.1,{
-				TextTransparency = 1,
-				Position = UDim2.new(1, -40,0, 16)
-			})
-
-			Fatality:CreateAnimation(HeaderText,0.35,{
-				TextStrokeTransparency = 1,
-				TextTransparency = 1
-			})
-
-			Fatality:CreateAnimation(HeaderLineShadow_2,0.5,{
-				BackgroundTransparency = 1,
-			})
-
-			Fatality:CreateAnimation(InfoButton,0.35,{
-				ImageTransparency = 1
-			})
-
-			Fatality:CreateAnimation(SearchButton,0.35,{
-				ImageTransparency = 1
-			})
-
-			Fatality:CreateAnimation(SaveButton,0.35,{
-				ImageTransparency = 1
-			})
-
-			Fatality:CreateAnimation(HeaderLineShadow,0.5,{
-				BackgroundTransparency = 1,
-			})
-
-			Fatality:CreateAnimation(FatalFrame,0.75,{
-				BackgroundTransparency = 1,
-			})
-
-			Fatality:CreateAnimation(Header,0.5,{
-				BackgroundTransparency = 1,
-			})
-
-			Fatality:CreateAnimation(HeaderLine,0.5,{
-				BackgroundTransparency = 1,
-			})
-
-			Fatality:CreateAnimation(Bottom,0.5,{
-				BackgroundTransparency = 1,
-			})
-
-			Fatality:CreateAnimation(HeaderLine_2,0.5,{
-				BackgroundTransparency = 1,
-			})
-
-			Fatality:CreateAnimation(DropShadow,0.35,{
-				ImageTransparency = 1
-			})
+			-- Мгновенный сброс позиций (чтобы при открытии анимация играла заново)
+			SaveButton.Position = UDim2.new(0,35,1, 20)
+			SearchButton.Position = UDim2.new(0,10,1, 20)
+			InfoButton.Position = UDim2.new(1, -5,1, 20)
+			
+			UIStroke.Thickness = 0
+			UIStroke.Transparency = 1
+			
+			UserIcon.ImageTransparency = 1
+			UserIcon.Position = UDim2.new(1, -10,0.5, 0)
+			
+			User_name.TextTransparency = 1
+			User_name.Position = UDim2.new(1, -40,0, 3)
+			
+			expire_days.TextTransparency = 1
+			expire_days.Position = UDim2.new(1, -40,0, 16)
+			
+			HeaderText.TextStrokeTransparency = 1
+			HeaderText.TextTransparency = 1
+			
+			HeaderLineShadow_2.BackgroundTransparency = 1
+			
+			InfoButton.ImageTransparency = 1
+			SearchButton.ImageTransparency = 1
+			SaveButton.ImageTransparency = 1
+			
+			HeaderLineShadow.BackgroundTransparency = 1
+			
+			-- Главные элементы
+			FatalFrame.BackgroundTransparency = 1
+			Header.BackgroundTransparency = 1
+			HeaderLine.BackgroundTransparency = 1
+			Bottom.BackgroundTransparency = 1
+			HeaderLine_2.BackgroundTransparency = 1
+			DropShadow.ImageTransparency = 1
 		end
 	end
 
@@ -4883,11 +4795,25 @@ function Fatality.new(Window: Window)
 
 	Fatality:Drag(FatalFrame,FatalFrame,0.1);
 
+	-- [NEW] Обновленный биндер с использованием CurrentKeybind
 	UserInputService.InputBegan:Connect(function(input,istyping)
 		if not istyping then
-			if input.KeyCode == Window.Keybind or input.KeyCode.Name == Window.Keybind then
-				Fatal.Toggle = not Fatal.Toggle;
+			-- Проверяем CurrentKeybind (может быть строкой или Enum.KeyCode)
+			local keyPressed = input.KeyCode
+			local isMatch = false
+			
+			if typeof(CurrentKeybind) == "string" then
+				if keyPressed.Name == CurrentKeybind or tostring(keyPressed) == CurrentKeybind then
+					isMatch = true
+				end
+			elseif typeof(CurrentKeybind) == "EnumItem" then
+				if keyPressed == CurrentKeybind then
+					isMatch = true
+				end
+			end
 
+			if isMatch then
+				Fatal.Toggle = not Fatal.Toggle;
 				ToggleUI(Fatal.Toggle);
 			end;
 		end
@@ -4904,6 +4830,27 @@ function Fatality.new(Window: Window)
 	function Fatal:SetExpire(str: string)
 		expire_days.Text = string.format("<font transparency=\"0.5\">expires:</font> <font color=\"#f53174\">%s</font>",str)
 	end;
+
+	-- [NEW] Функция для динамического изменения размера окна
+	function Fatal:SetScale(percent: number)
+		-- Процент: 50..150
+		local multiplier = percent / 100
+		local newX = OriginalSize.X.Offset * multiplier
+		local newY = OriginalSize.Y.Offset * multiplier
+		
+		-- Обновляем текущий Scale в конфиге окна, чтобы анимация открытия использовала новый размер
+		Window.Scale = UDim2.new(0, newX, 0, newY)
+		
+		-- Если меню открыто, применяем размер сразу
+		if Fatal.Toggle then
+			FatalFrame.Size = Window.Scale
+		end
+	end
+
+	-- [NEW] Функция для смены бинда
+	function Fatal:SetKeybind(key)
+		CurrentKeybind = key
+	end
 
 	function Fatal:GetFlags()
 		return Fatality.WindowFlags[Fatalitywin];
