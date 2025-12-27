@@ -4522,8 +4522,8 @@ function Fatality.new(Window: Window)
 	end
 
 	local Fatalitywin = Instance.new("ScreenGui")
+	Fatalitywin.Enabled = false 
 	
-	-- [FIX]
 	Fatal.Main = Fatalitywin 
 	
 	local FatalFrame = Instance.new("Frame")
