@@ -4513,7 +4513,7 @@ function Fatality.new(Window: Window)
 
 	Fatal.Notifier = Fatality.__NOTIFIER_CACHE or Fatality:CreateNotifier();
 
-	-- [FIX] Хелпер для безопасного цвета внутри New
+	-- [FIX]
 	local function GetSafeColor(val)
 		if typeof(val) == "ColorSequence" then
 			return val.Keypoints[1].Value
@@ -4522,11 +4522,15 @@ function Fatality.new(Window: Window)
 	end
 
 	local Fatalitywin = Instance.new("ScreenGui")
+	
+	-- [FIX]
+	Fatal.Main = Fatalitywin 
+	
 	local FatalFrame = Instance.new("Frame")
 	
 	local MainScale = Instance.new("UIScale")
 	MainScale.Parent = FatalFrame
-	MainScale.Scale = 1 
+	MainScale.Scale = 1
 
 	local UICorner = Instance.new("UICorner")
 	local DropShadow = Instance.new("ImageLabel")
