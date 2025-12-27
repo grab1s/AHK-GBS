@@ -2561,8 +2561,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		Toggle.Name = Fatality:RandomString()
 		Toggle.Parent = Parent
-		-- Регистрируем фон как элемент (темный)
-		Fatality:Register(Toggle, "Element") -- [THEME]
+		Fatality:Register(Toggle, "Element")
 		Toggle.BackgroundTransparency = 1.000
 		Toggle.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Toggle.BorderSizePixel = 0
@@ -2582,11 +2581,10 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		Toggle_Name.ZIndex = ZIndex + 2
 		Toggle_Name.FontFace = Fatality.FontSemiBold;
 		
-		-- Логика цвета текста (Risky или обычный)
 		if Config.Risky then
 			Toggle_Name.TextColor3 = Color3.fromRGB(255, 160, 92)
 		else
-			Fatality:Register(Toggle_Name, "Text", "TextColor3") -- [THEME]
+			Fatality:Register(Toggle_Name, "Text", "TextColor3")
 		end
 		
 		Toggle_Name.TextSize = 13.000
@@ -2598,8 +2596,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		ValueFrame.Name = Fatality:RandomString()
 		ValueFrame.Parent = Toggle
 		ValueFrame.AnchorPoint = Vector2.new(1, 0.5)
-		-- Чекбокс должен быть цвета контейнера
-		Fatality:Register(ValueFrame, "Element") -- [THEME]
+		Fatality:Register(ValueFrame, "Element")
 		ValueFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		ValueFrame.BorderSizePixel = 0
 		ValueFrame.Position = UDim2.new(1, -3, 0.5, 0)
@@ -2623,9 +2620,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		ValueIcon.ZIndex = ZIndex + 2
 		ValueIcon.Image = "rbxassetid://10709790644"
 		ValueIcon.ImageTransparency = 1;
-		
-		-- Регистрируем галочку как Accent (Main color)
-		Fatality:Register(ValueIcon, "Main", "ImageColor3") -- [THEME]
+		Fatality:Register(ValueIcon, "Main", "ImageColor3")
 
 		OptionButton.Name = Fatality:RandomString()
 		OptionButton.Parent = Toggle
@@ -2641,13 +2636,12 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		OptionButton.ImageTransparency = 1
 		OptionButton.ZIndex = ZIndex + 4
 		OptionButton.Visible = Config.Option;
-		Fatality:Register(OptionButton, "Text", "ImageColor3") -- [THEME]
+		Fatality:Register(OptionButton, "Text", "ImageColor3")
 
 		local toggleImg = function(value)
 			if value then
 				Fatality:CreateAnimation(ValueIcon,0.45,{
 					ImageTransparency = 0,
-					-- Используем CurrentTheme для анимаций
 					ImageColor3 = Fatality.CurrentTheme.Main,
 					Size = UDim2.new(0.8, 0, 0.8, 0),
 					Rotation = 0,
@@ -2743,14 +2737,16 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 				return Config.Default;
 			end,
 			Signal = Event.Event:Connect(OpcToggle),
-			SetValue = function(v)
+			-- [FIX] Добавлен аргумент force
+			SetValue = function(v, force)
 				local IsSame = v == Config.Default;
 
 				Config.Default = v;
 
 				toggleImg(Config.Default);
 
-				if not IsSame then
+				-- [FIX] Если force = true, вызываем callback даже если значение не менялось
+				if not IsSame or force then
 					Config.Callback(Config.Default);
 				end;
 			end,
@@ -2761,6 +2757,9 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		if Config.Flag then
 			Fatality.WindowFlags[FatalWindow][Config.Flag.."Toggle"] = Respons;
 		end;
+		
+		-- [FIX] Применяем дефолтное значение при старте
+		if Config.Default then Config.Callback(Config.Default) end
 
 		return Respons;
 	end;
@@ -2798,7 +2797,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		Slider.Name = Fatality:RandomString()
 		Slider.Parent = Parent
-		Fatality:Register(Slider, "Element") -- [THEME]
+		Fatality:Register(Slider, "Element")
 		Slider.BackgroundTransparency = 1.000
 		Slider.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Slider.BorderSizePixel = 0
@@ -2823,7 +2822,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		if Config.Risky then
 			Slider_Name.TextColor3 = Color3.fromRGB(255, 160, 92)
 		else
-			Fatality:Register(Slider_Name, "Text", "TextColor3") -- [THEME]
+			Fatality:Register(Slider_Name, "Text", "TextColor3")
 		end
 		
 		Slider_Name.TextSize = 13.000
@@ -2833,7 +2832,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		ValueFrame.Name = Fatality:RandomString()
 		ValueFrame.Parent = Slider
 		ValueFrame.AnchorPoint = Vector2.new(1, 0.5)
-		Fatality:Register(ValueFrame, "Element") -- [THEME]
+		Fatality:Register(ValueFrame, "Element")
 		ValueFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		ValueFrame.BorderSizePixel = 0
 		ValueFrame.Position = UDim2.new(1, -3, 0.5, 0)
@@ -2857,13 +2856,12 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		OptionButton.ImageTransparency = 0.600
 		OptionButton.Visible = Config.Option;
 		OptionButton.ZIndex = ZIndex + 1;
-		Fatality:Register(OptionButton, "Text", "ImageColor3") -- [THEME]
+		Fatality:Register(OptionButton, "Text", "ImageColor3")
 
 		local initialAlpha = (Config.Default - min) / (max - min)
 		boxli.Name = Fatality:RandomString()
 		boxli.Parent = ValueFrame
-		-- Полоска слайдера - Accent
-		Fatality:Register(boxli, "Main") -- [THEME]
+		Fatality:Register(boxli, "Main")
 		boxli.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		boxli.BorderSizePixel = 0
 		boxli.Size = UDim2.new(initialAlpha, 0, 1, 0)
@@ -2882,7 +2880,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		ValueText.ZIndex = ZIndex + 4
 		ValueText.FontFace = Fatality.FontSemiBold
 		ValueText.Text = string.format('%s%s',tostring(Config.Default),tostring(Config.Type));
-		ValueText.TextColor3 = Color3.fromRGB(255, 255, 255) -- Текст внутри слайдера обычно белый
+		ValueText.TextColor3 = Color3.fromRGB(255, 255, 255)
 		ValueText.TextSize = 9.000
 		ValueText.TextStrokeTransparency = 0.850;
 		ValueText.TextTransparency = 0;
@@ -2992,7 +2990,8 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 				return Config.Default;
 			end,
 			Signal = Event.Event:Connect(OpcToggle),
-			SetValue = function(v)
+			-- [FIX] Добавлен аргумент force
+			SetValue = function(v, force)
 				local IsSame = v == Config.Default;
 				v = math.clamp(v, min, max)
 				Config.Default = v;
@@ -3005,7 +3004,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 				ValueText.Text = string.format('%s%s', tostring(v), tostring(Config.Type))
 
-				if not IsSame then
+				if not IsSame or force then
 					Config.Callback(v);
 				end;
 			end,
@@ -3016,6 +3015,9 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		if Config.Flag then
 			Fatality.WindowFlags[FatalWindow][Config.Flag.."Slider"] = Respons;
 		end;
+		
+		-- [FIX] Применяем дефолтное значение при старте
+		Config.Callback(Config.Default)
 
 		return Respons;
 	end;
@@ -3039,7 +3041,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		Button.Name = Fatality:RandomString()
 		Button.Parent = Parent
-		Fatality:Register(Button, "Element") -- [THEME]
+		Fatality:Register(Button, "Element")
 		Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Button.BorderSizePixel = 0
 		Button.Size = UDim2.new(1, -25, 0, 25)
@@ -3062,7 +3064,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		if Config.Risky then
 			Button_Name.TextColor3 = Color3.fromRGB(255, 160, 92)
 		else
-			Fatality:Register(Button_Name, "Text", "TextColor3") -- [THEME]
+			Fatality:Register(Button_Name, "Text", "TextColor3")
 		end
 		
 		Button_Name.TextSize = 12.000
@@ -3096,13 +3098,12 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		Fatality:CreateHover(Button,function(value)
 			if value then
-				-- При наведении делаем чуть светлее или темнее
 				Fatality:CreateAnimation(Button,0.45,{
-					BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Хардкод для ховера, или можно придумать логику
+					BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 				})
 			else
 				Fatality:CreateAnimation(Button,0.45,{
-					BackgroundColor3 = Fatality.CurrentTheme.Element -- Возвращаем к теме
+					BackgroundColor3 = Fatality.CurrentTheme.Element
 				})
 			end;
 		end)
@@ -3148,7 +3149,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		ColorPicker.Name = Fatality:RandomString()
 		ColorPicker.Parent = Parent
-		Fatality:Register(ColorPicker, "Element") -- [THEME]
+		Fatality:Register(ColorPicker, "Element")
 		ColorPicker.BackgroundTransparency = 1.000
 		ColorPicker.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		ColorPicker.BorderSizePixel = 0
@@ -3168,7 +3169,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		ColorPicker_Name.ZIndex = ZIndex + 2
 		ColorPicker_Name.FontFace = Fatality.FontSemiBold
 		ColorPicker_Name.Text = Config.Name
-		Fatality:Register(ColorPicker_Name, "Text", "TextColor3") -- [THEME]
+		Fatality:Register(ColorPicker_Name, "Text", "TextColor3")
 		ColorPicker_Name.TextSize = 13.000
 		ColorPicker_Name.TextTransparency = 0.200
 		ColorPicker_Name.TextXAlignment = Enum.TextXAlignment.Left
@@ -3200,7 +3201,7 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		OptionButton.Image = "http://www.roblox.com/asset/?id=14007344336"
 		OptionButton.ImageTransparency = 0.600
 		OptionButton.ZIndex = 7;
-		Fatality:Register(OptionButton, "Text", "ImageColor3") -- [THEME]
+		Fatality:Register(OptionButton, "Text", "ImageColor3")
 
 		local res = Fatality:CreateColorPicker(ValueFrame,Config.Transparency,function(rgb,opc)
 			ValueFrame.BackgroundColor3 = rgb;
@@ -3244,14 +3245,15 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 				ColorPicker.Text = new_name
 			end,
 			Signal = Event.Event:Connect(OpcToggle),
-			SetValue = function(rgb,opc)
+			-- [FIX] Добавлен аргумент force
+			SetValue = function(rgb,opc,force)
 				local IsSame = ValueFrame.BackgroundColor3 == rgb or ValueFrame.BackgroundTransparency == opc;
 
 				ValueFrame.BackgroundColor3 = rgb; 
 				ValueFrame.BackgroundTransparency = opc;
 				res.set_opc(opc);
 
-				if not IsSame then
+				if not IsSame or force then
 					task.spawn(Config.Callback,rgb,opc)
 				end;
 			end,
@@ -3268,11 +3270,20 @@ function Fatality:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		if Config.Flag then
 			Fatality.WindowFlags[FatalWindow][Config.Flag.."ColorPicker"] = Respons;
 		end;
+		
+		-- [FIX] Применяем дефолтное значение при старте
+		if Config.Default then task.spawn(Config.Callback, Config.Default, Config.Transparency) end
 
 		return Respons;
 	end;
 
 function elements:AddDropdown(Config: Dropdown)
+    -- Код Dropdown оставляем как был в прошлом шаге (он уже правильный)
+    -- Но на всякий случай убедись, что там есть GetSafeColor
+    -- Если хочешь, я могу и его продублировать, но изменений там нет кроме force
+    -- ...
+    -- Давай лучше продублируем, чтобы ты одним махом заменил всё
+    
 		Config = Config or {};
 		
 		if not Fatality:CanShow(Config) then return GetDummyElement() end
@@ -3315,7 +3326,7 @@ function elements:AddDropdown(Config: Dropdown)
 
 		Dropdown.Name = Fatality:RandomString()
 		Dropdown.Parent = Parent
-		Fatality:Register(Dropdown, "Element") -- [THEME]
+		Fatality:Register(Dropdown, "Element")
 		Dropdown.BackgroundTransparency = 1.000
 		Dropdown.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Dropdown.BorderSizePixel = 0
@@ -3335,7 +3346,7 @@ function elements:AddDropdown(Config: Dropdown)
 		Dropdown_Name.ZIndex = 7
 		Dropdown_Name.FontFace = Fatality.FontSemiBold
 		Dropdown_Name.Text = Config.Name
-		Fatality:Register(Dropdown_Name, "Text", "TextColor3") -- [THEME]
+		Fatality:Register(Dropdown_Name, "Text", "TextColor3")
 		Dropdown_Name.TextSize = 13.000
 		Dropdown_Name.TextTransparency = 0.200
 		Dropdown_Name.TextXAlignment = Enum.TextXAlignment.Left
@@ -3345,7 +3356,7 @@ function elements:AddDropdown(Config: Dropdown)
 		ValueFrame.Name = Fatality:RandomString()
 		ValueFrame.Parent = Dropdown
 		ValueFrame.AnchorPoint = Vector2.new(1, 0.5)
-		Fatality:Register(ValueFrame, "Element") -- [THEME]
+		Fatality:Register(ValueFrame, "Element")
 		ValueFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		ValueFrame.BorderSizePixel = 0
 		ValueFrame.Position = UDim2.new(1, -3, 0.5, 0)
@@ -3369,7 +3380,7 @@ function elements:AddDropdown(Config: Dropdown)
 		OptionButton.ImageTransparency = 0.600
 		OptionButton.ZIndex = 8
 		OptionButton.Visible = Config.Option;
-		Fatality:Register(OptionButton, "Text", "ImageColor3") -- [THEME]
+		Fatality:Register(OptionButton, "Text", "ImageColor3")
 
 		icon.Name = Fatality:RandomString()
 		icon.Parent = ValueFrame
@@ -3383,7 +3394,7 @@ function elements:AddDropdown(Config: Dropdown)
 		icon.SizeConstraint = Enum.SizeConstraint.RelativeYY
 		icon.ZIndex = ZIndex + 5
 		icon.Image = "rbxassetid://10709790948"
-		Fatality:Register(icon, "Text", "ImageColor3") -- [THEME]
+		Fatality:Register(icon, "Text", "ImageColor3")
 
 		Value_Text.Name = Fatality:RandomString()
 		Value_Text.Parent = ValueFrame
@@ -3477,11 +3488,14 @@ function elements:AddDropdown(Config: Dropdown)
 				return Config.Default;
 			end,
 			Signal = Event.Event:Connect(OpcToggle),
-			SetValue = function(def)
+			-- [FIX] Добавлен force
+			SetValue = function(def, force)
 				Config.Default = def;
 				Value_Text.Text = DataParser(Config.Default);
 				res:change_default(Config.Default);
-				Config.Callback(def);
+				
+				-- Dropdown и так вызывает callback всегда внутри себя, но добавим для порядка
+				if force then Config.Callback(def) end
 			end,
 			SetData = function(def)
 				Config.Values = def;
@@ -3497,6 +3511,9 @@ function elements:AddDropdown(Config: Dropdown)
 		if Config.Flag then
 			Fatality.WindowFlags[FatalWindow][Config.Flag.."Dropdown"] = Respons;
 		end;
+		
+		-- [FIX] Применяем дефолт при старте
+		if Config.Default then Config.Callback(Config.Default) end
 
 		return Respons;
 	end;
@@ -3543,7 +3560,7 @@ function elements:AddDropdown(Config: Dropdown)
 
 		Keybind.Name = Fatality:RandomString()
 		Keybind.Parent = Parent
-		Fatality:Register(Keybind, "Element") -- [THEME]
+		Fatality:Register(Keybind, "Element")
 		Keybind.BackgroundTransparency = 1.000
 		Keybind.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Keybind.BorderSizePixel = 0
@@ -3563,7 +3580,7 @@ function elements:AddDropdown(Config: Dropdown)
 		Keybind_Name.ZIndex = ZIndex + 2
 		Keybind_Name.FontFace = Fatality.FontSemiBold
 		Keybind_Name.Text = Config.Name
-		Fatality:Register(Keybind_Name, "Text", "TextColor3") -- [THEME]
+		Fatality:Register(Keybind_Name, "Text", "TextColor3")
 		Keybind_Name.TextSize = 13.000
 		Keybind_Name.TextTransparency = 0.200
 		Keybind_Name.TextXAlignment = Enum.TextXAlignment.Left
@@ -3572,7 +3589,7 @@ function elements:AddDropdown(Config: Dropdown)
 		ValueFrame.Name = Fatality:RandomString()
 		ValueFrame.Parent = Keybind
 		ValueFrame.AnchorPoint = Vector2.new(1, 0.5)
-		Fatality:Register(ValueFrame, "Element") -- [THEME]
+		Fatality:Register(ValueFrame, "Element")
 		ValueFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		ValueFrame.BorderSizePixel = 0
 		ValueFrame.Position = UDim2.new(1, -3, 0.5, 0)
@@ -3595,7 +3612,7 @@ function elements:AddDropdown(Config: Dropdown)
 		OptionButton.Image = "http://www.roblox.com/asset/?id=14007344336"
 		OptionButton.ImageTransparency = 0.600
 		OptionButton.Visible = Config.Option or false;
-		Fatality:Register(OptionButton, "Text", "ImageColor3") -- [THEME]
+		Fatality:Register(OptionButton, "Text", "ImageColor3")
 
 		ValueText.Name = Fatality:RandomString()
 		ValueText.Parent = ValueFrame
@@ -3693,13 +3710,14 @@ function elements:AddDropdown(Config: Dropdown)
 				return Config.Default;
 			end,
 			Signal = Event.Event:Connect(OpcToggle),
-			SetValue = function(def)
+			-- [FIX] Добавлен force
+			SetValue = function(def, force)
 				local IsSame = Config.Default == def;
 
 				Config.Default = def;
 				ValueText.Text = GetItem(Config.Default);
 
-				if not IsSame then
+				if not IsSame or force then
 					Config.Callback(Config.Default);
 				end;
 			end,
@@ -3711,6 +3729,9 @@ function elements:AddDropdown(Config: Dropdown)
 
 			Fatality.WindowFlags[FatalWindow][Config.Flag.."Keybind"] = Respons;
 		end;
+		
+		-- [FIX] Применяем дефолт при старте
+		if Config.Default then Config.Callback(Config.Default) end
 
 		return Respons;
 	end;
@@ -3726,7 +3747,7 @@ function elements:AddDropdown(Config: Dropdown)
 		local Paragraph = Instance.new("Frame")
 		Paragraph.Name = Fatality:RandomString()
 		Paragraph.Parent = Parent
-		Fatality:Register(Paragraph, "Element") -- [THEME]
+		Fatality:Register(Paragraph, "Element")
 		Paragraph.BackgroundTransparency = 1.000
 		Paragraph.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Paragraph.BorderSizePixel = 0
@@ -3750,7 +3771,7 @@ function elements:AddDropdown(Config: Dropdown)
 		TitleLabel.ZIndex = ZIndex + 2
 		TitleLabel.FontFace = Fatality.FontSemiBold
 		TitleLabel.Text = settings.Title
-		Fatality:Register(TitleLabel, "Text", "TextColor3") -- [THEME]
+		Fatality:Register(TitleLabel, "Text", "TextColor3")
 		TitleLabel.TextSize = 13.000
 		TitleLabel.TextTransparency = 1
 		TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -3765,7 +3786,7 @@ function elements:AddDropdown(Config: Dropdown)
 		ContentLabel.ZIndex = ZIndex + 2
 		ContentLabel.FontFace = Fatality.FontSemiBold
 		ContentLabel.Text = settings.Content
-		Fatality:Register(ContentLabel, "TextDark", "TextColor3") -- [THEME] (Content потемнее)
+		Fatality:Register(ContentLabel, "TextDark", "TextColor3")
 		ContentLabel.TextSize = 12.000
 		ContentLabel.TextTransparency = 1
 		ContentLabel.TextWrapped = true
@@ -3806,7 +3827,7 @@ function elements:AddDropdown(Config: Dropdown)
 
 		InputFrame.Name = Fatality:RandomString()
 		InputFrame.Parent = Parent
-		Fatality:Register(InputFrame, "Element") -- [THEME]
+		Fatality:Register(InputFrame, "Element")
 		InputFrame.BackgroundTransparency = 1.000
 		InputFrame.Size = UDim2.new(1, -25, 0, 17)
 		InputFrame.ZIndex = ZIndex + 1
@@ -3821,7 +3842,7 @@ function elements:AddDropdown(Config: Dropdown)
 		NameLabel.ZIndex = ZIndex + 2
 		NameLabel.FontFace = Fatality.FontSemiBold
 		NameLabel.Text = settings.Name
-		Fatality:Register(NameLabel, "Text", "TextColor3") -- [THEME]
+		Fatality:Register(NameLabel, "Text", "TextColor3")
 		NameLabel.TextSize = 13.000
 		NameLabel.TextTransparency = 1
 		NameLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -3829,7 +3850,7 @@ function elements:AddDropdown(Config: Dropdown)
 		TextBoxFrame.Name = "TextBoxFrame"
 		TextBoxFrame.Parent = InputFrame
 		TextBoxFrame.AnchorPoint = Vector2.new(1, 0.5)
-		Fatality:Register(TextBoxFrame, "Element") -- [THEME]
+		Fatality:Register(TextBoxFrame, "Element")
 		TextBoxFrame.Position = UDim2.new(1, -3, 0.5, 0)
 		TextBoxFrame.Size = UDim2.new(0, 85, 0.85, 0)
 		TextBoxFrame.ZIndex = ZIndex + 2
@@ -3848,7 +3869,7 @@ function elements:AddDropdown(Config: Dropdown)
 		TextBox.FontFace = Fatality.FontSemiBold
 		TextBox.Text = settings.Default
 		TextBox.PlaceholderText = settings.PlaceholderText
-		Fatality:Register(TextBox, "Text", "TextColor3") -- [THEME]
+		Fatality:Register(TextBox, "Text", "TextColor3")
 		TextBox.PlaceholderColor3 = Color3.fromRGB(128, 128, 128)
 		TextBox.TextSize = 11.000
 		TextBox.TextXAlignment = Enum.TextXAlignment.Left
@@ -3879,6 +3900,10 @@ function elements:AddDropdown(Config: Dropdown)
 				TextBox.Text = tostring(text)
 			end
 		}
+		
+		-- [FIX] Применяем дефолт при старте
+		if settings.Default ~= "" then settings.Callback(settings.Default) end
+		
 		return Response
 	end;
 
@@ -4982,23 +5007,24 @@ function Fatality.new(Window: Window)
 		return Fatality:CreateConfigWindow(Fatalitywin,Fatal,ConfigButton);
 	end;
 
-	function Fatal:LoadConfig(config)
-
+function Fatal:LoadConfig(config)
 		for i,v in next , config do
 			if i ~= "Info" then
 				local Element = Fatality.WindowFlags[Fatalitywin][i];
 				if Element then
 					local Value = v.Value;
+					
+					-- [FIX] Передаем `true` вторым аргументом (force update)
 					if Value.Type == "String" then
-						Element:SetValue(tostring(Value.Value));
+						Element:SetValue(tostring(Value.Value), true);
 					elseif Value.Type == "Boolean" then
-						Element:SetValue((typeof(Value.Value) == 'boolean' and Value.Value) or (Value.Value == "true" and true or false));
+						Element:SetValue((typeof(Value.Value) == 'boolean' and Value.Value) or (Value.Value == "true" and true or false), true);
 					elseif Value.Type == "Number" then
-						Element:SetValue(Value.Value);
+						Element:SetValue(Value.Value, true);
 					elseif Value.Type == "Color3" then
-						Element:SetValue(Color3.new(Value.Value.R,Value.Value.G,Value.Value.B) , Value.Value.Transparency);
+						Element:SetValue(Color3.new(Value.Value.R,Value.Value.G,Value.Value.B) , Value.Value.Transparency, true);
 					elseif Value.Type == "Table" then
-						Element:SetValue(Value.Value);
+						Element:SetValue(Value.Value, true);
 					end;
 				end;
 			end;
