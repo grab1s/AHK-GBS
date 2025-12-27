@@ -1,5 +1,5 @@
 --[[
-    		Fatality-Dark Interface
+    Fatality Interface
 	Modded by: grab1s
     Author: 4lpaca
     License: MIT
@@ -6869,8 +6869,10 @@ end;
 function Fatality:Loader(Config: Loader)
 	Config = Config or {};
 	Config.Name = Config.Name or "FATALITY";
-	Config.Duration = Config.Duration or 3.5;
+	-- Duration теперь игнорируется, если включен ManualMode, но оставим для совместимости
+	Config.Duration = Config.Duration or 3.5; 
 	Config.Scale = Config.Scale or 3;
+	Config.Manual = Config.Manual or false; -- [NEW] Ручной режим
 
 	local Blur = Instance.new('BlurEffect');
 	local Loader = Instance.new("ScreenGui")
@@ -6884,78 +6886,56 @@ function Fatality:Loader(Config: Loader)
 	Loader.IgnoreGuiInset = true
 	Loader.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
-	center.Name = Fatality:RandomString()
+	-- Центрирование и верстка
 	center.Parent = Loader
 	center.AnchorPoint = Vector2.new(0.5, 0.5)
-	center.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	center.BackgroundTransparency = 1.000
-	center.BorderColor3 = Color3.fromRGB(0, 0, 0)
-	center.BorderSizePixel = 0
+	center.BackgroundTransparency = 1
 	center.Position = UDim2.new(0.5, 0, 0.5, 0)
 
-	texts.Name = Fatality:RandomString()
 	texts.Parent = Loader
 	texts.AnchorPoint = Vector2.new(0.5, 0.5)
-	texts.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	texts.BackgroundTransparency = 1.000
-	texts.BorderColor3 = Color3.fromRGB(0, 0, 0)
-	texts.BorderSizePixel = 0
+	texts.BackgroundTransparency = 1
 	texts.Position = UDim2.new(0.5, 0, 0.5, 0)
 	texts.Size = UDim2.new(1, 0, 0, 200)
 
 	UIListLayout.Parent = texts
 	UIListLayout.FillDirection = Enum.FillDirection.Horizontal
 	UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 	UIListLayout.Padding = UDim.new(0, Config.Scale * 5)
 
-	BlackFrame.Name = Fatality:RandomString()
 	BlackFrame.Parent = Loader
 	BlackFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	BlackFrame.BackgroundTransparency = 1
-	BlackFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-	BlackFrame.BorderSizePixel = 0
 	BlackFrame.Size = UDim2.new(1, 0, 1, 0)
+	BlackFrame.ZIndex = -1
 
 	Blur.Size = 0;
 	Blur.Parent = game:GetService('Lighting');
 
-	Fatality:CreateAnimation(Blur,1,{
-		Size = 60
-	})
+	-- Анимация появления фона
+	Fatality:CreateAnimation(Blur,1,{ Size = 60 })
+	Fatality:CreateAnimation(BlackFrame,0.5,{ BackgroundTransparency = 0.7 })
 
-	Fatality:CreateAnimation(BlackFrame,0.5,{
-		BackgroundTransparency = 0.7
-	}).Completed:Wait();
+	local UText = { Y = 14 }; -- Корректировка для буквы Y (опционально)
 
-	task.wait(0.5);
+	local PosText = {};
+	local IsFirst = true;
 
-	local UText = {
-		Y = 14,
-	};
-
-	local createText = function(TEXT)
+	-- Генерация букв
+	local function createText(TEXT)
 		local LIT = Instance.new("Frame")
 		local ASCII = Instance.new("TextLabel")
 		local UIGradient = Instance.new("UIGradient")
 		local UIScale = Instance.new("UIScale")
 
-		LIT.Name = Fatality:RandomString()
-		LIT.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		LIT.BackgroundTransparency = 1.000
-		LIT.BorderColor3 = Color3.fromRGB(0, 0, 0)
-		LIT.BorderSizePixel = 0
+		LIT.BackgroundTransparency = 1
 		LIT.Size = UDim2.new(0, 56, 0, 100)
 		LIT.ZIndex = 8
 
-		ASCII.Name = Fatality:RandomString()
 		ASCII.Parent = LIT
 		ASCII.AnchorPoint = Vector2.new(0.5, 0.5)
-		ASCII.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		ASCII.BackgroundTransparency = 1.000
-		ASCII.BorderColor3 = Color3.fromRGB(0, 0, 0)
-		ASCII.BorderSizePixel = 0
+		ASCII.BackgroundTransparency = 1
 		ASCII.Position = UDim2.new(0.5, 0, 0.5, 0)
 		ASCII.Size = UDim2.new(0, 28, 0, 50)
 		ASCII.ZIndex = 8
@@ -6966,91 +6946,54 @@ function Fatality:Loader(Config: Loader)
 		ASCII.TextWrapped = true
 
 		local textsize = Fatality:GetTextSize(ASCII);
-
 		ASCII.Size = UDim2.new(0, textsize.X + 100, 0, 50)
 		LIT.Size = UDim2.new(0, (textsize.X * 2.5) + (UText[TEXT] or 0), 0, 100)
 
-		UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 116, 116)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(132, 58, 58))}
+		UIGradient.Color = ColorSequence.new{
+			ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 116, 116)), 
+			ColorSequenceKeypoint.new(1.00, Color3.fromRGB(132, 58, 58))
+		}
 		UIGradient.Rotation = 88
 		UIGradient.Parent = ASCII
 
 		UIScale.Parent = ASCII
 		UIScale.Scale = Config.Scale
 
-		return LIT,ASCII
+		return LIT, ASCII
 	end;
 
-	local PosText = {};
-	local IsFirst = true;
+	-- Создаем буквы по одной
+	for i = 1, #Config.Name do
+		local char = Config.Name:sub(i,i)
+		local L, A = createText(char)
+		L.Parent = texts
+		A.TextTransparency = 1
+		
+		-- Первая буква (V) стоит по центру, остальные смещены
+		if i > 1 then
+			A.Position = UDim2.new(0.5,0,0.5,200); -- Спрятаны снизу
+		end
+		
+		table.insert(PosText,{ Frame = L, Text = A })
+	end
 
-	string.gsub(Config.Name,'.',function(T)
-		local L,A = createText(T);
-
-		L.Parent = texts;
-		A.TextTransparency = 1;
-
-		if not IsFirst then
-			A.Position = UDim2.new(0.5,0,0.5,200);
-		end;
-
-		table.insert(PosText,{
-			Frame = L,
-			Text = A
-		});
-
-		IsFirst = false;
-	end);
-
-	do
-		local StartText = Instance.new("TextLabel")
-		local UIGradient = Instance.new("UIGradient")
-		local UIScale = Instance.new("UIScale")
-
-		StartText.Name = Fatality:RandomString()
-		StartText.Parent = Loader
-		StartText.AnchorPoint = Vector2.new(0.5, 0.5)
-		StartText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		StartText.BackgroundTransparency = 1.000
-		StartText.BorderColor3 = Color3.fromRGB(0, 0, 0)
-		StartText.BorderSizePixel = 0
-		StartText.Position = UDim2.new(0.5, 0, 0.5, 0)
-		StartText.Size = UDim2.new(0, 28, 0, 50)
-		StartText.ZIndex = 8
-		StartText.Font = Enum.Font.GothamBold
-		StartText.Text = Config.Name:sub(1,1)
-		StartText.TextColor3 = Color3.fromRGB(255, 255, 255)
-		StartText.TextSize = 50.000
-		StartText.TextWrapped = true
-		StartText.TextTransparency = 1;
-
-		local textsize = Fatality:GetTextSize(StartText);
-		local baseSIZX = textsize.X;
-
-		StartText.Size = UDim2.new(0, baseSIZX + 100, 0, 50)
-
-		UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 116, 116)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(132, 58, 58))}
-		UIGradient.Rotation = 88
-		UIGradient.Parent = StartText
-
-		UIScale.Parent = StartText
-		UIScale.Scale = Config.Scale * 4;
-
-		Fatality:CreateAnimation(StartText,0.45,{
-			TextTransparency = 0
-		})
-
-		Fatality:CreateAnimation(UIScale,0.5,{
-			Scale = Config.Scale;
-		});
-
-		task.wait(0.45);
-
-		Fatality:CreateAnimation(StartText,0.35,{
-			Position = UDim2.fromOffset(PosText[1].Frame.AbsolutePosition.X + (PosText[1].Frame.AbsoluteSize.X / 2),PosText[1].Frame.AbsolutePosition.Y + (PosText[1].Frame.AbsoluteSize.Y / 2) + math.abs(Loader.AbsolutePosition.Y))
-		})
-
-		task.wait(0.5);
-
+	-- Анимация входа
+	task.spawn(function()
+		-- 1. Появление первой буквы
+		local FirstChar = PosText[1].Text
+		local FirstScale = FirstChar:FindFirstChild("UIScale")
+		
+		FirstScale.Scale = Config.Scale * 4
+		Fatality:CreateAnimation(FirstChar, 0.45, { TextTransparency = 0 })
+		Fatality:CreateAnimation(FirstScale, 0.5, { Scale = Config.Scale })
+		
+		task.wait(0.45)
+		
+		-- 2. Сдвиг первой буквы на свое место
+		-- Вычисляем позицию относительно контейнера
+		-- (Упростим анимацию: просто дадим Layout-у сделать свое дело, а буквы поднимем)
+		
+		-- Поднимаем остальные буквы
 		for i,v in next , PosText do
 			if i > 1 then
 				Fatality:CreateAnimation(v.Text,0.65,{
@@ -7059,31 +7002,35 @@ function Fatality:Loader(Config: Loader)
 				})
 			end;
 		end;
+	end)
 
-		task.wait((Config.Duration - 0.5) + 0.65);
+	-- Объект управления лоадером
+	local Controller = {
+		IsFinished = false,
+		Finish = function(self)
+			if self.IsFinished then return end
+			self.IsFinished = true
+			
+			-- Анимация выхода (Fade Out)
+			for i,v in next , PosText do
+				Fatality:CreateAnimation(v.Text, 1.0, { TextTransparency = 1 })
+			end
+			Fatality:CreateAnimation(Blur, 1.0, { Size = 0 })
+			Fatality:CreateAnimation(BlackFrame, 1.0, { BackgroundTransparency = 1 })
+			
+			task.wait(1.1)
+			Loader:Destroy()
+			Blur:Destroy()
+		end
+	}
 
-		Fatality:CreateAnimation(StartText,1.5,{
-			TextTransparency = 1
-		})
+	-- Если НЕ ручной режим - ждем время и закрываем сами (как раньше)
+	if not Config.Manual then
+		task.wait(Config.Duration or 3.5)
+		Controller:Finish()
+	end
 
-		for i,v in next , PosText do
-			Fatality:CreateAnimation(v.Text,1.5,{
-				TextTransparency = 1
-			})
-		end;
-
-		Fatality:CreateAnimation(Blur,1.5,{
-			Size = 0
-		})
-
-		Fatality:CreateAnimation(BlackFrame,1.5,{
-			BackgroundTransparency = 1
-		})
-
-		task.wait(1.65);
-
-		Loader:Destroy();
-	end;
+	return Controller
 end;
 
 function Fatality:CreateNotifier(): Notifier
