@@ -6856,12 +6856,57 @@ function Fatality.new(Window: Window)
 		return backpack;
 	end;
 
-	function Fatal:SetVisible(b)
+function Fatal:SetVisible(b)
 		Fatal.Toggle = b;
 		ToggleUI(b);
+		
+		-- Дополнительная гарантия видимости ScreenGui
+		if b then
+			Fatalitywin.Enabled = true
+		elseif FatalFrame.BackgroundTransparency >= 0.99 then
+			-- Отключаем Gui только если анимация закрытия прошла (или если мы сразу закрыты)
+			Fatalitywin.Enabled = false
+		end
 	end;
 
-	ToggleUI(true);
+	-- [FIX] УМНЫЙ СТАРТ
+	-- Если при создании передали Visible = false, мы НЕ запускаем анимацию открытия
+	if Window.Visible == false then
+		Fatal.Toggle = false
+		
+		-- Сразу применяем состояние "Закрыто" без анимаций
+		-- (Копируем логику из блока else в ToggleUI, чтобы задать стартовые позиции)
+		SaveButton.Position = UDim2.new(0,35,1, 20)
+		SearchButton.Position = UDim2.new(0,10,1, 20)
+		InfoButton.Position = UDim2.new(1, -5,1, 20)
+		UIStroke.Thickness = 0
+		UIStroke.Transparency = 1
+		UserIcon.ImageTransparency = 1
+		UserIcon.Position = UDim2.new(1, -10,0.5, 0)
+		User_name.TextTransparency = 1
+		User_name.Position = UDim2.new(1, -40,0, 3)
+		expire_days.TextTransparency = 1
+		expire_days.Position = UDim2.new(1, -40,0, 16)
+		HeaderText.TextStrokeTransparency = 1
+		HeaderText.TextTransparency = 1
+		HeaderLineShadow_2.BackgroundTransparency = 1
+		InfoButton.ImageTransparency = 1
+		SearchButton.ImageTransparency = 1
+		SaveButton.ImageTransparency = 1
+		HeaderLineShadow.BackgroundTransparency = 1
+		FatalFrame.BackgroundTransparency = 1
+		Header.BackgroundTransparency = 1
+		HeaderLine.BackgroundTransparency = 1
+		Bottom.BackgroundTransparency = 1
+		HeaderLine_2.BackgroundTransparency = 1
+		DropShadow.ImageTransparency = 1
+		
+		-- И самое главное - отключаем GUI физически
+		Fatalitywin.Enabled = false
+	else
+		-- Иначе открываем как обычно
+		ToggleUI(true);
+	end
 
 	return Fatal;
 end;
