@@ -3887,6 +3887,14 @@ end;
 
 function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButton)
 
+	-- [FIX] Добавляем функцию безопасности для цветов
+	local function GetSafeColor(val)
+		if typeof(val) == "ColorSequence" then
+			return val.Keypoints[1].Value
+		end
+		return val
+	end
+
 	local ConfigWindowFrame = Instance.new("Frame")
 	local UICorner = Instance.new("UICorner")
 	local UIStroke = Instance.new("UIStroke")
@@ -4039,7 +4047,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	ConfigWindowFrame.Name = "ConfigWindowFrame"
 	ConfigWindowFrame.Parent = Root
 	ConfigWindowFrame.AnchorPoint = Vector2.new(0,1)
-	Fatality:Register(ConfigWindowFrame, "Container") -- [THEME]
+	Fatality:Register(ConfigWindowFrame, "Container")
 	ConfigWindowFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	ConfigWindowFrame.BorderSizePixel = 0
 	ConfigWindowFrame.ClipsDescendants = true
@@ -4051,7 +4059,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	UICorner.Parent = ConfigWindowFrame
 
 	UIStroke.Color = Color3.fromRGB(29, 29, 29)
-	Fatality:Register(UIStroke, "Stroke", "Color") -- [THEME]
+	Fatality:Register(UIStroke, "Stroke", "Color")
 	UIStroke.Parent = ConfigWindowFrame
 
 	DropShadow.Name = "DropShadow"
@@ -4064,14 +4072,14 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	DropShadow.Size = UDim2.new(1, 47, 1, 47)
 	DropShadow.ZIndex = 205
 	DropShadow.Image = "rbxassetid://6014261993"
-	Fatality:Register(DropShadow, "Outline", "ImageColor3") -- [THEME]
+	Fatality:Register(DropShadow, "Outline", "ImageColor3")
 	DropShadow.ImageTransparency = 0.750
 	DropShadow.ScaleType = Enum.ScaleType.Slice
 	DropShadow.SliceCenter = Rect.new(49, 49, 450, 450)
 
 	ScrollingFrame.Parent = ConfigWindowFrame
 	ScrollingFrame.Active = true
-	Fatality:Register(ScrollingFrame, "Element") -- [THEME]
+	Fatality:Register(ScrollingFrame, "Element")
 	ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	ScrollingFrame.BorderSizePixel = 0
 	ScrollingFrame.Position = UDim2.new(0, 8, 0, 8)
@@ -4084,7 +4092,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 
 	UIStroke_2.Transparency = 0.750
 	UIStroke_2.Color = Color3.fromRGB(29, 29, 29)
-	Fatality:Register(UIStroke_2, "Stroke", "Color") -- [THEME]
+	Fatality:Register(UIStroke_2, "Stroke", "Color")
 	UIStroke_2.Parent = ScrollingFrame
 
 	UIListLayout.Parent = ScrollingFrame
@@ -4102,7 +4110,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	InputFrame.Name = "InputFrame"
 	InputFrame.Parent = ConfigWindowFrame
 	InputFrame.AnchorPoint = Vector2.new(0, 1)
-	Fatality:Register(InputFrame, "Element") -- [THEME]
+	Fatality:Register(InputFrame, "Element")
 	InputFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	InputFrame.BorderSizePixel = 0
 	InputFrame.Position = UDim2.new(0, 8, 1, -9)
@@ -4111,7 +4119,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 
 	UIStroke_3.Transparency = 0.750
 	UIStroke_3.Color = Color3.fromRGB(29, 29, 29)
-	Fatality:Register(UIStroke_3, "Stroke", "Color") -- [THEME]
+	Fatality:Register(UIStroke_3, "Stroke", "Color")
 	UIStroke_3.Parent = InputFrame
 
 	UICorner_3.CornerRadius = UDim.new(0, 3)
@@ -4128,7 +4136,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	TextBox.ZIndex = 209
 	TextBox.FontFace = Fatality.FontSemiBold
 	TextBox.Text = ""
-	Fatality:Register(TextBox, "Text", "TextColor3") -- [THEME]
+	Fatality:Register(TextBox, "Text", "TextColor3")
 	TextBox.TextSize = 10.000
 	TextBox.TextTransparency = 0.500
 	TextBox.TextXAlignment = Enum.TextXAlignment.Left
@@ -4145,7 +4153,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	AddConfigButton.ZIndex = 209
 	AddConfigButton.Image = "rbxassetid://10734923868"
 	AddConfigButton.ImageTransparency = 0.500
-	Fatality:Register(AddConfigButton, "Text", "ImageColor3") -- [THEME]
+	Fatality:Register(AddConfigButton, "Text", "ImageColor3")
 
 	UICorner_4.CornerRadius = UDim.new(1, 0)
 	UICorner_4.Parent = AddConfigButton
@@ -4162,7 +4170,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	GetConfigButton.ZIndex = 209
 	GetConfigButton.Image = "rbxassetid://10723387721"
 	GetConfigButton.ImageTransparency = 0.500
-	Fatality:Register(GetConfigButton, "Text", "ImageColor3") -- [THEME]
+	Fatality:Register(GetConfigButton, "Text", "ImageColor3")
 
 	UICorner_5.CornerRadius = UDim.new(1, 0)
 	UICorner_5.Parent = GetConfigButton
@@ -4179,7 +4187,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	SaveConfigButton.ZIndex = 209
 	SaveConfigButton.Image = "rbxassetid://10734941499"
 	SaveConfigButton.ImageTransparency = 0.500
-	Fatality:Register(SaveConfigButton, "Text", "ImageColor3") -- [THEME]
+	Fatality:Register(SaveConfigButton, "Text", "ImageColor3")
 
 	UICorner_6.CornerRadius = UDim.new(1, 0)
 	UICorner_6.Parent = SaveConfigButton
@@ -4195,8 +4203,8 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	DeleteButton.Size = UDim2.new(0, 15, 0, 15)
 	DeleteButton.ZIndex = 209
 	DeleteButton.Image = "rbxassetid://10747362393"
-	-- Кнопка удаления красная (Main), либо можно сделать ее всегда красной
-	Fatality:Register(DeleteButton, "Main", "ImageColor3") -- [THEME]
+	-- Кнопка удаления красная
+	Fatality:Register(DeleteButton, "Main", "ImageColor3")
 	DeleteButton.ImageTransparency = 0.250
 
 	UICorner_7.CornerRadius = UDim.new(1, 0)
@@ -4273,8 +4281,9 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 		db_selected.Size = UDim2.new(1, 0, 0, 10)
 		db_selected.ZIndex = 220
 		db_selected.FontFace = Fatality.FontSemiBold
-		-- По умолчанию TextDark (неактивный)
-		db_selected.TextColor3 = Fatality.CurrentTheme.TextDark
+		
+		-- [FIX] Используем безопасный цвет по умолчанию
+		db_selected.TextColor3 = GetSafeColor(Fatality.CurrentTheme.TextDark)
 		db_selected.TextSize = 12.000
 		db_selected.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -4315,22 +4324,22 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 				if tostring(import.Name) == tostring(v) or import.Name == v then
 					import.Element = button;
 					import.Name = v;
-					-- Активный элемент - Main color
-					button.TextColor3 = Fatality.CurrentTheme.Main;
+					-- [FIX] Присваиваем цвет безопасно
+					button.TextColor3 = GetSafeColor(Fatality.CurrentTheme.Main);
 					button.Text = "  "..tostring(v);
 				end;
 
 				button.MouseButton1Click:Connect(function()
 					if import.Element then
-						-- Возвращаем неактивный цвет
-						import.Element.TextColor3 = Fatality.CurrentTheme.TextDark;
+						-- [FIX] И здесь безопасно
+						import.Element.TextColor3 = GetSafeColor(Fatality.CurrentTheme.TextDark);
 						import.Element.Text = " "..import.Name;
 					end;
 
 					import.Element = button;
 					import.Name = v;
-					-- Ставим активный цвет
-					button.TextColor3 = Fatality.CurrentTheme.Main;
+					-- [FIX] И здесь
+					button.TextColor3 = GetSafeColor(Fatality.CurrentTheme.Main);
 					button.Text = "  "..tostring(v);
 				end);
 			end;
