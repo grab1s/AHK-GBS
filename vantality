@@ -1177,7 +1177,7 @@ settingsSection:AddDropdown({
 settingsSection:AddDropdown({
     Name = "Menu Size",
     Default = "100", 
-    Values = {"65", "75", "100", "125", "150"}, 
+    Values = {"60", "75", "100", "125", "150"}, 
     Multi = false, 
     Flag = "UI_Scale",
     Callback = function(val)
