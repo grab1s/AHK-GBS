@@ -1097,7 +1097,7 @@ end
 local settingsSection  = miscTab:AddSection({ Position = 'left', Name = "MENU SETTINGS" })
 local christmasSection = miscTab:AddSection({ Position = 'center', Name = "CHRISTMAS" })
 local overlaySection   = miscTab:AddSection({ Position = 'left', Name = "OVERLAY" })
-local blurTabSection   = miscTab:AddSection({ Position = 'center', Name = "ALT-TAB BLUR" OnlyPC = true })
+local blurTabSection   = miscTab:AddSection({ Position = 'center', Name = "ALT-TAB BLUR", OnlyPC = true })
 local BetaSection      = miscTab:AddSection({ Position = 'right', Name = "BETA.." })
 
 
