@@ -4547,7 +4547,7 @@ function Fatality.new(Window: Window)
 
 	Fatal.Notifier = Fatality.__NOTIFIER_CACHE or Fatality:CreateNotifier();
 
-	-- [HELPER] Функция безопасности цветов (локальная для этого окна)
+	-- [FIX]
 	local function GetSafeColor(val)
 		if typeof(val) == "ColorSequence" then
 			return val.Keypoints[1].Value
@@ -4556,15 +4556,15 @@ function Fatality.new(Window: Window)
 	end
 
 	local Fatalitywin = Instance.new("ScreenGui")
-	-- Сразу выключаем, чтобы не моргало при старте
 	Fatalitywin.Enabled = false 
+	
 	Fatal.Main = Fatalitywin 
 	
 	local FatalFrame = Instance.new("Frame")
 	
 	local MainScale = Instance.new("UIScale")
 	MainScale.Parent = FatalFrame
-	MainScale.Scale = 1 
+	MainScale.Scale = 1
 
 	local UICorner = Instance.new("UICorner")
 	local DropShadow = Instance.new("ImageLabel")
@@ -4927,11 +4927,7 @@ function Fatality.new(Window: Window)
 	UICorner_6.CornerRadius = UDim.new(0, 5)
 	UICorner_6.Parent = HeaderLineShadow_2
 
-	-- [FIX] Перетаскивание для всех зон
-	Fatality:Drag(FatalFrame, FatalFrame, 0.1) -- Фон
-	Fatality:Drag(Header, FatalFrame, 0.1)     -- Шапка
-	Fatality:Drag(Bottom, FatalFrame, 0.1)     -- Низ
-	Fatality:Drag(MenuFrame, FatalFrame, 0.1)  -- Центр
+	Fatality:Drag(FatalFrame,FatalFrame,0.1);
 
 	UserInputService.InputBegan:Connect(function(input,istyping)
 		if not istyping then
@@ -5011,13 +5007,14 @@ function Fatality.new(Window: Window)
 		return Fatality:CreateConfigWindow(Fatalitywin,Fatal,ConfigButton);
 	end;
 
-	function Fatal:LoadConfig(config)
+function Fatal:LoadConfig(config)
 		for i,v in next , config do
 			if i ~= "Info" then
 				local Element = Fatality.WindowFlags[Fatalitywin][i];
 				if Element then
 					local Value = v.Value;
 					
+					-- [FIX] Передаем `true` вторым аргументом (force update)
 					if Value.Type == "String" then
 						Element:SetValue(tostring(Value.Value), true);
 					elseif Value.Type == "Boolean" then
@@ -5328,6 +5325,7 @@ function Fatality.new(Window: Window)
 
 				Fatality:CreateAnimation(Icon,0.5,{
 					ImageTransparency = 0.15,
+					-- [FIX] Безопасный цвет для активной вкладки
 					ImageColor3 = GetSafeColor(Fatality.CurrentTheme.Main)
 				});
 
@@ -5349,6 +5347,7 @@ function Fatality.new(Window: Window)
 
 				Fatality:CreateAnimation(Icon,0.5,{
 					ImageTransparency = 0.5,
+					-- [FIX] Безопасный цвет для неактивной вкладки
 					ImageColor3 = GetSafeColor(Fatality.CurrentTheme.Text)
 				});
 
@@ -5724,6 +5723,7 @@ function Fatality.new(Window: Window)
 				db_selected.Size = UDim2.new(1, 0, 0, 10)
 				db_selected.ZIndex = 15
 				db_selected.FontFace = Fatality.FontSemiBold
+				-- [FIX] Safe Color for ListBox items
 				db_selected.TextColor3 = GetSafeColor(Fatality.CurrentTheme.Main)
 				db_selected.TextSize = 12.000
 				db_selected.TextTransparency = 0.5;
@@ -5833,6 +5833,36 @@ function Fatality.new(Window: Window)
 
 			BindEvent.Event:Connect(Toggle);
 
+			local DearchDelay = tick();
+
+			TextBox:GetPropertyChangedSignal('Text'):Connect(function()
+				DearchDelay = tick();
+
+				if not TextBox.Text:byte() then
+					for i,v in next , ScrollingFrame:GetChildren() do
+						if v:IsA('TextButton') then
+							v.Visible = true;
+						end;
+					end;
+
+					return;
+				end;
+
+				task.delay(0.25,function()
+					if (tick() - DearchDelay) > 0.25 then
+						for i,v in next , ScrollingFrame:GetChildren() do
+							if v:IsA('TextButton') then
+								if string.find(string.lower(v.Text),string.lower(TextBox.Text),1,true) then
+									v.Visible = true;
+								else
+									v.Visible = false;
+								end;
+							end;
+						end;
+					end;
+				end)
+			end);
+
 			local res;
 			res = Fatality:CreateResponse({
 				Refresh = function()
@@ -5854,6 +5884,7 @@ function Fatality.new(Window: Window)
 						if Config.Multi then
 							if (typeof(Config.Default) == 'table' and (Config.Default[v] or table.find(Config.Default,v))) or Config.Default == v then
 								Config.Default[v] = true
+								-- [FIX] Safe Color
 								bth.TextColor3 = GetSafeColor(Fatality.CurrentTheme.Main);
 								bth.TextTransparency = 0;
 
@@ -5969,300 +6000,951 @@ function Fatality.new(Window: Window)
 			return res;
 		end;
 
-		do
-			local AboutFrame = Instance.new("Frame")
+        function MenuLib:AddSection(Config : Section)
+			Config = Config or {};
+            
+            if not Fatality:CanShow(Config) then
+                return Fatality.Dummy
+            end
+
+			Config.Name = Config.Name or "SECTION";
+			Config.Position = Config.Position or "center";
+			Config.Height = Config.Height or 0;
+
+			table.insert(Fatal.ElementContents,{
+				Name = Config.Name,
+				Path = Menu.Name .. " > ".. Config.Name,
+				_TAB = _B
+			});
+
+			local Section = Instance.new("Frame")
+			local Elements = Instance.new("Frame")
 			local UIStroke = Instance.new("UIStroke")
 			local UICorner = Instance.new("UICorner")
-			local DropShadow = Instance.new("ImageLabel")
-			local HeaderText = Instance.new("TextLabel")
-			local CloseButton = Instance.new("TextButton")
-			local ContentFrame = Instance.new("Frame")
-			local LogoContainer = Instance.new("Frame")
-			local LogoRed = Instance.new("TextLabel")
-			local LogoBlue = Instance.new("TextLabel")
-			local LogoWhite = Instance.new("TextLabel")
-			local CreditsText = Instance.new("TextLabel")
-			local LinkButton = Instance.new("TextButton")
-			local UICorner_Btn = Instance.new("UICorner")
-			local UIStroke_Btn = Instance.new("UIStroke")
+			local UIListLayout = Instance.new("UIListLayout")
+			local SpaceBox = Instance.new("Frame")
+			local SectionName = Instance.new("TextLabel")
 
-			-- 1. Main Window
-			AboutFrame.Name = "AboutWindow"
-			AboutFrame.Parent = Fatalitywin
-			AboutFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-			AboutFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-			AboutFrame.Size = UDim2.new(0, 220, 0, 260)
-			Fatality:Register(AboutFrame, "Background") 
-			AboutFrame.BorderSizePixel = 0
-			AboutFrame.Visible = false
-			AboutFrame.ZIndex = 200
-			AboutFrame.Active = true 
-			
-			Fatality:AddDragBlacklist(AboutFrame)
-			Fatality:Drag(AboutFrame, AboutFrame, 0.1)
+			local Toggle = function(v)
+				if v then
+					Fatality:CreateAnimation(Section,0.5,{
+						BackgroundTransparency = 0
+					})
 
-			UICorner.CornerRadius = UDim.new(0, 4)
-			UICorner.Parent = AboutFrame
+					Fatality:CreateAnimation(UIStroke,0.5,{
+						Transparency = 0
+					})
+
+					Fatality:CreateAnimation(SectionName,0.5,{
+						TextStrokeTransparency = 0.750,
+						TextTransparency = 0
+					})
+				else
+					Fatality:CreateAnimation(Section,0.5,{
+						BackgroundTransparency = 1
+					})
+
+					Fatality:CreateAnimation(UIStroke,0.5,{
+						Transparency = 1
+					})
+
+					Fatality:CreateAnimation(SectionName,0.5,{
+						TextStrokeTransparency = 1,
+						TextTransparency = 1
+					})
+				end
+			end;
+
+			Section.Name = Fatality:RandomString()
+			Section.Parent = (string.lower(Config.Position) == 'left' and Left) or (string.lower(Config.Position) == 'center' and Center) or Right;
+			Fatality:Register(Section, "Background") -- [THEME]
+			Section.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Section.BorderSizePixel = 0
+			Section.ClipsDescendants = true
+			Section.Size = UDim2.new(1, 0, 0, 0)
+
+			Elements.Name = Fatality:RandomString()
+			Elements.Parent = Section
+			Elements.AnchorPoint = Vector2.new(0.5, 1)
+			Fatality:Register(Elements, "Container") -- [THEME]
+			Elements.BackgroundTransparency = 0
+			Elements.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Elements.BorderSizePixel = 0
+			Elements.Position = UDim2.new(0.5, 0, 1, -1)
+			Elements.Size = UDim2.new(1, -5, 1, -10)
 
 			UIStroke.Color = Color3.fromRGB(29, 29, 29)
-			Fatality:Register(UIStroke, "Stroke", "Color")
-			UIStroke.Parent = AboutFrame
+			Fatality:Register(UIStroke, "Stroke", "Color") -- [THEME]
+			UIStroke.Parent = Elements
 
-			-- Shadow
-			DropShadow.Name = "Shadow"
-			DropShadow.Parent = AboutFrame
-			DropShadow.AnchorPoint = Vector2.new(0.5, 0.5)
-			DropShadow.BackgroundTransparency = 1
-			DropShadow.Position = UDim2.new(0.5, 0, 0.5, 0)
-			DropShadow.Size = UDim2.new(1, 60, 1, 60)
-			DropShadow.ZIndex = 199
-			DropShadow.Image = "rbxassetid://6014261993"
-			DropShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-			DropShadow.ImageTransparency = 0.5
-			DropShadow.ScaleType = Enum.ScaleType.Slice
-			DropShadow.SliceCenter = Rect.new(49, 49, 450, 450)
+			UICorner.CornerRadius = UDim.new(0, 2)
+			UICorner.Parent = Elements
 
-			-- 2. Header
-			HeaderText.Name = "Title"
-			HeaderText.Parent = AboutFrame
-			HeaderText.BackgroundTransparency = 1
-			HeaderText.Position = UDim2.new(0, 10, 0, 8)
-			HeaderText.Size = UDim2.new(1, -20, 0, 20)
-			HeaderText.ZIndex = 201
-			HeaderText.Font = Enum.Font.GothamBold
-			HeaderText.Text = "About"
-			Fatality:Register(HeaderText, "Main", "TextColor3") 
-			HeaderText.TextSize = 14
-			HeaderText.TextXAlignment = Enum.TextXAlignment.Left
+			UIListLayout.Parent = Elements
+			UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+			UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+			UIListLayout.Padding = UDim.new(0, 5)
 
-			CloseButton.Name = "Close"
-			CloseButton.Parent = AboutFrame
-			CloseButton.BackgroundTransparency = 1
-			CloseButton.Position = UDim2.new(1, -25, 0, 8)
-			CloseButton.Size = UDim2.new(0, 15, 0, 15)
-			CloseButton.ZIndex = 202
-			CloseButton.Font = Enum.Font.GothamBold
-			CloseButton.Text = "x"
-			CloseButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-			CloseButton.TextSize = 14
-			
-			CloseButton.MouseEnter:Connect(function() 
-				game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255,255,255)}):Play() 
-			end)
-			CloseButton.MouseLeave:Connect(function() 
-				game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(150,150,150)}):Play() 
-			end)
-			CloseButton.MouseButton1Click:Connect(function() AboutFrame.Visible = false end)
+			SpaceBox.Name = Fatality:RandomString()
+			SpaceBox.Parent = Elements
+			SpaceBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			SpaceBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			SpaceBox.BorderSizePixel = 0
+			SpaceBox.Size = UDim2.new(0, 0, 0, 10)
 
-			-- 3. Content
-			ContentFrame.Name = "Content"
-			ContentFrame.Parent = AboutFrame
-			ContentFrame.BackgroundTransparency = 1
-			ContentFrame.Position = UDim2.new(0, 10, 0, 35)
-			ContentFrame.Size = UDim2.new(1, -20, 1, -45)
-			ContentFrame.ZIndex = 201
+			SectionName.Name = Fatality:RandomString()
+			SectionName.Parent = Section
+			SectionName.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			SectionName.BackgroundTransparency = 1.000
+			SectionName.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			SectionName.BorderSizePixel = 0
+			SectionName.Position = UDim2.new(0, 10, 0, 0)
+			SectionName.Size = UDim2.new(1, 0, 0, 15)
+			SectionName.FontFace = Fatality.FontSemiBold;
+			SectionName.Text = Config.Name
+			Fatality:Register(SectionName, "Text", "TextColor3") -- [THEME]
+			SectionName.TextSize = 15.000
+			SectionName.TextStrokeTransparency = 0.750
+			SectionName.TextXAlignment = Enum.TextXAlignment.Left
 
-			LogoContainer.Name = "Logo"
-			LogoContainer.Parent = ContentFrame
-			LogoContainer.BackgroundTransparency = 1
-			LogoContainer.Size = UDim2.new(1, 0, 0, 30)
-			LogoContainer.ZIndex = 202
 
-			local function createGlitchText(color, offset, z)
-				local l = Instance.new("TextLabel")
-				l.Parent = LogoContainer
-				l.BackgroundTransparency = 1
-				l.Size = UDim2.new(1, 0, 1, 0)
-				l.Position = UDim2.new(0, offset, 0, 0)
-				l.Font = Enum.Font.GothamBlack
-				l.Text = "VANTALITY"
-				l.TextColor3 = color
-				l.TextSize = 22
-				l.ZIndex = 202 + z
-				return l
-			end
+			UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+				local MainScale = UIListLayout.AbsoluteContentSize.Y + 20 + Config.Height;
 
-			LogoRed = createGlitchText(Color3.fromRGB(255, 0, 0), -2, 0)
-			LogoBlue = createGlitchText(Color3.fromRGB(0, 255, 255), 2, 0)
-			LogoWhite = createGlitchText(Color3.fromRGB(255, 255, 255), 0, 1)
-
-			CreditsText.Name = "Credits"
-			CreditsText.Parent = ContentFrame
-			CreditsText.BackgroundTransparency = 1
-			CreditsText.Position = UDim2.new(0, 0, 0, 40)
-			CreditsText.Size = UDim2.new(1, 0, 0, 120)
-			CreditsText.ZIndex = 202
-			CreditsText.Font = Enum.Font.GothamMedium
-			CreditsText.TextSize = 11
-			CreditsText.TextColor3 = Color3.fromRGB(200, 200, 200)
-			CreditsText.TextXAlignment = Enum.TextXAlignment.Left
-			CreditsText.TextYAlignment = Enum.TextYAlignment.Top
-			CreditsText.RichText = true
-			
-			CreditsText.Text = table.concat({
-				'<font color="#666666">// developed by</font>',
-				'<b>grabis</b>', 
-				' ',
-				'<font color="#666666">// ui base by</font>',
-				'<b>4lpaca</b>',
-				' ',
-				'<font color="#666666">// special thanks</font>',
-				'<b>Mepilok, Tetraquark, ahk_lzt</b>',
-				' ',
-				'<font color="#666666">// copyright © 2025</font> <font color="#ff4a68">VANTALITY</font>'
-			}, "<br />")
-
-			LinkButton.Name = "LinkButton"
-			LinkButton.Parent = ContentFrame
-			LinkButton.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-			LinkButton.Position = UDim2.new(0, 0, 1, -25)
-			LinkButton.Size = UDim2.new(1, 0, 0, 25)
-			LinkButton.ZIndex = 202
-			LinkButton.AutoButtonColor = false
-			LinkButton.Font = Enum.Font.GothamBold
-			LinkButton.Text = "Public Software"
-			LinkButton.TextColor3 = Color3.fromRGB(150, 150, 150)
-			LinkButton.TextSize = 12
-			
-			UICorner_Btn.CornerRadius = UDim.new(0, 4)
-			UICorner_Btn.Parent = LinkButton
-			
-			UIStroke_Btn.Color = Color3.fromRGB(29, 29, 29)
-			UIStroke_Btn.Parent = LinkButton
-			Fatality:Register(UIStroke_Btn, "Stroke", "Color")
-
-			Fatality:CreateHover(LinkButton, function(hover) 
-				local TS = game:GetService("TweenService")
-				if hover then
-					TS:Create(LinkButton, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255,255,255), BackgroundColor3 = Color3.fromRGB(20,20,20)}):Play()
+				if not Menu.AutoFill then
+					Fatality:CreateAnimation(Section,0.25,{
+						Size = UDim2.new(1, 0, 0, MainScale)
+					})
 				else
-					TS:Create(LinkButton, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(150,150,150), BackgroundColor3 = Color3.fromRGB(12,12,12)}):Play()
-				end
-			end)
+					Section.Size = UDim2.new(1,0,0,MainScale / 2.5);
+				end;
+			end);
 
-			InfoButton.MouseButton1Click:Connect(function()
-				AboutFrame.Visible = not AboutFrame.Visible
-				if AboutFrame.Visible then
-					AboutFrame.Size = UDim2.new(0, 220, 0, 240)
-					AboutFrame.BackgroundTransparency = 1
-					for _, v in pairs(AboutFrame:GetDescendants()) do
-						if v:IsA("TextLabel") or v:IsA("TextButton") then v.TextTransparency = 1 end
-						if v:IsA("UIStroke") then v.Transparency = 1 end
-					end
-					
-					local TS = game:GetService("TweenService")
-					local info = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-					
-					TS:Create(AboutFrame, info, {Size = UDim2.new(0, 220, 0, 260), BackgroundTransparency = 0}):Play()
-					TS:Create(UIStroke, info, {Transparency = 0}):Play()
-					
-					task.wait(0.1)
-					for _, v in pairs(AboutFrame:GetDescendants()) do
-						if v:IsA("TextLabel") or v:IsA("TextButton") then 
-							TS:Create(v, TweenInfo.new(0.3), {TextTransparency = 0}):Play() 
-						end
-						if v:IsA("UIStroke") then TS:Create(v, TweenInfo.new(0.3), {Transparency = 0}):Play() end
-					end
-				end
-			end)
+			Toggle(BindEvent:GetAttribute('V'));
 
-			function Fatal:AddInfo(callback)
-				LinkButton.MouseButton1Click:Connect(function()
-					LinkButton.TextSize = 11
-					task.wait(0.05)
-					LinkButton.TextSize = 12
-					callback()
-				end)
-			end;
-		end
+			BindEvent.Event:Connect(Toggle);
 
-		function Fatal:GetButton()
-			local backpack = Instance.new("TextButton")
-			backpack.Name = "FATALITY_MOBILE_TOGGLE"
-			backpack.BackgroundColor3 = Fatality.CurrentTheme.Container
-			Fatality:Register(backpack, "Container")
-			backpack.BorderSizePixel = 0
-			-- [FIX] Квадратная кнопка
-			backpack.Size = UDim2.new(0, 50, 0, 50) 
-			backpack.AutoButtonColor = false
-			backpack.Text = "" -- [FIX] Нет текста
-
-			local corner = Instance.new("UICorner")
-			corner.CornerRadius = UDim.new(0, 10)
-			corner.Parent = backpack
-
-			local stroke = Instance.new("UIStroke")
-			stroke.Color = Fatality.CurrentTheme.Stroke
-			Fatality:Register(stroke, "Stroke", "Color")
-			stroke.Parent = backpack
-			
-			-- [FIX] Буква V внутри
-			local icon = Instance.new("TextLabel")
-			icon.Name = "Icon"
-			icon.Parent = backpack
-			icon.BackgroundTransparency = 1
-			icon.Size = UDim2.new(1, 0, 1, 0)
-			icon.Font = Enum.Font.GothamBold
-			icon.Text = "V"
-			icon.TextColor3 = GetSafeColor(Fatality.CurrentTheme.Main)
-			Fatality:Register(icon, "Main", "TextColor3")
-			icon.TextSize = 24
-
-			backpack.MouseButton1Click:Connect(function()
-				Fatal.Toggle = not Fatal.Toggle
-				ToggleUI(Fatal.Toggle)
-			end)
-
-			return backpack
-		end
-
-		function Fatal:SetVisible(b)
-			Fatal.Toggle = b;
-			ToggleUI(b);
-			
-			if b then
-				Fatalitywin.Enabled = true
-			elseif FatalFrame.BackgroundTransparency >= 0.99 then
-				Fatalitywin.Enabled = false
-			end
+			return Fatality:CreateElements(Elements,Elements.ZIndex,BindEvent,{
+				Path = Menu.Name .. " > ".. Config.Name,
+				Memory = function(Name)
+					table.insert(Fatal.ElementContents,{
+						Name = Name,
+						Path = Menu.Name .. " > ".. Config.Name .. " > " .. Name,
+						_TAB = _B
+					});
+				end,
+			});
 		end;
 
-		if Window.Visible == false then
-			Fatal.Toggle = false
-			
-			SaveButton.Position = UDim2.new(0,35,1, 20)
-			SearchButton.Position = UDim2.new(0,10,1, 20)
-			InfoButton.Position = UDim2.new(1, -5,1, 20)
-			UIStroke.Thickness = 0
-			UIStroke.Transparency = 1
-			UserIcon.ImageTransparency = 1
-			UserIcon.Position = UDim2.new(1, -10,0.5, 0)
-			User_name.TextTransparency = 1
-			User_name.Position = UDim2.new(1, -40,0, 3)
-			expire_days.TextTransparency = 1
-			expire_days.Position = UDim2.new(1, -40,0, 16)
-			HeaderText.TextStrokeTransparency = 1
-			HeaderText.TextTransparency = 1
-			HeaderLineShadow_2.BackgroundTransparency = 1
-			InfoButton.ImageTransparency = 1
-			SearchButton.ImageTransparency = 1
-			SaveButton.ImageTransparency = 1
-			HeaderLineShadow.BackgroundTransparency = 1
-			FatalFrame.BackgroundTransparency = 1
-			Header.BackgroundTransparency = 1
-			HeaderLine.BackgroundTransparency = 1
-			Bottom.BackgroundTransparency = 1
-			HeaderLine_2.BackgroundTransparency = 1
-			DropShadow.ImageTransparency = 1
-			
-			Fatalitywin.Enabled = false
-		else
-			Fatalitywin.Enabled = true 
-			ToggleUI(true);
+		return MenuLib;
+	end;
+
+	do
+		InfoButton.Name = Fatality:RandomString()
+		InfoButton.Parent = Bottom
+		InfoButton.AnchorPoint = Vector2.new(1, 0.5)
+		InfoButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		InfoButton.BackgroundTransparency = 1.000
+		InfoButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		InfoButton.BorderSizePixel = 0
+		InfoButton.Position = UDim2.new(1, -5, 0.5, 0)
+		InfoButton.Size = UDim2.new(0, 16, 0, 16)
+		InfoButton.ZIndex = 4
+		InfoButton.Image = "rbxassetid://10723415903"
+		InfoButton.ImageTransparency = 0.500
+
+		SearchButton.Name = Fatality:RandomString()
+		SearchButton.Parent = Bottom
+		SearchButton.AnchorPoint = Vector2.new(0, 0.5)
+		SearchButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		SearchButton.BackgroundTransparency = 1.000
+		SearchButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		SearchButton.BorderSizePixel = 0
+		SearchButton.Position = UDim2.new(0, 10, 0.5, 0)
+		SearchButton.Size = UDim2.new(0, 16, 0, 16)
+		SearchButton.ZIndex = 4
+		SearchButton.Image = "rbxassetid://10734943674"
+		SearchButton.ImageTransparency = 0.500
+
+		SaveButton.Name = Fatality:RandomString()
+		SaveButton.Parent = Bottom
+		SaveButton.AnchorPoint = Vector2.new(0, 0.5)
+		SaveButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		SaveButton.BackgroundTransparency = 1.000
+		SaveButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		SaveButton.BorderSizePixel = 0
+		SaveButton.Position = UDim2.new(0, 35, 0.5, 0)
+		SaveButton.Size = UDim2.new(0, 16, 0, 16)
+		SaveButton.ZIndex = 4
+		SaveButton.Image = "rbxassetid://10734941499"
+		SaveButton.ImageTransparency = 0.500
+
+		Fatality:CreateHover(SaveButton,function(bool)
+			if bool then
+				Fatality:CreateAnimation(SaveButton,0.5,{
+					ImageTransparency = 0.1
+				})
+			else
+				Fatality:CreateAnimation(SaveButton,0.5,{
+					ImageTransparency = 0.5
+				})
+			end	
+		end);
+
+		Fatality:CreateHover(InfoButton,function(bool)
+			if bool then
+				Fatality:CreateAnimation(InfoButton,0.5,{
+					ImageTransparency = 0.1
+				})
+			else
+				Fatality:CreateAnimation(InfoButton,0.5,{
+					ImageTransparency = 0.5
+				})
+			end	
+		end);
+
+		function Fatal:AddSave(callback)
+			SaveButton.MouseButton1Click:Connect(callback);
+		end;
+
+-- [NEW] ABOUT WINDOW (POPUP)
+	do
+		local AboutFrame = Instance.new("Frame")
+		local UIStroke = Instance.new("UIStroke")
+		local UICorner = Instance.new("UICorner")
+		local DropShadow = Instance.new("ImageLabel")
+		local HeaderText = Instance.new("TextLabel")
+		local CloseButton = Instance.new("TextButton")
+		local ContentFrame = Instance.new("Frame")
+		local LogoContainer = Instance.new("Frame")
+		local LogoRed = Instance.new("TextLabel")
+		local LogoBlue = Instance.new("TextLabel")
+		local LogoWhite = Instance.new("TextLabel")
+		local CreditsText = Instance.new("TextLabel")
+		local LinkButton = Instance.new("TextButton")
+		local UICorner_Btn = Instance.new("UICorner")
+		local UIStroke_Btn = Instance.new("UIStroke")
+
+		-- 1. Main Window
+		AboutFrame.Name = "AboutWindow"
+		AboutFrame.Parent = Fatalitywin
+		AboutFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+		AboutFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+		AboutFrame.Size = UDim2.new(0, 220, 0, 260)
+		Fatality:Register(AboutFrame, "Background") 
+		AboutFrame.BorderSizePixel = 0
+		AboutFrame.Visible = false
+		AboutFrame.ZIndex = 200
+		
+		-- [FIX] Active = true предотвращает клики сквозь окно в игру
+		AboutFrame.Active = true 
+		
+		-- Dragging
+		Fatality:AddDragBlacklist(AboutFrame)
+		Fatality:Drag(AboutFrame, AboutFrame, 0.1)
+
+		UICorner.CornerRadius = UDim.new(0, 4)
+		UICorner.Parent = AboutFrame
+
+		UIStroke.Color = Color3.fromRGB(29, 29, 29)
+		Fatality:Register(UIStroke, "Stroke", "Color")
+		UIStroke.Parent = AboutFrame
+
+		-- Shadow
+		DropShadow.Name = "Shadow"
+		DropShadow.Parent = AboutFrame
+		DropShadow.AnchorPoint = Vector2.new(0.5, 0.5)
+		DropShadow.BackgroundTransparency = 1
+		DropShadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+		DropShadow.Size = UDim2.new(1, 60, 1, 60)
+		DropShadow.ZIndex = 199
+		DropShadow.Image = "rbxassetid://6014261993"
+		DropShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+		DropShadow.ImageTransparency = 0.5
+		DropShadow.ScaleType = Enum.ScaleType.Slice
+		DropShadow.SliceCenter = Rect.new(49, 49, 450, 450)
+
+		-- 2. Header
+		HeaderText.Name = "Title"
+		HeaderText.Parent = AboutFrame
+		HeaderText.BackgroundTransparency = 1
+		HeaderText.Position = UDim2.new(0, 10, 0, 8)
+		HeaderText.Size = UDim2.new(1, -20, 0, 20)
+		HeaderText.ZIndex = 201
+		HeaderText.Font = Enum.Font.GothamBold
+		HeaderText.Text = "About"
+		Fatality:Register(HeaderText, "Main", "TextColor3") 
+		HeaderText.TextSize = 14
+		HeaderText.TextXAlignment = Enum.TextXAlignment.Left
+
+		CloseButton.Name = "Close"
+		CloseButton.Parent = AboutFrame
+		CloseButton.BackgroundTransparency = 1
+		CloseButton.Position = UDim2.new(1, -25, 0, 8)
+		CloseButton.Size = UDim2.new(0, 15, 0, 15)
+		CloseButton.ZIndex = 202
+		CloseButton.Font = Enum.Font.GothamBold
+		CloseButton.Text = "x"
+		CloseButton.TextColor3 = Color3.fromRGB(150, 150, 150)
+		CloseButton.TextSize = 14
+		
+		-- Hover effect for Close
+		CloseButton.MouseEnter:Connect(function() 
+			game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255,255,255)}):Play() 
+		end)
+		CloseButton.MouseLeave:Connect(function() 
+			game:GetService("TweenService"):Create(CloseButton, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(150,150,150)}):Play() 
+		end)
+		CloseButton.MouseButton1Click:Connect(function() AboutFrame.Visible = false end)
+
+		-- 3. Content
+		ContentFrame.Name = "Content"
+		ContentFrame.Parent = AboutFrame
+		ContentFrame.BackgroundTransparency = 1
+		ContentFrame.Position = UDim2.new(0, 10, 0, 35)
+		ContentFrame.Size = UDim2.new(1, -20, 1, -45)
+		ContentFrame.ZIndex = 201
+
+		-- 3.1 GLITCH LOGO ("VANTALITY")
+		LogoContainer.Name = "Logo"
+		LogoContainer.Parent = ContentFrame
+		LogoContainer.BackgroundTransparency = 1
+		LogoContainer.Size = UDim2.new(1, 0, 0, 30)
+		LogoContainer.ZIndex = 202
+
+		local function createGlitchText(color, offset, z)
+			local l = Instance.new("TextLabel")
+			l.Parent = LogoContainer
+			l.BackgroundTransparency = 1
+			l.Size = UDim2.new(1, 0, 1, 0)
+			l.Position = UDim2.new(0, offset, 0, 0)
+			l.Font = Enum.Font.GothamBlack
+			l.Text = "VANTALITY"
+			l.TextColor3 = color
+			l.TextSize = 22
+			l.ZIndex = 202 + z
+			return l
 		end
 
-		return Fatal;
-	end; -- UPDATE FOR MOBILE BUTTON AND DRAGGABLE ON MOBILE FOR TOUCHES
+		LogoRed = createGlitchText(Color3.fromRGB(255, 0, 0), -2, 0)   -- Red Shift Left
+		LogoBlue = createGlitchText(Color3.fromRGB(0, 255, 255), 2, 0) -- Blue Shift Right
+		LogoWhite = createGlitchText(Color3.fromRGB(255, 255, 255), 0, 1) -- White Top
+
+		-- 3.2 CREDITS TEXT
+		CreditsText.Name = "Credits"
+		CreditsText.Parent = ContentFrame
+		CreditsText.BackgroundTransparency = 1
+		CreditsText.Position = UDim2.new(0, 0, 0, 40)
+		CreditsText.Size = UDim2.new(1, 0, 0, 120)
+		CreditsText.ZIndex = 202
+		CreditsText.Font = Enum.Font.GothamMedium
+		CreditsText.TextSize = 11
+		CreditsText.TextColor3 = Color3.fromRGB(200, 200, 200)
+		CreditsText.TextXAlignment = Enum.TextXAlignment.Left
+		CreditsText.TextYAlignment = Enum.TextYAlignment.Top
+		CreditsText.RichText = true
+		
+		CreditsText.Text = table.concat({
+			'<font color="#666666">// developed by</font>',
+			'<b>grabis</b>', 
+			' ',
+			'<font color="#666666">// ui base by</font>',
+			'<b>4lpaca</b>',
+			' ',
+			'<font color="#666666">// special thanks</font>',
+			'<b>Mepilok, Tetraquark, ahk_lzt</b>',
+			' ',
+			'<font color="#666666">// copyright © 2025</font> <font color="#ff4a68">VANTALITY</font>'
+		}, "<br />")
+
+		-- 3.3 LINK BUTTON ("Public Software")
+		LinkButton.Name = "LinkButton"
+		LinkButton.Parent = ContentFrame
+		LinkButton.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+		LinkButton.Position = UDim2.new(0, 0, 1, -25)
+		LinkButton.Size = UDim2.new(1, 0, 0, 25)
+		LinkButton.ZIndex = 202
+		LinkButton.AutoButtonColor = false
+		LinkButton.Font = Enum.Font.GothamBold
+		LinkButton.Text = "Public Software"
+		LinkButton.TextColor3 = Color3.fromRGB(150, 150, 150)
+		LinkButton.TextSize = 12
+		
+		UICorner_Btn.CornerRadius = UDim.new(0, 4)
+		UICorner_Btn.Parent = LinkButton
+		
+		UIStroke_Btn.Color = Color3.fromRGB(29, 29, 29)
+		UIStroke_Btn.Parent = LinkButton
+		Fatality:Register(UIStroke_Btn, "Stroke", "Color")
+
+		Fatality:CreateHover(LinkButton, function(hover) 
+			local TS = game:GetService("TweenService")
+			if hover then
+				TS:Create(LinkButton, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255,255,255), BackgroundColor3 = Color3.fromRGB(20,20,20)}):Play()
+			else
+				TS:Create(LinkButton, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(150,150,150), BackgroundColor3 = Color3.fromRGB(12,12,12)}):Play()
+			end
+		end)
+
+		InfoButton.MouseButton1Click:Connect(function()
+			AboutFrame.Visible = not AboutFrame.Visible
+			if AboutFrame.Visible then
+				AboutFrame.Size = UDim2.new(0, 220, 0, 240)
+				AboutFrame.BackgroundTransparency = 1
+				for _, v in pairs(AboutFrame:GetDescendants()) do
+					if v:IsA("TextLabel") or v:IsA("TextButton") then v.TextTransparency = 1 end
+					if v:IsA("UIStroke") then v.Transparency = 1 end
+				end
+				
+				local TS = game:GetService("TweenService")
+				local info = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+				
+				TS:Create(AboutFrame, info, {Size = UDim2.new(0, 220, 0, 260), BackgroundTransparency = 0}):Play()
+				TS:Create(UIStroke, info, {Transparency = 0}):Play()
+				
+				task.wait(0.1)
+				for _, v in pairs(AboutFrame:GetDescendants()) do
+					if v:IsA("TextLabel") or v:IsA("TextButton") then 
+						TS:Create(v, TweenInfo.new(0.3), {TextTransparency = 0}):Play() 
+					end
+					if v:IsA("UIStroke") then TS:Create(v, TweenInfo.new(0.3), {Transparency = 0}):Play() end
+				end
+			end
+		end)
+
+		function Fatal:AddInfo(callback)
+			LinkButton.MouseButton1Click:Connect(function()
+				LinkButton.TextSize = 11
+				task.wait(0.05)
+				LinkButton.TextSize = 12
+				callback()
+			end)
+		end;
+	end
+	end;
+
+	do
+		local SearchFrame = Instance.new("Frame")
+		local UIStroke = Instance.new("UIStroke")
+		local UICorner = Instance.new("UICorner")
+		local DropShadow = Instance.new("ImageLabel")
+		local SearchBox = Instance.new("Frame")
+		local UICorner_2 = Instance.new("UICorner")
+		local UIStroke_2 = Instance.new("UIStroke")
+		local TextBox = Instance.new("TextBox")
+		local ScrollingFrame = Instance.new("ScrollingFrame")
+		local UIListLayout = Instance.new("UIListLayout")
+		local searchScale = UDim2.new(0, 295, 0, 295);
+
+		Fatality:AddDragBlacklist(SearchFrame);
+
+		local SearchToggle = function(value)
+			if value then
+				SearchFrame.Position = UDim2.fromOffset(SearchButton.AbsolutePosition.X - 5,SearchButton.AbsolutePosition.Y + (SearchButton.AbsoluteSize.Y * 3))
+
+				Fatality:CreateAnimation(SearchFrame,0.35,{
+					Size = searchScale
+				})
+
+				Fatality:CreateAnimation(DropShadow,0.35,{
+					ImageTransparency = 0.750
+				})
+
+				Fatality:CreateAnimation(SearchBox,0.35,{
+					BackgroundTransparency = 0
+				})
+
+				Fatality:CreateAnimation(UIStroke_2,0.5,{
+					Transparency = 0.650
+				})
+
+				Fatality:CreateAnimation(UIStroke,0.5,{
+					Transparency = 0
+				})
+
+				Fatality:CreateAnimation(TextBox,0.5,{
+					TextTransparency = 0
+				})
+
+				Fatality:CreateAnimation(TextBox,0.5,{
+					TextTransparency = 0
+				})
+			else
+				Fatality:CreateAnimation(UIStroke,0.5,{
+					Transparency = 1
+				})
+
+				Fatality:CreateAnimation(SearchFrame,0.35,{
+					Size = UDim2.new(searchScale.X.Scale, searchScale.X.Offset, 0, 0)
+				})
+
+				Fatality:CreateAnimation(DropShadow,0.35,{
+					ImageTransparency = 1
+				})
+
+				Fatality:CreateAnimation(SearchBox,0.5,{
+					BackgroundTransparency = 1
+				})
+
+				Fatality:CreateAnimation(UIStroke_2,0.5,{
+					Transparency = 1
+				})
+
+				Fatality:CreateAnimation(TextBox,0.5,{
+					TextTransparency = 1
+				})
+
+				Fatality:CreateAnimation(TextBox,0.5,{
+					TextTransparency = 1
+				})
+
+				table.foreach(ScrollingFrame:GetChildren(),function(i,v)
+					if v:IsA('Frame') then
+						v:Destroy();
+					end;
+				end);
+			end;
+		end;
+
+		SearchFrame.Name = Fatality:RandomString()
+		SearchFrame.Parent = Fatalitywin;
+		SearchFrame.AnchorPoint = Vector2.new(0, 1)
+		SearchFrame.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
+		SearchFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		SearchFrame.BorderSizePixel = 0
+		SearchFrame.Position = UDim2.new(4,0,4,0)
+		SearchFrame.Size = searchScale
+		SearchFrame.ZIndex = 100
+		SearchFrame.ClipsDescendants = true
+
+		UIStroke.Color = Color3.fromRGB(29, 29, 29)
+		UIStroke.Parent = SearchFrame
+
+		UICorner.CornerRadius = UDim.new(0, 2)
+		UICorner.Parent = SearchFrame
+
+		DropShadow.Name = Fatality:RandomString()
+		DropShadow.Parent = SearchFrame
+		DropShadow.AnchorPoint = Vector2.new(0.5, 0.5)
+		DropShadow.BackgroundTransparency = 1.000
+		DropShadow.BorderSizePixel = 0
+		DropShadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+		DropShadow.Rotation = 0.010
+		DropShadow.Size = UDim2.new(1, 47, 1, 47)
+		DropShadow.ZIndex = 99
+		DropShadow.Image = "rbxassetid://6014261993"
+		DropShadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+		DropShadow.ImageTransparency = 0.750
+		DropShadow.ScaleType = Enum.ScaleType.Slice
+		DropShadow.SliceCenter = Rect.new(49, 49, 450, 450)
+
+		SearchBox.Name = Fatality:RandomString()
+		SearchBox.Parent = SearchFrame
+		SearchBox.AnchorPoint = Vector2.new(0.5, 0)
+		SearchBox.BackgroundColor3 = Fatality.Colors.Black
+		SearchBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		SearchBox.BorderSizePixel = 0
+		SearchBox.Position = UDim2.new(0.5, 0, 0, 9)
+		SearchBox.Size = UDim2.new(1, -15, 0, 25)
+		SearchBox.ZIndex = 101
+
+		UICorner_2.CornerRadius = UDim.new(0, 2)
+		UICorner_2.Parent = SearchBox
+
+		UIStroke_2.Transparency = 0.650
+		UIStroke_2.Color = Color3.fromRGB(29, 29, 29)
+		UIStroke_2.Parent = SearchBox
+
+		TextBox.Parent = SearchBox
+		TextBox.AnchorPoint = Vector2.new(0.5, 0.5)
+		TextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		TextBox.BackgroundTransparency = 1.000
+		TextBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		TextBox.BorderSizePixel = 0
+		TextBox.Position = UDim2.new(0.5, 0, 0.5, 0)
+		TextBox.Size = UDim2.new(1, -15, 1, -5)
+		TextBox.ZIndex = 102
+		TextBox.ClearTextOnFocus = false
+		TextBox.FontFace = Fatality.FontSemiBold;
+		TextBox.PlaceholderText = "Search"
+		TextBox.Text = ""
+		TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TextBox.TextSize = 12.000
+		TextBox.TextXAlignment = Enum.TextXAlignment.Left
+
+		ScrollingFrame.Parent = SearchFrame
+		ScrollingFrame.Active = true
+		ScrollingFrame.AnchorPoint = Vector2.new(0.5, 0)
+		ScrollingFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		ScrollingFrame.BackgroundTransparency = 1.000
+		ScrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		ScrollingFrame.BorderSizePixel = 0
+		ScrollingFrame.Position = UDim2.new(0.5, 0, 0, 40)
+		ScrollingFrame.Size = UDim2.new(1, -15, 1, -45)
+		ScrollingFrame.ZIndex = 102
+		ScrollingFrame.ScrollBarThickness = 0
+
+		UIListLayout.Parent = ScrollingFrame
+		UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		UIListLayout.Padding = UDim.new(0, 4)
+
+		UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+			ScrollingFrame.CanvasSize = UDim2.fromOffset(0,UIListLayout.AbsoluteContentSize.Y)
+		end)
+
+		SearchToggle(false);
+
+		Fatality:CreateHover(SearchButton,function(bool)
+			if bool then
+				Fatality:CreateAnimation(SearchButton,0.5,{
+					ImageTransparency = 0.1
+				})
+			else
+				Fatality:CreateAnimation(SearchButton,0.5,{
+					ImageTransparency = 0.5
+				})
+			end	
+		end);
+
+		local SearchInformation = {};
+
+		local get_button = function(Name,Path,TAB_WARP)
+			local ResultFrame = Instance.new("Frame")
+			local UICorner = Instance.new("UICorner")
+			local FeatureName = Instance.new("TextLabel")
+			local FeaturePath = Instance.new("TextLabel")
+
+			ResultFrame.Name = Fatality:RandomString()
+			ResultFrame.Parent = ScrollingFrame;
+			ResultFrame.BackgroundColor3 = Fatality.Colors.Black
+			ResultFrame.BackgroundTransparency = 1.000
+			ResultFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			ResultFrame.BorderSizePixel = 0
+			ResultFrame.Size = UDim2.new(1, 0, 0, 42)
+			ResultFrame.ZIndex = 103
+
+			UICorner.CornerRadius = UDim.new(0, 4)
+			UICorner.Parent = ResultFrame
+
+			FeatureName.Name = Fatality:RandomString()
+			FeatureName.Parent = ResultFrame
+			FeatureName.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			FeatureName.BackgroundTransparency = 1.000
+			FeatureName.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			FeatureName.BorderSizePixel = 0
+			FeatureName.Position = UDim2.new(0, 6, 0, 5)
+			FeatureName.Size = UDim2.new(1, 0, 0, 15)
+			FeatureName.ZIndex = 104
+			FeatureName.FontFace = Fatality.FontSemiBold
+			FeatureName.Text = Name
+			FeatureName.TextColor3 = Color3.fromRGB(255, 255, 255)
+			FeatureName.TextSize = 14.000
+			FeatureName.TextXAlignment = Enum.TextXAlignment.Left
+
+			FeaturePath.Name = Fatality:RandomString()
+			FeaturePath.Parent = ResultFrame
+			FeaturePath.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			FeaturePath.BackgroundTransparency = 1.000
+			FeaturePath.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			FeaturePath.BorderSizePixel = 0
+			FeaturePath.Position = UDim2.new(0, 6, 0, 22)
+			FeaturePath.Size = UDim2.new(1, 0, 0, 15)
+			FeaturePath.ZIndex = 104
+			FeaturePath.FontFace = Fatality.FontSemiBold
+			FeaturePath.Text = Path
+			FeaturePath.TextColor3 = Color3.fromRGB(255, 255, 255)
+			FeaturePath.TextSize = 12.000
+			FeaturePath.TextTransparency = 0.500
+			FeaturePath.TextXAlignment = Enum.TextXAlignment.Left
+
+			local button = Fatality:NewInput(ResultFrame);
+
+			Fatality:CreateHover(button,function(bool)
+				if bool then
+					Fatality:CreateAnimation(ResultFrame,0.5,{
+						BackgroundTransparency = 0
+					})
+				else
+					Fatality:CreateAnimation(ResultFrame,0.5,{
+						BackgroundTransparency = 1
+					})
+				end	
+			end);
+
+			button.MouseButton1Click:Connect(function()
+				if TAB_WARP then
+					for i,v in next , Fatal.Menus do
+						if v.Root == TAB_WARP.Root then
+							Fatal.MenuSelected = v;
+							v.ValueSelect(true)
+						else
+							v.ValueSelect(false)
+						end;
+					end;
+				end;
+			end);
+
+			return ResultFrame;
+		end
+
+		SearchButton.MouseButton1Click:Connect(function()
+			TextBox.Text = "";
+
+			SearchToggle(true);
+
+			table.clear(SearchInformation);
+
+			table.foreach(ScrollingFrame:GetChildren(),function(i,v)
+				if v:IsA('Frame') then
+					v:Destroy();
+				end;
+			end);
+
+			table.foreach(Fatal.ElementContents,function(i,v)
+				local button = get_button(v.Name,v.Path,v._TAB);
+
+				SearchInformation[v.Path.." - "..Fatality:RandomString()] = {
+					root = button,
+					callback = function()
+
+					end,
+				};
+			end);
+		end)
+
+		local DearchDelay = tick();
+
+		TextBox:GetPropertyChangedSignal('Text'):Connect(function()
+			DearchDelay = tick();
+
+			if not TextBox.Text:byte() then
+				for i,v in next , SearchInformation do
+					v.root.Visible = true;
+				end;
+
+				return;
+			end;
+
+			task.delay(0.5,function()
+				if (tick() - DearchDelay) > 0.5 then
+					for i,v in next , SearchInformation do
+						if string.find(tostring(string.lower(i)),string.lower(TextBox.Text),1,true) then
+							v.root.Visible = true;
+						else
+							v.root.Visible = false;
+						end;
+					end;
+				end;
+			end)
+		end);
+
+		UserInputService.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+				if not Fatality:IsMouseOverFrame(SearchFrame) then
+					SearchToggle(false);
+				end
+			end
+		end)
+	end;
+
+	function Fatal:GetButton()
+		local backpack = Instance.new("ImageButton")
+		local UICorner = Instance.new("UICorner")
+		local RowLabel = Instance.new("Frame")
+		local UIListLayout = Instance.new("UIListLayout")
+		local StyledTextLabel = Instance.new("TextLabel")
+		local UITextSizeConstraint = Instance.new("UITextSizeConstraint")
+		local UIPadding = Instance.new("UIPadding")
+		local IconHost = Instance.new("Frame")
+		local IntegrationIconFrame = Instance.new("Frame")
+		local UIListLayout_2 = Instance.new("UIListLayout")
+		local IntegrationIcon = Instance.new("ImageLabel")
+		local SelectedHighlighter = Instance.new("Frame")
+		local corner = Instance.new("UICorner")
+		local Highlighter = Instance.new("Frame")
+		local corner_2 = Instance.new("UICorner")
+		local _5 = Instance.new("Frame")
+
+		backpack.Name = "FATALITY"..Fatality:RandomString();
+		backpack.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+		backpack.BackgroundTransparency = 1.000
+		backpack.BorderSizePixel = 0
+		backpack.LayoutOrder = 9
+		backpack.Size = UDim2.new(1, 0, 0, 56)
+		backpack.AutoButtonColor = false
+
+		UICorner.CornerRadius = UDim.new(0, 10)
+		UICorner.Parent = backpack
+
+		RowLabel.Name = "RowLabel"
+		RowLabel.Parent = backpack
+		RowLabel.BackgroundTransparency = 1.000
+		RowLabel.BorderSizePixel = 0
+		RowLabel.LayoutOrder = 9
+		RowLabel.Size = UDim2.new(1, 0, 1, 0)
+
+		UIListLayout.Parent = RowLabel
+		UIListLayout.FillDirection = Enum.FillDirection.Horizontal
+		UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+		UIListLayout.Padding = UDim.new(0, 8)
+
+		StyledTextLabel.Name = "StyledTextLabel"
+		StyledTextLabel.Parent = RowLabel
+		StyledTextLabel.BackgroundTransparency = 1.000
+		StyledTextLabel.Size = UDim2.new(1, -52, 1, 0)
+		StyledTextLabel.Font = Enum.Font.BuilderSansBold
+		StyledTextLabel.Text = Window.Name
+		StyledTextLabel.TextColor3 = Color3.fromRGB(247, 247, 248)
+		StyledTextLabel.TextScaled = true
+		StyledTextLabel.TextSize = 20.000
+		StyledTextLabel.TextWrapped = true
+		StyledTextLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+		UITextSizeConstraint.Parent = StyledTextLabel
+		UITextSizeConstraint.MaxTextSize = 20
+		UITextSizeConstraint.MinTextSize = 15
+
+		UIPadding.Parent = RowLabel
+		UIPadding.PaddingLeft = UDim.new(0, 8)
+		UIPadding.PaddingRight = UDim.new(0, 8)
+
+		IconHost.Name = "IconHost"
+		IconHost.Parent = RowLabel
+		IconHost.BackgroundTransparency = 1.000
+		IconHost.BorderSizePixel = 0
+		IconHost.LayoutOrder = 9
+		IconHost.Size = UDim2.new(0, 44, 0, 44)
+		IconHost.ZIndex = 9
+
+		IntegrationIconFrame.Name = "IntegrationIconFrame"
+		IntegrationIconFrame.Parent = IconHost
+		IntegrationIconFrame.BackgroundTransparency = 1.000
+		IntegrationIconFrame.BorderSizePixel = 0
+		IntegrationIconFrame.Size = UDim2.new(1, 0, 1, 0)
+
+		UIListLayout_2.Parent = IntegrationIconFrame
+		UIListLayout_2.FillDirection = Enum.FillDirection.Horizontal
+		UIListLayout_2.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		UIListLayout_2.VerticalAlignment = Enum.VerticalAlignment.Center
+
+		IntegrationIcon.Name = "IntegrationIcon"
+		IntegrationIcon.Parent = IntegrationIconFrame
+		IntegrationIcon.BackgroundTransparency = 1.000
+		IntegrationIcon.Size = UDim2.new(0, 36, 0, 36)
+		IntegrationIcon.Image = "http://www.roblox.com/asset/?id=11290237405"
+		IntegrationIcon.ImageColor3 = Color3.fromRGB(247, 247, 248)
+
+		SelectedHighlighter.Name = "SelectedHighlighter"
+		SelectedHighlighter.Parent = IconHost
+		SelectedHighlighter.AnchorPoint = Vector2.new(0.5, 0.5)
+		SelectedHighlighter.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		SelectedHighlighter.BackgroundTransparency = 0.850
+		SelectedHighlighter.BorderSizePixel = 0
+		SelectedHighlighter.Position = UDim2.new(0.5, 0, 0.5, 0)
+		SelectedHighlighter.Size = UDim2.new(0, 36, 0, 36)
+		SelectedHighlighter.Visible = false
+
+		corner.CornerRadius = UDim.new(1, 0)
+		corner.Name = "corner"
+		corner.Parent = SelectedHighlighter
+
+		Highlighter.Name = "Highlighter"
+		Highlighter.Parent = IconHost
+		Highlighter.AnchorPoint = Vector2.new(0.5, 0.5)
+		Highlighter.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Highlighter.BackgroundTransparency = 0.850
+		Highlighter.BorderSizePixel = 0
+		Highlighter.Position = UDim2.new(0.5, 0, 0.5, 0)
+		Highlighter.Size = UDim2.new(0, 36, 0, 36)
+		Highlighter.Visible = false
+
+		corner_2.CornerRadius = UDim.new(1, 0)
+		corner_2.Name = "corner"
+		corner_2.Parent = Highlighter
+
+		_5.Name = "5"
+		_5.Parent = IconHost
+		_5.BackgroundTransparency = 1.000
+		_5.Size = UDim2.new(1, 0, 1, 0)
+		_5.ZIndex = 2
+
+		backpack.MouseButton1Click:Connect(function()
+			Fatal.Toggle = not Fatal.Toggle;
+
+			ToggleUI(Fatal.Toggle);
+		end);
+
+		backpack.MouseEnter:Connect(function()
+			Fatality:CreateAnimation(backpack,0.3,nil,{
+				BackgroundColor3 = Fatality.Colors.Main,
+				BackgroundTransparency = 0.85
+			})
+		end)
+
+		backpack.MouseLeave:Connect(function()
+			Fatality:CreateAnimation(backpack,0.3,nil,{
+				BackgroundTransparency = 1
+			})
+		end)
+
+		return backpack;
+	end;
+
+function Fatal:SetVisible(b)
+		Fatal.Toggle = b;
+		ToggleUI(b);
+		
+		-- Дополнительная гарантия видимости ScreenGui
+		if b then
+			Fatalitywin.Enabled = true
+		elseif FatalFrame.BackgroundTransparency >= 0.99 then
+			-- Отключаем Gui только если анимация закрытия прошла (или если мы сразу закрыты)
+			Fatalitywin.Enabled = false
+		end
+	end;
+
+	-- [FIX] УМНЫЙ СТАРТ
+	-- Если при создании передали Visible = false, мы НЕ запускаем анимацию открытия
+	if Window.Visible == false then
+		Fatal.Toggle = false
+		
+		-- Сразу применяем состояние "Закрыто" без анимаций
+		-- (Копируем логику из блока else в ToggleUI, чтобы задать стартовые позиции)
+		SaveButton.Position = UDim2.new(0,35,1, 20)
+		SearchButton.Position = UDim2.new(0,10,1, 20)
+		InfoButton.Position = UDim2.new(1, -5,1, 20)
+		UIStroke.Thickness = 0
+		UIStroke.Transparency = 1
+		UserIcon.ImageTransparency = 1
+		UserIcon.Position = UDim2.new(1, -10,0.5, 0)
+		User_name.TextTransparency = 1
+		User_name.Position = UDim2.new(1, -40,0, 3)
+		expire_days.TextTransparency = 1
+		expire_days.Position = UDim2.new(1, -40,0, 16)
+		HeaderText.TextStrokeTransparency = 1
+		HeaderText.TextTransparency = 1
+		HeaderLineShadow_2.BackgroundTransparency = 1
+		InfoButton.ImageTransparency = 1
+		SearchButton.ImageTransparency = 1
+		SaveButton.ImageTransparency = 1
+		HeaderLineShadow.BackgroundTransparency = 1
+		FatalFrame.BackgroundTransparency = 1
+		Header.BackgroundTransparency = 1
+		HeaderLine.BackgroundTransparency = 1
+		Bottom.BackgroundTransparency = 1
+		HeaderLine_2.BackgroundTransparency = 1
+		DropShadow.ImageTransparency = 1
+		
+		-- И самое главное - отключаем GUI физически
+		Fatalitywin.Enabled = false
+	else
+		-- Иначе открываем как обычно
+		ToggleUI(true);
+	end
+
+	return Fatal;
+end;
 
 function Fatality:Loader(Config: Loader)
 	Config = Config or {};
