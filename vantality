@@ -1,0 +1,1468 @@
+-- [MOBILE CLEANUP]
+if _G.VantalityMobileGui then
+    if _G.VantalityMobileGui.Parent then _G.VantalityMobileGui:Destroy() end
+    _G.VantalityMobileGui = nil
+end
+
+-- ПРОВЕРКА И ОЧИСТКА ОКРУЖЕНИЯ 
+if _G.ahkgbs_instance then
+    if type(_G.ahkgbs_instance) == "table" and _G.ahkgbs_instance.Main then
+        _G.ahkgbs_instance.Main:Destroy()
+    
+    elseif typeof(_G.ahkgbs_instance) == "Instance" then
+        _G.ahkgbs_instance:Destroy()
+    end
+    
+    _G.ahkgbs_instance = nil
+    
+    if _G.VantalityChristmas and _G.VantalityChristmas.Maid then
+        for _, v in pairs(_G.VantalityChristmas.Maid) do pcall(function() v:Destroy() end) end
+        _G.VantalityChristmas = nil
+    end
+end
+
+--  ЗАГРУЗКА БИБЛИОТЕКИ 
+local Fatality_Success, Fatality_Result = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/grab1s/AHK-GBS/refs/heads/main/fatality.lib"))()
+end)
+
+if not Fatality_Success then
+    warn("FATALITY: КРИТИЧЕСКАЯ ОШИБКА ЗАГРУЗКИ БИБЛИОТЕКИ:", Fatality_Result)
+    return
+end
+
+if typeof(Fatality_Result) ~= "table" then
+    warn("FATALITY: КРИТИЧЕСКАЯ ОШИБКА: Библиотека не является таблицей. Тип:", typeof(Fatality_Result))
+    return
+end
+
+local Fatality = Fatality_Result
+
+-- ИНИЦИАЛИЗАЦИЯ UI ОКНА
+local Notification = Fatality:CreateNotifier()
+
+task.spawn(function()
+    local Sound = Instance.new("Sound")
+    Sound.Name = "VantalityIntroFX"
+    Sound.SoundId = "rbxassetid://138079767" 
+    Sound.Volume = 4 
+    Sound.Parent = game:GetService("SoundService") 
+    Sound:Play()
+    game:GetService("Debris"):AddItem(Sound, 20)
+end)
+
+local LoadingScreen = Fatality:Loader({
+    Name = "Vantality",
+    Scale = 3,
+    Manual = true
+})
+
+Notification:Notify({
+    Title = "Vantality",
+    Content = "MERRY CHRISTMAS, " .. game.Players.LocalPlayer.DisplayName,
+    Icon = "loader"
+})
+
+local Window = Fatality.new({
+    Name = "Vantality",
+    Expire = "NEVER!",
+    Visible = false
+})
+_G.ahkgbs_instance = Window
+
+local Config = Window:AddConfig()
+Config:Init("Vantality", "TSB-Vantality-Config")
+
+local ThemeSuccess, ThemeMgr = pcall(function()
+    return loadstring(game:HttpGet("https://pastebin.com/raw/X0MN3W3X"))()
+end)
+if not ThemeSuccess or type(ThemeMgr) ~= "table" then
+    warn("Themes failed to load!")
+    ThemeMgr = { GetThemeNames = function() return {"Default"} end, Apply = function() end }
+end
+
+
+local cameraTab = Window:AddMenu({ Name = "CAMERA", Icon = "camera" })
+local worldTab  = Window:AddMenu({ Name = "WORLD", Icon = "globe" })
+local playerTab = Window:AddMenu({ Name = "PLAYER", Icon = "user" })
+local flexTab   = Window:AddMenu({ Name = "FLEX (NO FE)", Icon = "crown" })
+local miscTab   = Window:AddMenu({ Name = "MISC", Icon = "more-horizontal" })
+local infoTab   = Window:AddMenu({ Name = "INFO", Icon = "info" })
+
+
+-- CAMERA
+local fovSection     = cameraTab:AddSection({ Position = 'left', Name = "FOV" })
+local vhsSection     = cameraTab:AddSection({ Position = 'center', Name = "VHS" })
+local tiltSection    = cameraTab:AddSection({ Position = 'right', Name = "CAMERA TILT" })
+local stretchSection = cameraTab:AddSection({ Position = 'left', Name = "SCREEN STRETCH" })
+local zoomSection    = cameraTab:AddSection({ Position = 'center', Name = "MAX ZOOM" })
+local camBlurSection = cameraTab:AddSection({ Position = 'right', Name = "CAMERA BLUR" })
+
+do -- >> FOV
+    local fovScriptUrl = "https://pastebin.com/raw/kqpz3Ldg"
+    local s, c = pcall(game.HttpGet, game, fovScriptUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("FOV ERR:", e); _G.FOV=nil end else warn("FOV COMPILE:", err) end 
+    else 
+        warn("FOV DL ERR") 
+    end
+    
+    fovSection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "Fov_Enabled",
+        Callback = function(val)
+            if not _G.FOV then return end
+            if val then _G.FOV:enable() else _G.FOV:disable() end
+        end
+    })
+
+    fovSection:AddSlider({
+        Name = "FOV Value",
+        Default = 90,
+        Range = {60, 110},
+        Precise = 0,
+        Flag = "Fov_Value",
+        Callback = function(val)
+            if _G.FOV then _G.FOV:setBase(math.floor(val + 0.5)) end
+        end
+    })
+
+    fovSection:AddToggle({
+        Name = "Dynamic FOV",
+        Default = false,
+        Flag = "Fov_Dynamic",
+        Callback = function(val)
+            if _G.FOV then _G.FOV:setDynamicSpeedEnabled(val) end
+        end
+    })
+
+    fovSection:AddSlider({
+        Name = "FOV Boost",
+        Default = 22,
+        Range = {0, 38},
+        Precise = 0,
+        Flag = "Fov_Boost",
+        Callback = function(val)
+            if _G.FOV then _G.FOV:updateSetting("SpeedFovBoost", math.floor(val + 0.5)) end
+        end
+    })
+
+    fovSection:AddSlider({
+        Name = "Boost Speed",
+        Default = 8,
+        Range = {1, 25},
+        Precise = 0,
+        Flag = "Fov_BoostSpeed",
+        Callback = function(val)
+            if _G.FOV then _G.FOV:updateSetting("TransitionSpeed", math.floor(val + 0.5)) end
+        end
+    })
+end
+
+do -- >> VHS (Misc Effects)
+    local miscUrl = "https://pastebin.com/raw/EHY0hztD"
+    local s, c = pcall(game.HttpGet, game, miscUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("VHS ERR:", e); _G.ExecutorVHS_v3=nil end else warn("VHS COMPILE:", err) end 
+    else 
+        warn("VHS DL ERR") 
+    end
+    
+    vhsSection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "MiscV3_Enabled",
+        Callback = function(val)
+            if not _G.ExecutorVHS_v3 then return end
+            if val then _G.ExecutorVHS_v3:Enable() else _G.ExecutorVHS_v3:Disable() end
+        end
+    })
+    
+    vhsSection:AddToggle({
+        Name = "Color Correction",
+        Default = true,
+        Flag = "MiscV3_ColorCorrection",
+        Callback = function(val)
+            if _G.ExecutorVHS_v3 then _G.ExecutorVHS_v3:UpdateSetting("EnableColorCorrection", val) end
+        end
+    })
+
+    vhsSection:AddSlider({
+        Name = "Brightness",
+        Default = 0,
+        Range = {-0.5, 0.5},
+        Precise = 2,
+        Flag = "MiscV3_Brightness",
+        Callback = function(val)
+            if _G.ExecutorVHS_v3 then _G.ExecutorVHS_v3:UpdateSetting("Brightness", val) end
+        end
+    })
+
+    vhsSection:AddSlider({
+        Name = "Saturation",
+        Default = 0,
+        Range = {-0.5, 1},
+        Precise = 2,
+        Flag = "MiscV3_Saturation",
+        Callback = function(val)
+            if _G.ExecutorVHS_v3 then _G.ExecutorVHS_v3:UpdateSetting("Saturation", val) end
+        end
+    })
+
+    vhsSection:AddSlider({
+        Name = "Contrast",
+        Default = 0,
+        Range = {-1, 1},
+        Precise = 2,
+        Flag = "MiscV3_Contrast",
+        Callback = function(val)
+            if _G.ExecutorVHS_v3 then _G.ExecutorVHS_v3:UpdateSetting("Contrast", val) end
+        end
+    })
+
+    vhsSection:AddToggle({
+        Name = "Vignette",
+        Default = true,
+        Flag = "MiscV3_Vignette",
+        Callback = function(val)
+            if _G.ExecutorVHS_v3 then _G.ExecutorVHS_v3:UpdateSetting("EnableVignette", val) end
+        end
+    })
+
+    vhsSection:AddSlider({
+        Name = "Intensity",
+        Default = 0.5,
+        Range = {0, 1},
+        Precise = 2,
+        Flag = "MiscV3_VignetteIntensity",
+        Callback = function(val)
+            if _G.ExecutorVHS_v3 then _G.ExecutorVHS_v3:UpdateSetting("VignetteIntensity", val) end
+        end
+    })
+
+    vhsSection:AddColorPicker({
+        Name = "Tint Color",
+        Default = Color3.fromRGB(255,255,255),
+        Flag = "MiscV3_TintColor",
+        Callback = function(val)
+            if _G.ExecutorVHS_v3 then _G.ExecutorVHS_v3:UpdateSetting("TintColor", val) end
+        end
+    })
+end
+
+do -- >> CAMERA TILT
+    local tiltUrl = "https://pastebin.com/raw/2FkZTzVq"
+    local s, c = pcall(game.HttpGet, game, tiltUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then 
+            local ok, e = pcall(chunk) 
+            if not ok then 
+                warn("TILT ERR:", e); 
+                _G.CameraTiltTest = nil 
+            end 
+        else 
+            warn("TILT COMPILE:", err) 
+        end 
+    else 
+        warn("TILT DL ERR") 
+    end
+    
+    tiltSection:AddToggle({
+        Name = "Enable",
+        Default = false, -- Скрипт запускается включенным по дефолту
+        Flag = "Tilt_Enabled",
+        Callback = function(val)
+            if _G.CameraTiltTest then _G.CameraTiltTest.Settings.Enabled = val end
+        end
+    })
+
+    tiltSection:AddSlider({
+        Name = "Tilt Angle",
+        Default = 3,
+        Range = {1, 15},
+        Precise = 1,
+        Flag = "Tilt_Angle",
+        Callback = function(val)
+            if _G.CameraTiltTest then _G.CameraTiltTest.Settings.TiltAngle = val end
+        end
+    })
+
+    tiltSection:AddSlider({
+        Name = "Smoothing",
+        Default = 6,
+        Range = {1, 20},
+        Precise = 1,
+        Flag = "Tilt_Smooth",
+        Callback = function(val)
+            if _G.CameraTiltTest then _G.CameraTiltTest.Settings.Smoothness = val end
+        end
+    })
+end
+
+do -- >> SCREEN STRETCH
+    local ssUrl = "https://pastebin.com/raw/X6hJEiHR"
+    local s, c = pcall(game.HttpGet, game, ssUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("STRETCH ERR:", e); _G.ExecutorScreenStretch=nil end else warn("STRETCH COMPILE:", err) end 
+    else 
+        warn("STRETCH DL ERR") 
+    end
+    
+    stretchSection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "Stretch_Enabled",
+        Risky = true,
+        Callback = function(val)
+            if not _G.ExecutorScreenStretch then return end
+            if val then _G.ExecutorScreenStretch:Enable() else _G.ExecutorScreenStretch:Disable() end
+        end
+    })
+
+    stretchSection:AddSlider({
+        Name = "Stretch Factor",
+        Default = 0.75,
+        Range = {0.55, 1.0},
+        Precise = 2,
+        Flag = "Stretch_Factor",
+        Callback = function(val)
+            if _G.ExecutorScreenStretch then _G.ExecutorScreenStretch:UpdateSetting("StretchFactor", val) end
+        end
+    })
+end
+
+do -- >> MAX ZOOM
+    local zoomUrl = "https://pastebin.com/raw/wHBHA7fG"
+    local s4, c4 = pcall(game.HttpGet, game, zoomUrl, true)
+    if s4 and c4 then 
+        local chunk, err = loadstring(c4)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("ZOOM ERR:", e); _G.ExecutorZoom=nil end else warn("ZOOM COMPILE:", err) end 
+    else 
+        warn("ZOOM DL ERR") 
+    end
+
+    zoomSection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "Zoom_Enabled",
+        Callback = function(val)
+            if not _G.ExecutorZoom then return end
+            if val then _G.ExecutorZoom:Enable() else _G.ExecutorZoom:Disable() end
+        end
+    })
+end
+
+do -- >> CAMERA BLUR
+    local mbUrl = "https://pastebin.com/raw/bQuApWm2"
+    local s, c = pcall(game.HttpGet, game, mbUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("CAM BLUR ERR:", e); _G.ExecutorSimulatedMB_CamOnly=nil end else warn("CAM BLUR COMPILE:", err) end 
+    else 
+        warn("CAM BLUR DL ERR") 
+    end
+    
+    camBlurSection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "CamBlur_Enabled",
+        Callback = function(val)
+            if not _G.ExecutorSimulatedMB_CamOnly then return end
+            if val then _G.ExecutorSimulatedMB_CamOnly:Enable() else _G.ExecutorSimulatedMB_CamOnly:Disable() end
+        end
+    })
+
+    camBlurSection:AddSlider({
+        Name = "Blur Strength",
+        Default = 10,
+        Range = {0, 28},
+        Precise = 0,
+        Flag = "CamBlur_Strength",
+        Callback = function(val)
+            if _G.ExecutorSimulatedMB_CamOnly then 
+                _G.ExecutorSimulatedMB_CamOnly:UpdateSetting("MaxBlurSize", math.floor(val + 0.5)) 
+            end
+        end
+    })
+
+    camBlurSection:AddSlider({
+        Name = "Transition",
+        Default = 26,
+        Range = {1, 60},
+        Precise = 0,
+        Flag = "CamBlur_Transition",
+        Callback = function(val)
+            if _G.ExecutorSimulatedMB_CamOnly then 
+                _G.ExecutorSimulatedMB_CamOnly:UpdateSetting("TransitionSpeed", math.floor(val + 0.5)) 
+            end
+        end
+    })
+end
+
+-- WORLD
+local fogSection    = worldTab:AddSection({ Position = 'left', Name = "FOG" })
+local sakuraSection = worldTab:AddSection({ Position = 'center', Name = "SAKURA" })
+
+do -- >> FOG
+    local atmUrl = "https://pastebin.com/raw/LTJfd4JA"
+    local s, c = pcall(game.HttpGet, game, atmUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("FOG ERR:", e); _G.ExecutorAtmosphere=nil end else warn("FOG COMPILE:", err) end 
+    else 
+        warn("FOG DL ERR") 
+    end
+    
+    fogSection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "Fog_Enabled",
+        Callback = function(val)
+            if not _G.ExecutorAtmosphere then return end
+            if val then _G.ExecutorAtmosphere:Enable() else _G.ExecutorAtmosphere:Disable() end
+        end
+    })
+
+    fogSection:AddColorPicker({
+        Name = "Color",
+        Default = Color3.fromRGB(255,255,255),
+        Flag = "Fog_Color",
+        Callback = function(val)
+            if _G.ExecutorAtmosphere then _G.ExecutorAtmosphere:UpdateSetting("Color", val) end
+        end
+    })
+    
+    fogSection:AddSlider({
+        Name = "Density",
+        Default = 0.3,
+        Range = {0, 1},
+        Precise = 2,
+        Flag = "Fog_Density",
+        Callback = function(val)
+            if _G.ExecutorAtmosphere then _G.ExecutorAtmosphere:UpdateSetting("Density", val) end
+        end
+    })
+
+    fogSection:AddSlider({
+        Name = "Offset",
+        Default = 0.5,
+        Range = {0, 1},
+        Precise = 2,
+        Flag = "Fog_Offset",
+        Callback = function(val)
+            if _G.ExecutorAtmosphere then _G.ExecutorAtmosphere:UpdateSetting("Offset", val) end
+        end
+    })
+
+    fogSection:AddSlider({
+        Name = "Haze",
+        Default = 3,
+        Range = {0.1, 3},
+        Precise = 2,
+        Flag = "Fog_Haze",
+        Callback = function(val)
+            if _G.ExecutorAtmosphere then _G.ExecutorAtmosphere:UpdateSetting("Haze", val) end
+        end
+    })
+
+    fogSection:AddSlider({
+        Name = "Glare",
+        Default = 1,
+        Range = {0, 5},
+        Precise = 2,
+        Flag = "Fog_Glare",
+        Callback = function(val)
+            if _G.ExecutorAtmosphere then _G.ExecutorAtmosphere:UpdateSetting("Glare", val) end
+        end
+    })
+end
+
+do -- >> SAKURA
+    local sakUrl = "https://pastebin.com/raw/V9bxq9wg"
+    local s, c = pcall(game.HttpGet, game, sakUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("SAKURA ERR:", e); _G.ExecutorSakuraEffect=nil end else warn("SAKURA COMPILE:", err) end 
+    else 
+        warn("SAKURA DL ERR") 
+    end
+    
+    sakuraSection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "Sakura_Enabled",
+        Callback = function(val)
+            if not _G.ExecutorSakuraEffect then return end
+            if val then _G.ExecutorSakuraEffect:Enable() else _G.ExecutorSakuraEffect:Disable() end
+        end
+    })
+
+    sakuraSection:AddToggle({
+        Name = "Falling Leaves",
+        Default = true,
+        Flag = "Sakura_FallingLeaves",
+        Callback = function(val)
+            if _G.ExecutorSakuraEffect then _G.ExecutorSakuraEffect:UpdateSetting("ENABLE_FALLING_LEAVES", val) end
+        end
+    })
+
+    sakuraSection:AddSlider({
+        Name = "Spawn Chance",
+        Default = 0.3,
+        Range = {0.1, 0.5},
+        Precise = 2,
+        Flag = "Sakura_SpawnChance",
+        Callback = function(val)
+            if _G.ExecutorSakuraEffect then _G.ExecutorSakuraEffect:UpdateSetting("CHANCE_TO_HAVE_PARTICLES", val) end
+        end
+    })
+
+    sakuraSection:AddSlider({
+        Name = "Leaves Rate",
+        Default = 0.7,
+        Range = {0.1, 2.5},
+        Precise = 2,
+        Flag = "Sakura_LeavesRate",
+        Callback = function(val)
+            if _G.ExecutorSakuraEffect then _G.ExecutorSakuraEffect:UpdateSetting("PARTICLE_RATE", val) end
+        end
+    })
+
+    sakuraSection:AddSlider({
+        Name = "Render Distance",
+        Default = 250,
+        Range = {50, 550},
+        Precise = 0,
+        Flag = "Sakura_RenderDistance",
+        Callback = function(val)
+            if _G.ExecutorSakuraEffect then _G.ExecutorSakuraEffect:UpdateSetting("MAX_EFFECT_RENDER_DISTANCE", val) end
+        end
+    })
+
+    sakuraSection:AddSlider({
+        Name = "Lifetime Min",
+        Default = 3,
+        Range = {1, 5},
+        Precise = 2,
+        Flag = "Sakura_LifetimeMin",
+        Callback = function(val)
+            if _G.ExecutorSakuraEffect then _G.ExecutorSakuraEffect:UpdateSetting("PARTICLE_LIFETIME_MIN", val) end
+        end
+    })
+
+    sakuraSection:AddSlider({
+        Name = "Lifetime Max",
+        Default = 10,
+        Range = {5, 15},
+        Precise = 2,
+        Flag = "Sakura_LifetimeMax",
+        Callback = function(val)
+            if _G.ExecutorSakuraEffect then _G.ExecutorSakuraEffect:UpdateSetting("PARTICLE_LIFETIME_MAX", val) end
+        end
+    })
+end
+
+
+-- PLAYER 
+local arrowsSection      = playerTab:AddSection({ Position = 'left', Name = "PLAYER ARROWS" })
+local NHespSection       = playerTab:AddSection({ Position = 'center', Name = "NAME / HEALTH (ESP)" })
+local tracerSection      = playerTab:AddSection({ Position = 'right', Name = "VIEW TRACERS" })
+
+do -- >> PLAYER ARROWS
+    local arrUrl = "https://pastebin.com/raw/qLr6BeX4"
+    local s, c = pcall(game.HttpGet, game, arrUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("ARROWS ERR:", e); _G.ExecutorPlayerArrows=nil end else warn("ARROWS COMPILE:", err) end 
+    else 
+        warn("ARROWS DL ERR") 
+    end
+    
+    arrowsSection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "Arrows_Enabled",
+        Callback = function(val)
+            if not _G.ExecutorPlayerArrows then return end
+            if val then _G.ExecutorPlayerArrows:Enable() else _G.ExecutorPlayerArrows:Disable() end
+        end
+    })
+
+    arrowsSection:AddSlider({
+        Name = "Render Distance",
+        Default = 300,
+        Range = {50, 1000},
+        Precise = 0,
+        Flag = "Arrows_RenderDist",
+        Callback = function(val)
+            if _G.ExecutorPlayerArrows then _G.ExecutorPlayerArrows:UpdateSetting("RenderDistance", val) end
+        end
+    })
+
+    arrowsSection:AddSlider({
+        Name = "Ring Radius",
+        Default = 120,
+        Range = {50, 400},
+        Precise = 0,
+        Flag = "Arrows_RingRadius",
+        Callback = function(val)
+            if _G.ExecutorPlayerArrows then _G.ExecutorPlayerArrows:UpdateSetting("RingRadius", val) end
+        end
+    })
+
+    arrowsSection:AddSlider({
+        Name = "Base Size",
+        Default = 32,
+        Range = {16, 64},
+        Precise = 0,
+        Flag = "Arrows_BaseSize",
+        Callback = function(val)
+            if _G.ExecutorPlayerArrows then _G.ExecutorPlayerArrows:UpdateSetting("ArrowBaseSizeXY", val) end
+        end
+    })
+
+    arrowsSection:AddSlider({
+        Name = "Transparency",
+        Default = 0.1,
+        Range = {0, 1},
+        Precise = 2,
+        Flag = "Arrows_Transparency",
+        Callback = function(val)
+            if _G.ExecutorPlayerArrows then _G.ExecutorPlayerArrows:UpdateSetting("ArrowTransparency", val) end
+        end
+    })
+
+    arrowsSection:AddSlider({
+        Name = "Max Arrows",
+        Default = 0,
+        Range = {0, 20},
+        Precise = 0,
+        Flag = "Arrows_MaxVisible",
+        Callback = function(val)
+            if _G.ExecutorPlayerArrows then _G.ExecutorPlayerArrows:UpdateSetting("MaxVisibleArrows", val) end
+        end
+    })
+
+    arrowsSection:AddToggle({
+        Name = "Dynamic Size",
+        Default = true,
+        Flag = "Arrows_DynSize",
+        Callback = function(val)
+            if _G.ExecutorPlayerArrows then _G.ExecutorPlayerArrows:UpdateSetting("EnableDynamicSize", val) end
+        end
+    })
+
+    arrowsSection:AddSlider({
+        Name = "Min Scale",
+        Default = 0.5,
+        Range = {0.1, 1.0},
+        Precise = 2,
+        Flag = "Arrows_MinScale",
+        Callback = function(val)
+            if _G.ExecutorPlayerArrows then _G.ExecutorPlayerArrows:UpdateSetting("MinArrowScale", val) end
+        end
+    })
+
+    arrowsSection:AddSlider({
+        Name = "Max Scale",
+        Default = 1.5,
+        Range = {1.0, 3.0},
+        Precise = 2,
+        Flag = "Arrows_MaxScale",
+        Callback = function(val)
+            if _G.ExecutorPlayerArrows then _G.ExecutorPlayerArrows:UpdateSetting("MaxArrowScale", val) end
+        end
+    })
+
+    arrowsSection:AddSlider({
+        Name = "Near Dist",
+        Default = 30,
+        Range = {5, 100},
+        Precise = 0,
+        Flag = "Arrows_NearDistScale",
+        Callback = function(val)
+            if _G.ExecutorPlayerArrows then _G.ExecutorPlayerArrows:UpdateSetting("NearDistanceForScaling", val) end
+        end
+    })
+
+    arrowsSection:AddSlider({
+        Name = "Far Dist",
+        Default = 150,
+        Range = {50, 500},
+        Precise = 0,
+        Flag = "Arrows_FarDistScale",
+        Callback = function(val)
+            if _G.ExecutorPlayerArrows then _G.ExecutorPlayerArrows:UpdateSetting("FarDistanceForScaling", val) end
+        end
+    })
+
+    arrowsSection:AddToggle({
+        Name = "Dynamic Color",
+        Default = true,
+        Flag = "Arrows_DynColor",
+        Callback = function(val)
+            if _G.ExecutorPlayerArrows then _G.ExecutorPlayerArrows:UpdateSetting("EnableDynamicColor", val) end
+        end
+    })
+
+    arrowsSection:AddColorPicker({
+        Name = "Color (Far)",
+        Default = Color3.fromRGB(80,200,80),
+        Flag = "Arrows_ColorFar",
+        Callback = function(val)
+            if _G.ExecutorPlayerArrows then _G.ExecutorPlayerArrows:UpdateSetting("ArrowColorFar", val) end
+        end
+    })
+
+    arrowsSection:AddColorPicker({
+        Name = "Color (Near)",
+        Default = Color3.fromRGB(255,80,80),
+        Flag = "Arrows_ColorNear",
+        Callback = function(val)
+            if _G.ExecutorPlayerArrows then _G.ExecutorPlayerArrows:UpdateSetting("ArrowColorNear", val) end
+        end
+    })
+end
+
+do -- >> VIEW TRACERS
+    local vespUrl = "https://pastebin.com/raw/XVhhKB3i"
+    local s, c = pcall(game.HttpGet, game, vespUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("TRACER ERR:", e); _G.ExecutorVisualESP=nil end else warn("TRACER COMPILE:", err) end 
+    else 
+        warn("TRACER DL ERR") 
+    end
+    
+    tracerSection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "Tracers_Enabled",
+        Callback = function(val)
+            if not _G.ExecutorVisualESP then return end
+            if val then _G.ExecutorVisualESP:EnableTracers() else _G.ExecutorVisualESP:DisableTracers() end
+        end
+    })
+
+    tracerSection:AddColorPicker({
+        Name = "Color",
+        Default = Color3.fromRGB(255,203,138),
+        Flag = "Tracers_Color",
+        Callback = function(val)
+            if _G.ExecutorVisualESP then _G.ExecutorVisualESP:UpdateTracerSetting("Color", val) end
+        end
+    })
+
+    tracerSection:AddSlider({
+        Name = "Max Distance",
+        Default = 250,
+        Range = {50, 1000},
+        Precise = 0,
+        Flag = "Tracers_MaxDistance",
+        Callback = function(val)
+            if _G.ExecutorVisualESP then _G.ExecutorVisualESP:UpdateTracerSetting("MaxDistance", val) end
+        end
+    })
+end
+
+do -- >> ESP (NH)
+    local nhUrl = "https://pastebin.com/raw/Vh0ESZAw"
+    local s, c = pcall(game.HttpGet, game, nhUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("NH ERR:", e); _G.ExecutorNameHealthESP=nil end else warn("NH COMPILE:", err) end 
+    else 
+        warn("NH DL ERR") 
+    end
+    
+    NHespSection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "NH_ESP_Enabled",
+        Callback = function(val)
+            if not _G.ExecutorNameHealthESP then return end
+            if val then _G.ExecutorNameHealthESP:Enable() else _G.ExecutorNameHealthESP:Disable() end
+        end
+    })
+
+    NHespSection:AddSlider({
+        Name = "Distance",
+        Default = 300,
+        Range = {100, 1000},
+        Precise = 0,
+        Flag = "NH_ESP_RenderDist",
+        Callback = function(val)
+            if _G.ExecutorNameHealthESP then _G.ExecutorNameHealthESP:UpdateSetting("RenderDistance", val) end
+        end
+    })
+
+    NHespSection:AddToggle({
+        Name = "Through Walls",
+        Default = true,
+        Flag = "NH_ESP_NameWalls",
+        Callback = function(val)
+            if _G.ExecutorNameHealthESP then _G.ExecutorNameHealthESP:UpdateSetting("ShowNameThroughWalls", val) end
+        end
+    })
+
+    NHespSection:AddToggle({
+        Name = "Show Health",
+        Default = true,
+        Flag = "NH_ESP_HealthAlways",
+        Callback = function(val)
+            if _G.ExecutorNameHealthESP then _G.ExecutorNameHealthESP:UpdateSetting("AlwaysShowHealthBar", val) end
+        end
+    })
+end
+
+
+-- FLEX (NO FE) 
+local fakeKillsSection   = flexTab:AddSection({ Position = 'left', Name = "FAKE KILLS" })
+local spoofLbSection     = flexTab:AddSection({ Position = 'center', Name = "SPOOF LEADERBOARDS" })
+local killStreakSection  = flexTab:AddSection({ Position = 'left', Name = "KILL STREAK" })
+local cosmeticsSection   = flexTab:AddSection({ Position = 'right', Name = "SANTA HAT" })
+local localPlayerSection = flexTab:AddSection({ Position = 'right', Name = "CHINA HAT" })
+local fakeVisualsSection = flexTab:AddSection({ Position = 'right', Name = "FAKE ACCESSORIES" })
+
+
+do -- >> SPOOFER
+    local lbsUrl = "https://pastebin.com/raw/3akWqAYX"
+    local s, c = pcall(game.HttpGet, game, lbsUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("SPOOFER ERR:", e); _G.ExecutorSpoofer=nil end else warn("SPOOFER COMPILE:", err) end 
+    else 
+        warn("SPOOFER DL ERR") 
+    end
+    
+    -- Leaderboards
+    spoofLbSection:AddToggle({
+        Name = "Spoof Leaderboards",
+        Default = false,
+        Flag = "Spoofer_LB_Enabled",
+        Callback = function(val)
+            if not _G.ExecutorSpoofer then return end
+            if val then _G.ExecutorSpoofer:EnableLeaderboardSpoof() else _G.ExecutorSpoofer:DisableLeaderboardSpoof() end
+        end
+    })
+
+    spoofLbSection:AddToggle({
+        Name = "Spoof Season Kills",
+        Default = false,
+        Flag = "Spoofer_LB_SeasonKills",
+        Callback = function(val)
+            if _G.ExecutorSpoofer then _G.ExecutorSpoofer:UpdateSetting("Leaderboards.SpoofTotalKills", val) end
+        end
+    })
+
+    spoofLbSection:AddToggle({
+        Name = "Spoof Total Kills",
+        Default = false,
+        Flag = "Spoofer_LB_TotalKills",
+        Callback = function(val)
+            if _G.ExecutorSpoofer then _G.ExecutorSpoofer:UpdateSetting("Leaderboards.SpoofTotalKillsReal", val) end
+        end
+    })
+
+    spoofLbSection:AddToggle({
+        Name = "Spoof Donations",
+        Default = false,
+        Flag = "Spoofer_LB_Donations",
+        Callback = function(val)
+            if _G.ExecutorSpoofer then _G.ExecutorSpoofer:UpdateSetting("Leaderboards.SpoofDonations", val) end
+        end
+    })
+    
+    -- Fake Kills (Leaderstats)
+    fakeKillsSection:AddToggle({
+        Name = "Fake Season Kills",
+        Default = false,
+        Flag = "Spoofer_Stats_SeasonEnabled",
+        Callback = function(val)
+            if _G.ExecutorSpoofer then _G.ExecutorSpoofer:UpdateSetting("Leaderstats.SpoofKills", val) end
+        end
+    })
+
+    fakeKillsSection:AddInput({
+        Name = "Amount",
+        Default = "1337",
+        Flag = "Spoofer_Stats_SeasonAmount",
+        Callback = function(val)
+            if _G.ExecutorSpoofer then 
+                local n=tonumber(val)
+                if n then _G.ExecutorSpoofer:UpdateSetting("Leaderstats.TargetKills", math.floor(n)) end 
+            end
+        end
+    })
+
+    fakeKillsSection:AddToggle({
+        Name = "Fake Total Kills",
+        Default = false,
+        Flag = "Spoofer_Stats_TotalEnabled",
+        Callback = function(val)
+            if _G.ExecutorSpoofer then _G.ExecutorSpoofer:UpdateSetting("Leaderstats.SpoofTotalKillsStat", val) end
+        end
+    })
+
+    fakeKillsSection:AddInput({
+        Name = "Amount",
+        Default = "9001",
+        Flag = "Spoofer_Stats_TotalAmount",
+        Callback = function(val)
+            if _G.ExecutorSpoofer then 
+                local n=tonumber(val)
+                if n then _G.ExecutorSpoofer:UpdateSetting("Leaderstats.TargetTotalKills", math.floor(n)) end 
+            end
+        end
+    })
+end
+
+
+do -- >> KILL STREAK
+    local ksUrl = "https://pastebin.com/raw/d5ZT73du"
+    local s, c = pcall(game.HttpGet, game, ksUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("KS ERR:", e); _G.ExecutorKillStreakEffect=nil end else warn("KS COMPILE:", err) end 
+    else 
+        warn("KS DL ERR") 
+    end
+    
+    killStreakSection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "KS_Enabled",
+        Callback = function(val)
+            if not _G.ExecutorKillStreakEffect then return end
+            if val then _G.ExecutorKillStreakEffect:Enable() else _G.ExecutorKillStreakEffect:Disable() end
+        end
+    })
+
+    killStreakSection:AddInput({
+        Name = "Display Text",
+        Default = "2",
+        Flag = "KS_DisplayText",
+        Callback = function(val)
+            if _G.ExecutorKillStreakEffect then _G.ExecutorKillStreakEffect:UpdateSetting("DisplayText", val) end
+        end
+    })
+end
+
+do -- >> SANTA HAT
+    local hatUrl = "https://pastebin.com/raw/B5FY1ijk"
+    local s, c = pcall(game.HttpGet, game, hatUrl, true)
+    
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then 
+            local ok, e = pcall(chunk) 
+            if not ok then warn("SANTA HAT ERR:", e) end
+        else 
+            warn("SANTA HAT COMPILE:", err) 
+        end 
+    else 
+        warn("SANTA HAT DL ERR") 
+    end
+    
+    cosmeticsSection:AddToggle({
+        Name = "Santa Hat",
+        Default = false,
+        Flag = "SantaHat_Enabled",
+        Callback = function(val)
+            if _G.SantaHatSettings then 
+                _G.SantaHatSettings.Enabled = val
+                -- Вызываем функцию обновления из скрипта (если она доступна глобально)
+                if getgenv().UpdateSantaHatState then getgenv().UpdateSantaHatState() end
+            end
+        end
+    })
+
+    -- Настройка размера
+    cosmeticsSection:AddSlider({
+        Name = "Scale",
+        Default = 1.1,
+        Range = {0.5, 2.0},
+        Precise = 2,
+        Flag = "SantaHat_Scale",
+        Callback = function(val)
+            if _G.SantaHatSettings then
+                _G.SantaHatSettings.Scale = Vector3.new(val, val, val)
+            end
+        end
+    })
+
+    -- Настройка высоты (Offset Y)
+    cosmeticsSection:AddSlider({
+        Name = "Height Y",
+        Default = 0.2,
+        Range = {-1.0, 1.5},
+        Precise = 2,
+        Flag = "SantaHat_OffsetY",
+        Callback = function(val)
+            if _G.SantaHatSettings then
+                -- Сохраняем старые X и Z, меняем только Y
+                local old = _G.SantaHatSettings.Offset
+                _G.SantaHatSettings.Offset = Vector3.new(old.X, val, old.Z)
+            end
+        end
+    })
+end
+
+do -- >> CHINA HAT
+    local chUrl = "https://pastebin.com/raw/B5mJ2K1R"
+    local s, c = pcall(game.HttpGet, game, chUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("HAT ERR:", e); _G.ExecutorChinaHat=nil end else warn("HAT COMPILE:", err) end 
+    else 
+        warn("HAT DL ERR") 
+    end
+    
+    localPlayerSection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "ChinaHat_Enabled",
+        Callback = function(val)
+            if not _G.ExecutorChinaHat then return end
+            if val then _G.ExecutorChinaHat:Enable() else _G.ExecutorChinaHat:Disable() end
+        end
+    })
+
+    localPlayerSection:AddToggle({
+        Name = "Lite Mode (Cone)",
+        Default = false,
+        Flag = "ChinaHat_Lite",
+        Callback = function(val)
+            if not _G.ExecutorChinaHat then return end
+            if val then _G.ExecutorChinaHat:SetHatMode("Cone") else _G.ExecutorChinaHat:SetHatMode("Beam") end
+        end
+    })
+
+    localPlayerSection:AddColorPicker({
+        Name = "Color",
+        Default = Color3.fromRGB(255,255,255),
+        Flag = "ChinaHat_Color",
+        Callback = function(val)
+            if _G.ExecutorChinaHat then _G.ExecutorChinaHat:UpdateSetting("Color", val) end
+        end
+    })
+
+    localPlayerSection:AddSlider({
+        Name = "Transparency",
+        Default = 0,
+        Range = {0, 1},
+        Precise = 2,
+        Flag = "ChinaHat_Transparency",
+        Callback = function(val)
+            if _G.ExecutorChinaHat then _G.ExecutorChinaHat:UpdateSetting("Transparency", val) end
+        end
+    })
+end
+
+do -- >> FAKE VISUALS (Headless & Korblox)
+    local vizUrl = "https://pastebin.com/raw/BaguRWZS"
+    local s, c = pcall(game.HttpGet, game, vizUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("VISUALS ERR:", e); _G.ExecutorFakeVisuals=nil end else warn("VISUALS COMPILE:", err) end 
+    else 
+        warn("VISUALS DL ERR") 
+    end
+
+    fakeVisualsSection:AddToggle({
+        Name = "Fake Headless",
+        Default = false,
+        Flag = "Visuals_Headless",
+        Callback = function(val)
+            if _G.ExecutorFakeVisuals then _G.ExecutorFakeVisuals:SetHeadless(val) end
+        end
+    })
+
+    fakeVisualsSection:AddToggle({
+        Name = "Fake Korblox",
+        Default = false,
+        Flag = "Visuals_Korblox",
+        Callback = function(val)
+            if _G.ExecutorFakeVisuals then _G.ExecutorFakeVisuals:SetKorblox(val) end
+        end
+    })
+end
+
+--MISC 
+local settingsSection  = miscTab:AddSection({ Position = 'left', Name = "MENU SETTINGS" })
+local christmasSection = miscTab:AddSection({ Position = 'center', Name = "CHRISTMAS" })
+local overlaySection   = miscTab:AddSection({ Position = 'left', Name = "OVERLAY" })
+local blurTabSection   = miscTab:AddSection({ Position = 'center', Name = "ALT-TAB BLUR" })
+local BetaSection      = miscTab:AddSection({ Position = 'right', Name = "BETA.." })
+
+
+do -- >> CHRISTMAS (XMAS)
+    local xmasUrl = "https://pastebin.com/raw/HucyDTja"
+    local s, c = pcall(game.HttpGet, game, xmasUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then 
+            local ok, e = pcall(chunk) 
+            if not ok then 
+                warn("XMAS ERR:", e); 
+                _G.VantalityChristmas = nil 
+            end 
+        else 
+            warn("XMAS COMPILE:", err) 
+        end 
+    else 
+        warn("XMAS DL ERR") 
+    end
+
+    christmasSection:AddToggle({
+        Name = "Enable",
+        Default = true,
+        Flag = "Xmas_SnowEnabled",
+        Callback = function(val)
+            if _G.VantalityChristmas then _G.VantalityChristmas.Settings.SnowEnabled = val end
+        end
+    })
+
+    christmasSection:AddSlider({
+        Name = "Snow Amount",
+        Default = 800,
+        Range = {10, 1500},
+        Precise = 0,
+        Flag = "Xmas_SnowAmount",
+        Callback = function(val)
+            if _G.VantalityChristmas then
+                _G.VantalityChristmas.Settings.PARTICLE_COUNT = math.floor(val)
+                _G.VantalityChristmas.RefreshParticles()
+            end
+        end
+    })
+
+    christmasSection:AddToggle({
+        Name = "Enable Snowman",
+        Default = true,
+        Flag = "Xmas_SnowmanEnabled",
+        Callback = function(val)
+            if _G.VantalityChristmas then _G.VantalityChristmas.Settings.SnowmanEnabled = val end
+        end
+    })
+
+    christmasSection:AddSlider({
+        Name = "Snowman Position",
+        Default = -627,
+        Range = {-627, 0},
+        Precise = 0,
+        Flag = "Xmas_SnowmanOffset",
+        Callback = function(val)
+            if _G.VantalityChristmas then _G.VantalityChristmas.Settings.SNOWMAN_OFFSET_X = math.floor(val) end
+        end
+    })
+end
+
+-- MENU MISC
+settingsSection:AddDropdown({
+    Name = "UI Theme",
+    Values = ThemeMgr:GetThemeNames(),
+    Default = "Fatality (Default)",
+    Flag = "UI_Theme",
+    Callback = function(val)
+        ThemeMgr:Apply(Fatality, val)
+    end
+})
+
+settingsSection:AddDropdown({
+    Name = "Menu Size",
+    Default = "100", 
+    Values = {"65", "75", "100", "125", "150"}, 
+    Multi = false, 
+    Flag = "UI_Scale",
+    Callback = function(val)
+        local scale = tonumber(val)
+        if scale then
+            Window:SetScale(scale)
+        end
+    end
+})
+
+settingsSection:AddKeybind({
+    Name = "Toggle Key",
+    Default = Enum.KeyCode.Insert, 
+    Flag = "UI_Keybind",
+    OnlyPC = true,
+    Callback = function(key)
+        Window:SetKeybind(key) 
+    end
+});
+
+do -- >> OVERLAY
+    local overlayUrl = "https://pastebin.com/raw/iKGzdHQW"
+    local s3, c3 = pcall(game.HttpGet, game, overlayUrl, true)
+    if s3 and c3 then 
+        local chunk, err = loadstring(c3)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("OVERLAY ERR:", e); _G.ExecutorOverlay=nil end else warn("OVERLAY COMPILE:", err) end 
+    else 
+        warn("OVERLAY DL ERR") 
+    end
+
+    overlaySection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "Overlay_Enabled",
+        Callback = function(val)
+            if not _G.ExecutorOverlay then return end
+            if val then _G.ExecutorOverlay:Enable() else _G.ExecutorOverlay:Disable() end
+        end
+    })
+    
+    overlaySection:AddToggle({
+        Name = "Show FPS",
+        Default = true,
+        Flag = "Overlay_ShowFPS",
+        Callback = function(val)
+            if _G.ExecutorOverlay then _G.ExecutorOverlay:UpdateSetting("ShowFPS", val) end
+        end
+    })
+
+    overlaySection:AddToggle({
+        Name = "Show Ping",
+        Default = false,
+        Flag = "Overlay_ShowPing",
+        Callback = function(val)
+            if _G.ExecutorOverlay then _G.ExecutorOverlay:UpdateSetting("ShowPing", val) end
+        end
+    })
+
+    overlaySection:AddDropdown({ 
+        Name = "Position", 
+        Default = "TopLeft", 
+        Values = {"TopLeft", "TopRight", "BottomLeft", "BottomRight"},
+        Flag = "Overlay_Position", 
+        Callback = function(val) 
+            if _G.ExecutorOverlay then _G.ExecutorOverlay:UpdateSetting("Position", val) end 
+        end
+    })
+    
+    overlaySection:AddSlider({
+        Name = "Scale",
+        Default = 24,
+        Range = {10, 60},
+        Precise = 0,
+        Flag = "Overlay_Scale",
+        Callback = function(val)
+            if _G.ExecutorOverlay then _G.ExecutorOverlay:UpdateSetting("Scale", val) end
+        end
+    })
+
+    overlaySection:AddColorPicker({
+        Name = "Text Color",
+        Default = Color3.fromRGB(255, 255, 255),
+        Flag = "Overlay_Color",
+        Callback = function(val)
+            if _G.ExecutorOverlay then _G.ExecutorOverlay:UpdateSetting("TextColor", val) end
+        end
+    })
+end
+
+do -- >> ALT-TAB BLUR
+    local atbUrl = "https://pastebin.com/raw/0NuNVUHK"
+    local s2, c2 = pcall(game.HttpGet, game, atbUrl, true)
+    if s2 and c2 then 
+        local chunk, err = loadstring(c2)
+        if chunk then local ok,e = pcall(chunk) if not ok then warn("ATB ERR:", e); _G.ExecutorAltTabBlur=nil end else warn("ATB COMPILE:", err) end 
+    else 
+        warn("ATB DL ERR") 
+    end
+
+    blurTabSection:AddToggle({
+        Name = "Enable",
+        Default = false,
+        Flag = "AltTabBlur_Enabled",
+        OnlyPC = true,
+        Callback = function(val)
+            if _G.ExecutorAltTabBlur then _G.ExecutorAltTabBlur:UpdateSetting("EnableAltTabBlur", val) end
+        end
+    })
+
+    blurTabSection:AddSlider({
+        Name = "Strength",
+        Default = 14,
+        Range = {0, 52},
+        Precise = 0,
+        Flag = "AltTabBlur_Strength",
+        OnlyPC = true,
+        Callback = function(val)
+            if _G.ExecutorAltTabBlur then _G.ExecutorAltTabBlur:UpdateSetting("AltTabBlurAmount", math.floor(val + 0.5)) end
+        end
+    })
+
+    blurTabSection:AddSlider({
+        Name = "Transition",
+        Default = 4,
+        Range = {1, 30},
+        Precise = 0,
+        Flag = "AltTabBlur_Transition",
+        OnlyPC = true,
+        Callback = function(val)
+            if _G.ExecutorAltTabBlur then _G.ExecutorAltTabBlur:UpdateSetting("AltTabTransitionSpeed", val) end
+        end
+    })
+end
+
+
+do -- >> GRAVITY RAGDOLLS
+    local gravUrl = "https://pastebin.com/raw/psAEduFG"
+    local s, c = pcall(game.HttpGet, game, gravUrl, true)
+    if s and c then 
+        local chunk, err = loadstring(c)
+        if chunk then 
+            local ok, e = pcall(chunk) 
+            if not ok then warn("GRAVITY ERR:", e); _G.ExecutorLowGravity=nil end 
+        else 
+            warn("GRAVITY COMPILE:", err) 
+        end 
+    else 
+        warn("GRAVITY DL ERR") 
+    end
+    
+    local grvrag = BetaSection:AddToggle({
+        Name = "Ragdoll Gravity",
+        Default = false,
+        Flag = "LowGrav_Enabled",
+        Option = true,
+        Callback = function(val)
+            if not _G.ExecutorLowGravity then return end
+            if val then _G.ExecutorLowGravity:Enable() else _G.ExecutorLowGravity:Disable() end
+        end
+    })
+
+    grvrag.Option:AddSlider({
+        Name = "Rise Speed",
+        Default = 4,
+        Range = {1, 10},
+        Precise = 1,
+        Flag = "LowGrav_Speed",
+        Callback = function(val)
+            if _G.ExecutorLowGravity then _G.ExecutorLowGravity:UpdateSetting("RiseSpeed", val) end
+        end
+    })
+
+    grvrag.Option:AddSlider({
+        Name = "Rotation Speed",
+        Default = 1.5,
+        Range = {0, 5},
+        Precise = 1,
+        Flag = "LowGrav_RotSpeed",
+        Callback = function(val)
+            if _G.ExecutorLowGravity then _G.ExecutorLowGravity:UpdateSetting("RotationSpeed", val) end
+        end
+    })
+
+    grvrag.Option:AddSlider({
+        Name = "Life Time",
+        Default = 7,
+        Range = {1, 20},
+        Precise = 0,
+        Flag = "LowGrav_LifeTime",
+        Callback = function(val)
+            if _G.ExecutorLowGravity then _G.ExecutorLowGravity:UpdateSetting("LifeTime", val) end
+        end
+    })
+end
+
+
+task.wait(0.3) 
+
+LoadingScreen:Finish() 
+
+task.wait(0.2) 
+
+Window:SetVisible(true)
+
+-- INFO
+local aboutHostSection    = infoTab:AddSection({ Position = 'left', Name = "ABOUT HOST" })
+local aboutProjectSection = infoTab:AddSection({ Position = 'center', Name = "ABOUT PROJECT" })
+local logsSection         = infoTab:AddSection({ Position = 'right', Name = "UPDATE LOGS" })
+
+do -- >> ABOUT
+    aboutHostSection:AddParagraph({
+        Title = "AHK | GBS", 
+        Content = "Первоисточник и разработчик скрипта. Телеграмм канал: t.me/ahk_gbs"
+    })
+    aboutHostSection:AddParagraph({
+        Title = "SCRIPT ROBOX",
+        Content = "Один из первых каналов, где был выложен скрипт. Владелец: Mepilok. Канал: t.me/ScriptRobox"
+    })
+    aboutHostSection:AddParagraph({ 
+        Title = "FOR SKIDS",
+        Content = "Скрипт был выложен официально лишь в выше упомянутых каналах. Сотрудничество: @grab1s (telegram)"
+    })
+
+    aboutProjectSection:AddParagraph({
+        Title = "PROJECT",
+        Content = "Проект AHK | GBS запущен 13 марта 2025 года, специализируется на разработке скриптов для Roblox. Открылся при поддержке канала ScriptRobox."
+    })
+    aboutProjectSection:AddParagraph({
+        Title = "SCRIPT",
+        Content = "Скрипт предназначен для The Strongest Battleground, позволяет настраивать различные визуальные аспекты игры. Есть NO FE функции типа Fake Kills, видимые только вам и прочие интересные визуальные эффекты."
+    })
+    aboutProjectSection:AddParagraph({
+        Title = "P.S.",
+        Content = "Скрипт в активной разработке. О багах сообщайте разработчикам: @ahk_gbs, @ahkgbs_bot, @grab1s (TELEGRAM)"
+    })
+end
+
+do -- >> UPDATE LOGS
+    logsSection:AddParagraph({
+        Title = "v1 - BIG UPDATE",
+        Content = "НОВЫЙ UI! Старые UI были полностью заменены на новый -- Fatality UI (cs2)."
+    })
+    logsSection:AddParagraph({
+        Title = "Features",
+        Content = "1"
+    })
+    logsSection:AddParagraph({
+        Title = "Fixes",
+        Content = "2."
+    })
+    logsSection:AddParagraph({
+        Title = "HAPPY NEW YEAR!",
+        Content = "31.12.2025"
+    })
+end
+
+
+-- INFO BUTTON 
+Window:AddInfo(function()
+    Notification:Notify({ Title = "INFO", Content = "Project: AHK-GBS | Dev: @grab1s", Duration = 5, Icon = "info"
+})
+    if setclipboard then
+        setclipboard("https://t.me/ahk_gbs")
+        Notification:Notify({ Title = "LINK COPIED", Content = "Telegram link copied to clipboard!", Duration = 5, Icon = "clipboard"
+        })
+    end
+end)
+
+Notification:Notify({
+    Title = "Ready",
+    Content = "Vantality loaded successfully!",
+    Icon = "check",
+    Duration = 3
+})
+
+
+-- [MOBILE SUPPORT]
+if not Fatality.IsPC then
+    local MobileGui = Instance.new("ScreenGui")
+    MobileGui.Name = "VantalityMobile"
+    MobileGui.Parent = (gethui and gethui()) or game:GetService("CoreGui")
+    _G.VantalityMobileGui = MobileGui
+    
+    local MobileButton = Window:GetButton()
+    MobileButton.Parent = MobileGui
+    MobileButton.Position = UDim2.new(0.5, -50, 0, 5)
+    MobileButton.Size = UDim2.new(0, 100, 0, 35)
+end
