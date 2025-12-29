@@ -4527,7 +4527,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	return res;
 end;
 
-function Fatality.new(Window: Window)
+function function Fatality.new(Window: Window) -- lolez
 	Window = Window or {};
 	Window.Name = Window.Name or "FATALITY";
 	Window.Scale = Window.Scale or UDim2.new(0, 750, 0, 500);
@@ -4547,7 +4547,7 @@ function Fatality.new(Window: Window)
 
 	Fatal.Notifier = Fatality.__NOTIFIER_CACHE or Fatality:CreateNotifier();
 
-	-- [FIX] Хелпер для безопасного цвета
+	-- [HELPER] Функция безопасности цветов (локальная для этого окна)
 	local function GetSafeColor(val)
 		if typeof(val) == "ColorSequence" then
 			return val.Keypoints[1].Value
@@ -4556,7 +4556,8 @@ function Fatality.new(Window: Window)
 	end
 
 	local Fatalitywin = Instance.new("ScreenGui")
-	Fatalitywin.Enabled = false -- [FIX] Скрываем при старте
+	-- Сразу выключаем, чтобы не моргало при старте
+	Fatalitywin.Enabled = false 
 	Fatal.Main = Fatalitywin 
 	
 	local FatalFrame = Instance.new("Frame")
@@ -4926,12 +4927,11 @@ function Fatality.new(Window: Window)
 	UICorner_6.CornerRadius = UDim.new(0, 5)
 	UICorner_6.Parent = HeaderLineShadow_2
 
-	-- [FIX] ПЕРЕТАСКИВАНИЕ (MULTI-ZONE)
-	-- Применяем drag ко всем контейнерам, чтобы на телефоне можно было брать "везде"
+	-- [FIX] Перетаскивание для всех зон
 	Fatality:Drag(FatalFrame, FatalFrame, 0.1) -- Фон
 	Fatality:Drag(Header, FatalFrame, 0.1)     -- Шапка
 	Fatality:Drag(Bottom, FatalFrame, 0.1)     -- Низ
-	Fatality:Drag(MenuFrame, FatalFrame, 0.1)  -- Середина
+	Fatality:Drag(MenuFrame, FatalFrame, 0.1)  -- Центр
 
 	UserInputService.InputBegan:Connect(function(input,istyping)
 		if not istyping then
@@ -5969,142 +5969,6 @@ function Fatality.new(Window: Window)
 			return res;
 		end;
 
-        function MenuLib:AddSection(Config : Section)
-			Config = Config or {};
-            
-            if not Fatality:CanShow(Config) then
-                return Fatality.Dummy
-            end
-
-			Config.Name = Config.Name or "SECTION";
-			Config.Position = Config.Position or "center";
-			Config.Height = Config.Height or 0;
-
-			table.insert(Fatal.ElementContents,{
-				Name = Config.Name,
-				Path = Menu.Name .. " > ".. Config.Name,
-				_TAB = _B
-			});
-
-			local Section = Instance.new("Frame")
-			local Elements = Instance.new("Frame")
-			local UIStroke = Instance.new("UIStroke")
-			local UICorner = Instance.new("UICorner")
-			local UIListLayout = Instance.new("UIListLayout")
-			local SpaceBox = Instance.new("Frame")
-			local SectionName = Instance.new("TextLabel")
-
-			local Toggle = function(v)
-				if v then
-					Fatality:CreateAnimation(Section,0.5,{
-						BackgroundTransparency = 0
-					})
-
-					Fatality:CreateAnimation(UIStroke,0.5,{
-						Transparency = 0
-					})
-
-					Fatality:CreateAnimation(SectionName,0.5,{
-						TextStrokeTransparency = 0.750,
-						TextTransparency = 0
-					})
-				else
-					Fatality:CreateAnimation(Section,0.5,{
-						BackgroundTransparency = 1
-					})
-
-					Fatality:CreateAnimation(UIStroke,0.5,{
-						Transparency = 1
-					})
-
-					Fatality:CreateAnimation(SectionName,0.5,{
-						TextStrokeTransparency = 1,
-						TextTransparency = 1
-					})
-				end
-			end;
-
-			Section.Name = Fatality:RandomString()
-			Section.Parent = (string.lower(Config.Position) == 'left' and Left) or (string.lower(Config.Position) == 'center' and Center) or Right;
-			Fatality:Register(Section, "Background") -- [THEME]
-			Section.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			Section.BorderSizePixel = 0
-			Section.ClipsDescendants = true
-			Section.Size = UDim2.new(1, 0, 0, 0)
-
-			Elements.Name = Fatality:RandomString()
-			Elements.Parent = Section
-			Elements.AnchorPoint = Vector2.new(0.5, 1)
-			Fatality:Register(Elements, "Container") -- [THEME]
-			Elements.BackgroundTransparency = 0
-			Elements.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			Elements.BorderSizePixel = 0
-			Elements.Position = UDim2.new(0.5, 0, 1, -1)
-			Elements.Size = UDim2.new(1, -5, 1, -10)
-
-			UIStroke.Color = Color3.fromRGB(29, 29, 29)
-			Fatality:Register(UIStroke, "Stroke", "Color") -- [THEME]
-			UIStroke.Parent = Elements
-
-			UICorner.CornerRadius = UDim.new(0, 2)
-			UICorner.Parent = Elements
-
-			UIListLayout.Parent = Elements
-			UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-			UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-			UIListLayout.Padding = UDim.new(0, 5)
-
-			SpaceBox.Name = Fatality:RandomString()
-			SpaceBox.Parent = Elements
-			SpaceBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			SpaceBox.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			SpaceBox.BorderSizePixel = 0
-			SpaceBox.Size = UDim2.new(0, 0, 0, 10)
-
-			SectionName.Name = Fatality:RandomString()
-			SectionName.Parent = Section
-			SectionName.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			SectionName.BackgroundTransparency = 1.000
-			SectionName.BorderColor3 = Color3.fromRGB(0, 0, 0)
-			SectionName.BorderSizePixel = 0
-			SectionName.Position = UDim2.new(0, 10, 0, 0)
-			SectionName.Size = UDim2.new(1, 0, 0, 15)
-			SectionName.FontFace = Fatality.FontSemiBold;
-			SectionName.Text = Config.Name
-			Fatality:Register(SectionName, "Text", "TextColor3") -- [THEME]
-			SectionName.TextSize = 15.000
-			SectionName.TextStrokeTransparency = 0.750
-			SectionName.TextXAlignment = Enum.TextXAlignment.Left
-
-
-			UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
-				local MainScale = UIListLayout.AbsoluteContentSize.Y + 20 + Config.Height;
-
-				if not Menu.AutoFill then
-					Fatality:CreateAnimation(Section,0.25,{
-						Size = UDim2.new(1, 0, 0, MainScale)
-					})
-				else
-					Section.Size = UDim2.new(1,0,0,MainScale / 2.5);
-				end;
-			end);
-
-			Toggle(BindEvent:GetAttribute('V'));
-
-			BindEvent.Event:Connect(Toggle);
-
-			return Fatality:CreateElements(Elements,Elements.ZIndex,BindEvent,{
-				Path = Menu.Name .. " > ".. Config.Name,
-				Memory = function(Name)
-					table.insert(Fatal.ElementContents,{
-						Name = Name,
-						Path = Menu.Name .. " > ".. Config.Name .. " > " .. Name,
-						_TAB = _B
-					});
-				end,
-			});
-		end;
-
 		do
 			local AboutFrame = Instance.new("Frame")
 			local UIStroke = Instance.new("UIStroke")
@@ -6318,38 +6182,35 @@ function Fatality.new(Window: Window)
 			backpack.BackgroundColor3 = Fatality.CurrentTheme.Container
 			Fatality:Register(backpack, "Container")
 			backpack.BorderSizePixel = 0
-			backpack.Size = UDim2.new(0, 100, 0, 35)
+			-- [FIX] Квадратная кнопка
+			backpack.Size = UDim2.new(0, 50, 0, 50) 
 			backpack.AutoButtonColor = false
-			backpack.Font = Enum.Font.GothamBold
-			backpack.Text = "VANTALITY"
-			backpack.TextColor3 = Fatality.CurrentTheme.Text
-			Fatality:Register(backpack, "Text", "TextColor3")
-			backpack.TextSize = 14
+			backpack.Text = "" -- [FIX] Нет текста
 
 			local corner = Instance.new("UICorner")
-			corner.CornerRadius = UDim.new(0, 6)
+			corner.CornerRadius = UDim.new(0, 10)
 			corner.Parent = backpack
 
 			local stroke = Instance.new("UIStroke")
 			stroke.Color = Fatality.CurrentTheme.Stroke
 			Fatality:Register(stroke, "Stroke", "Color")
 			stroke.Parent = backpack
+			
+			-- [FIX] Буква V внутри
+			local icon = Instance.new("TextLabel")
+			icon.Name = "Icon"
+			icon.Parent = backpack
+			icon.BackgroundTransparency = 1
+			icon.Size = UDim2.new(1, 0, 1, 0)
+			icon.Font = Enum.Font.GothamBold
+			icon.Text = "V"
+			icon.TextColor3 = GetSafeColor(Fatality.CurrentTheme.Main)
+			Fatality:Register(icon, "Main", "TextColor3")
+			icon.TextSize = 24
 
 			backpack.MouseButton1Click:Connect(function()
 				Fatal.Toggle = not Fatal.Toggle
 				ToggleUI(Fatal.Toggle)
-			end)
-
-			backpack.MouseEnter:Connect(function()
-				game:GetService("TweenService"):Create(backpack, TweenInfo.new(0.2), {
-					BackgroundColor3 = Fatality.CurrentTheme.Element 
-				}):Play()
-			end)
-
-			backpack.MouseLeave:Connect(function()
-				game:GetService("TweenService"):Create(backpack, TweenInfo.new(0.2), {
-					BackgroundColor3 = Fatality.CurrentTheme.Container
-				}):Play()
 			end)
 
 			return backpack
@@ -6401,7 +6262,7 @@ function Fatality.new(Window: Window)
 		end
 
 		return Fatal;
-	end;
+	end; --ezezez
 
 function Fatality:Loader(Config: Loader)
 	Config = Config or {};
