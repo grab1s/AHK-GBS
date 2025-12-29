@@ -4527,7 +4527,7 @@ function Fatality:CreateConfigWindow(Root: ScreenGui , Fatal , Button: ImageButt
 	return res;
 end;
 
-function function Fatality.new(Window: Window) -- lolez
+function Fatality.new(Window: Window)
 	Window = Window or {};
 	Window.Name = Window.Name or "FATALITY";
 	Window.Scale = Window.Scale or UDim2.new(0, 750, 0, 500);
@@ -6262,14 +6262,15 @@ function function Fatality.new(Window: Window) -- lolez
 		end
 
 		return Fatal;
-	end; --ezezez
+	end; -- UPDATE FOR MOBILE BUTTON AND DRAGGABLE ON MOBILE FOR TOUCHES
 
 function Fatality:Loader(Config: Loader)
 	Config = Config or {};
 	Config.Name = Config.Name or "FATALITY";
+	-- Duration теперь игнорируется, если включен ManualMode, но оставим для совместимости
 	Config.Duration = Config.Duration or 3.5; 
 	Config.Scale = Config.Scale or 3;
-	Config.Manual = Config.Manual or false;
+	Config.Manual = Config.Manual or false; -- [NEW] Ручной режим
 
 	local Blur = Instance.new('BlurEffect');
 	local Loader = Instance.new("ScreenGui")
