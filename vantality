@@ -1097,7 +1097,7 @@ end
 local settingsSection  = miscTab:AddSection({ Position = 'left', Name = "MENU SETTINGS" })
 local christmasSection = miscTab:AddSection({ Position = 'center', Name = "CHRISTMAS" })
 local overlaySection   = miscTab:AddSection({ Position = 'left', Name = "OVERLAY" })
-local blurTabSection   = miscTab:AddSection({ Position = 'center', Name = "ALT-TAB BLUR" })
+local blurTabSection   = miscTab:AddSection({ Position = 'center', Name = "ALT-TAB BLUR" OnlyPC = true })
 local BetaSection      = miscTab:AddSection({ Position = 'right', Name = "BETA.." })
 
 
@@ -1174,10 +1174,17 @@ settingsSection:AddDropdown({
     end
 })
 
+-- определение размера при старте
+local StartScale = "100" 
+
+if not Fatality.IsPC then
+    StartScale = "65" 
+end
+
 settingsSection:AddDropdown({
     Name = "Menu Size",
     Default = "100", 
-    Values = {"60", "75", "100", "125", "150"}, 
+    Values = {"60", "65", "75", "100", "125", "150"}, 
     Multi = false, 
     Flag = "UI_Scale",
     Callback = function(val)
