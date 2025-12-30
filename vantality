@@ -822,8 +822,8 @@ end
 
 
 -- FLEX (NO FE) 
+local spoofLbSection     = flexTab:AddSection({ Position = 'Left', Name = "SPOOF LEADERBOARDS" })
 local fakeKillsSection   = flexTab:AddSection({ Position = 'left', Name = "FAKE KILLS" })
-local spoofLbSection     = flexTab:AddSection({ Position = 'center', Name = "SPOOF LEADERBOARDS" })
 local killStreakSection  = flexTab:AddSection({ Position = 'left', Name = "KILL STREAK" })
 local cosmeticsSection   = flexTab:AddSection({ Position = 'right', Name = "SANTA HAT" })
 local localPlayerSection = flexTab:AddSection({ Position = 'right', Name = "CHINA HAT" })
@@ -1178,7 +1178,7 @@ settingsSection:AddDropdown({
 local StartScale = "100" 
 
 if not Fatality.IsPC then
-    StartScale = "65" 
+    StartScale = "60" 
 end
 
 settingsSection:AddDropdown({
