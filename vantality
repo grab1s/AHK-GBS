@@ -1163,31 +1163,31 @@ do -- >> CHRISTMAS (XMAS)
     })
 end
 
--- MENU MISC
-settingsSection:AddDropdown({
-    Name = "UI Theme",
-    Values = ThemeMgr:GetThemeNames(),
-    Default = "Fatality (Default)",
-    Flag = "UI_Theme",
-    Callback = function(val)
-        ThemeMgr:Apply(Fatality, val)
-    end
-})
+do
+    local UserInputService = game:GetService("UserInputService")
+    local IsMobile = not UserInputService.TouchEnabled
+    if UserInputService.TouchEnabled then IsMobile = true end
+    
+    -- 2. Выбираем дефолтное значение для списка
+    local StartScale = IsMobile and "60" or "100"
+    
+    settingsSection:AddDropdown({
+        Name = "UI Theme",
+        Values = ThemeMgr:GetThemeNames(),
+        Default = "Fatality (Default)",
+        Flag = "UI_Theme",
+        Callback = function(val)
+            ThemeMgr:Apply(Fatality, val)
+        end
+    })
 
--- определение размера при старте
-local StartScale = "100" 
-
-if not Fatality.IsPC then
-    StartScale = "60" 
-end
-
-settingsSection:AddDropdown({
-    Name = "Menu Size",
-    Default = "100", 
-    Values = {"60", "65", "75", "100", "125", "150"}, 
-    Multi = false, 
-    Flag = "UI_Scale",
-    Callback = function(val)
+    settingsSection:AddDropdown({
+        Name = "Menu Size",
+        Default = "100", 
+        Values = {"60", "65", "75", "100", "125", "150"}, 
+        Multi = false, 
+        Flag = "UI_Scale",
+        Callback = function(val)
         local scale = tonumber(val)
         if scale then
             Window:SetScale(scale)
@@ -1195,15 +1195,21 @@ settingsSection:AddDropdown({
     end
 })
 
-settingsSection:AddKeybind({
-    Name = "Toggle Key",
-    Default = Enum.KeyCode.Insert, 
-    Flag = "UI_Keybind",
-    OnlyPC = true,
-    Callback = function(key)
-        Window:SetKeybind(key) 
+    -- ПРИНУДИТЕЛЬНОЕ ПРИМЕНЕНИЕ ДЛЯ ТЕЛЕФОНОВ
+    if IsMobile then
+        Window:SetScale(60)
     end
-});
+
+    settingsSection:AddKeybind({
+        Name = "Toggle Key",
+        Default = Enum.KeyCode.Insert, 
+        Flag = "UI_Keybind",
+        OnlyPC = true,
+        Callback = function(key)
+            Window:SetKeybind(key) 
+        end
+    })
+end
 
 do -- >> OVERLAY
     local overlayUrl = "https://pastebin.com/raw/iKGzdHQW"
