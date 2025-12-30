@@ -1163,12 +1163,14 @@ do -- >> CHRISTMAS (XMAS)
     })
 end
 
-do
+do -- >> MENU SETTINGS
+    -- 1. Правильное определение устройства
+    -- Если TouchEnabled = true, значит это телефон/планшет
     local UserInputService = game:GetService("UserInputService")
-    local IsMobile = not UserInputService.TouchEnabled
-    if UserInputService.TouchEnabled then IsMobile = true end
+    local IsMobile = UserInputService.TouchEnabled 
     
     -- 2. Выбираем дефолтное значение для списка
+    -- Если мобилка - "60", если ПК - "100"
     local StartScale = IsMobile and "60" or "100"
     
     settingsSection:AddDropdown({
