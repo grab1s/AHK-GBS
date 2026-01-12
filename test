@@ -1,294 +1,157 @@
 --[[
     Fatality Interface
-	Modded by: grab1s
+    Modded by: grab1s
     Author: 4lpaca
     License: MIT
     Github: https://github.com/4lpaca-pin/Fatality
+    Version: 1.8 (3D Fixed & No-Types)
 --]]
 
--- Export Types --
-export type Window = {
-	Name: string,
-	Keybind: string | Enum.KeyCode,
-	Scale: UDim2,
-	Expire: string
-}
+-- // EXPLOIT ENVIRONMENT COMPATIBILITY //
+-- Мы убрали 'export type', так как они вызывают ошибку на многих инжекторах
 
-export type Loader = {
-	Name: string,
-	Duration: number,
-	Scale: number
-}
+cloneref = cloneref or function(i) return i end
+clonefunction = clonefunction or function(f) return f end
+hookfunction = hookfunction or function(a,b) return a end
+getgenv = getgenv or getfenv
+protect_gui = protect_gui or (syn and syn.protect_gui) or function() end
 
-export type Menu = {
-	Name: string,
-	Icon: string,
-	AutoFill: boolean
-}
+-- Safe LPH (Obfuscation Mock)
+if getgenv then
+    local env = getgenv()
+    if not env.LPH_NO_VIRTUALIZE then
+        env.LPH_NO_VIRTUALIZE = function(f) return f end
+    end
+end
 
-export type Section = {
-	Name: string,
-	Position: string,
-	Height: number,
-}
-
-export type Listbox = {
-	Name: string,
-	Option: boolean,
-	Multi: boolean,
-	Position: string,
-	Flag: string | nil,
-	Height: number,
-	Default: ValueBase,
-	Values: {ValueBase},
-	Callback: (values: {ValueBase}) -> any
-}
-
-export type Elements = {
-	AddToggle: (self,Config: Toggle) -> {
-		Option: Elements	
-	},
-	AddSlider: (self,Config: Slider) -> {
-		Option: Elements	
-	},
-	AddButton: (self,Config: Button) -> {},
-	AddColorPicker: (self,Config: ColorPicker) -> {
-		Option: Elements	
-	},
-	AddDropdown: (self,Config: Dropdown) -> {
-		Option: Elements	
-	},
-	AddKeybind: (self,Config: Keybind) -> {
-		Option: Elements	
-	},
-}
-
-export type Preview = {
-	Position: string,
-	Height: number
-}
-
-export type Toggle = {
-	Name: string,
-	Default: boolean,
-	Callback: (boolean) -> any,
-	Risky: boolean,
-	Option: boolean,
-	Flag: string | nil,
-}
-
-export type Slider = {
-    Name: string,
-    Default: number,
-    Range: {number}, 
-    Precise: boolean, 
-    Step: number,    
-    Type: string,
-    Callback: (number) -> any,
-    Risky: boolean,
-    Flag: string | nil,
-    Option: boolean
-}
-
-export type Button = {
-	Name: string,
-	Callback: (number) -> any,
-	Risky: boolean,
-}
-
-export type ColorPicker = {
-	Name: string,
-	Default: Color3,
-	Transparency: number,
-	Callback: (number) -> any,
-	Flag: string | nil,
-	Option: boolean
-}
-
-export type Dropdown = {
-	Name: string,
-	Default: string | {string},
-	Values: {string},
-	Callback: (string | {string}) -> any,
-	Option: boolean,
-	Multi: boolean,
-	Flag: string | nil,
-	AutoUpdate: boolean
-}
-
-export type Keybind = {
-	Name: string,
-	Default: string | Enum.KeyCode,
-	Callback: (string) -> any,
-	Flag: string | nil,
-	Option: boolean,
-}
-
-export type Notify = {
-	Title: string,
-	Content: string,
-	Duration: number,
-	Flag: string | nil,
-	Icon: string
-}
-
-export type Notifier = {
-	Notify: (self, Config: Notify) -> nil
-}
-
--- Exploit Environments --
-cloneref = cloneref or function(i) return i; end;
-clonefunction = clonefunction or function(...) return ...; end;
-hookfunction = hookfunction or function(a,b) return a; end;
-getgenv = getgenv or getfenv;
-protect_gui = protect_gui or protectgui or (syn and syn.protect_gui) or function() end;
-getgenv().LPH_NO_VIRTUALIZE = LPH_NO_VIRTUALIZE or function(f) return f end;
-
+-- File System Simulation (For Roblox Studio)
 if game:GetService('RunService'):IsStudio() then
-	local BaseWorkspace = Instance.new('Folder',game:GetService("ReplicatedFirst"));
+    local BaseWorkspace = Instance.new('Folder', game:GetService("ReplicatedFirst"))
+    BaseWorkspace.Name = "WORKSPACE"
 
-	BaseWorkspace.Name = "WORKSPACE";
+    local __get_path_c = function(path)
+        return (string.find(path, '/', 1, true) and string.split(path, '/')) or (string.find(path, '\\', 1, true) and string.split(path, '\\')) or {path}
+    end
 
-	local __get_path_c = function(path)
-		return (string.find(path,'/',1,true) and string.split(path,'/')) or (string.find(path,'\\',1,true) and string.split(path,'\\')) or {path};
-	end
+    local __get_path = function(path)
+        local main = __get_path_c(path)
+        local block = BaseWorkspace
+        for i, v in next, main do
+            block = block[v]
+        end
+        return block
+    end
 
-	local __get_path = function(path)
-		local main = __get_path_c(path);
+    getgenv().readfile = function(path)
+        local p = __get_path(path)
+        return p and p.Value or ""
+    end
 
-		local block = BaseWorkspace;
+    getgenv().isfile = function(path)
+        local success, message = pcall(function() return __get_path(path) end)
+        return success and not message:IsA("Folder")
+    end
 
-		for i,v in next , main do
-			block = block[v];
-		end;
+    getgenv().isfolder = function(path)
+        local success, message = pcall(function() return __get_path(path) end)
+        return success and message:IsA("Folder")
+    end
 
-		return block;
-	end;
+    getgenv().writefile = function(path, content)
+        local main = __get_path_c(path)
+        local block = BaseWorkspace
+        for i, v in next, main do
+            local item = block:FindFirstChild(v)
+            if not item then
+                local c = Instance.new('StringValue', block)
+                c.Name = tostring(v)
+                c.Value = content
+            else
+                if item:IsA('StringValue') and tostring(item) == v then
+                    item.Name = tostring(v)
+                    item.Value = content
+                end
+                block = item
+            end
+        end
+    end
 
-	getgenv().readfile = function(path)
-		local path : StringValue = __get_path(path);
+    getgenv().listfiles = function(path)
+        local fold = __get_path(path)
+        local pa = {}
+        if fold then
+            for i, v in next, fold:GetChildren() do
+                if v:IsA('StringValue') then
+                    table.insert(pa, path .. '/' .. tostring(v))
+                end
+            end
+        end
+        return pa
+    end
 
-		return path.Value;
-	end;
+    getgenv().makefolder = function(path)
+        local main = __get_path_c(path)
+        local block = BaseWorkspace
+        for i, v in next, main do
+            local item = block:FindFirstChild(v)
+            if not item then
+                local c = Instance.new('Folder', block)
+                c.Name = tostring(v)
+            else
+                block = item
+            end
+        end
+    end
 
-	getgenv().isfile = function(path)
-		local success , message = pcall(function()
-			return __get_path(path);
-		end);
-
-		if success and not message:IsA("Folder") then
-			return true;
-		end;
-
-		return false;
-	end;
-
-	getgenv().isfolder = function(path)
-		local success , message = pcall(function()
-			return __get_path(path);
-		end);
-
-		if success and message:IsA("Folder") then
-			return true;
-		end;
-
-		return false;
-	end;
-
-	getgenv().writefile = function(path,content)
-		local main = __get_path_c(path);
-
-		local block = BaseWorkspace;
-
-		for i,v in next , main do
-			local item = block:FindFirstChild(v);
-			if not item then
-				local c = Instance.new('StringValue',block);
-
-				c.Name = tostring(v);
-				c.Value = content;
-			else
-				if item:IsA('StringValue') and tostring(item) == v then
-					item.Name = tostring(v);
-					item.Value = content;
-				end;
-
-				block = item;
-			end;
-		end;
-	end;
-
-	getgenv().listfiles = function(path)
-		local fold = __get_path(path);
-		local pa = {};
-
-		for i,v in next , fold:GetChildren() do
-			if v:IsA('StringValue') then
-				table.insert(pa,path..'/'..tostring(v));
-			end;
-		end;
-
-		return pa;
-	end;
-
-	getgenv().makefolder = function(path)
-		local main = __get_path_c(path);
-
-		local block = BaseWorkspace;
-
-		for i,v in next , main do
-			local item = block:FindFirstChild(v);
-			if not item then
-				local c = Instance.new('Folder',block);
-
-				c.Name = tostring(v);
-			else
-				block = item;
-			end;
-		end;
-	end;
-
-	getgenv().delfile = function(path)
-		local main = __get_path_c(path);
-
-		local block = BaseWorkspace;
-
-		for i,v in next , main do
-			local item = block:FindFirstChild(v);
-			if item and item:IsA('StringValue') then
-				item:Destroy();
-			else
-				block = item;
-			end;
-		end;
-	end;
-end;
+    getgenv().delfile = function(path)
+        local main = __get_path_c(path)
+        local block = BaseWorkspace
+        for i, v in next, main do
+            local item = block:FindFirstChild(v)
+            if item and item:IsA('StringValue') then
+                item:Destroy()
+            else
+                block = item
+            end
+        end
+    end
+end
 
 -- Services --
-local TextService = cloneref(game:GetService('TextService'));
-local TweenService = cloneref(game:GetService('TweenService'));
-local RunService = cloneref(game:GetService('RunService'));
-local Players = cloneref(game:GetService('Players'));
-local UserInputService = cloneref(game:GetService('UserInputService'));
-local Client = Players.LocalPlayer;
-local Mouse = Client:GetMouse();
-local CurrentCamera = workspace.CurrentCamera;
-local _,CoreGui = xpcall(function()
-	return (gethui and gethui()) or game:GetService("CoreGui"):FindFirstChild("RobloxGui");
-end,function()
-	return Client.PlayerGui;
-end);
+local TextService = cloneref(game:GetService('TextService'))
+local TweenService = cloneref(game:GetService('TweenService'))
+local RunService = cloneref(game:GetService('RunService'))
+local Players = cloneref(game:GetService('Players'))
+local UserInputService = cloneref(game:GetService('UserInputService'))
+local CoreGuiService = cloneref(game:GetService("CoreGui"))
 
--- Fatality --
-local Fatality = {};
+local Client = Players.LocalPlayer
+local Mouse = Client:GetMouse()
+local CurrentCamera = workspace.CurrentCamera
 
-Fatality.Ascii = "qwertyuiopasdfghjklzxcvbnmQWRTYUIOPASDFGHJKLZXCVBNM";
-Fatality.GLOBAL_ENVIRONMENT = {};
-Fatality.Windows = {};
-Fatality.FontSemiBold = Font.new('rbxasset://fonts/families/GothamSSm.json',Enum.FontWeight.SemiBold,Enum.FontStyle.Normal);
-Fatality.Flags = {};
-Fatality.DragBlacklist = {};
-Fatality.Version = '1.7 - Theme Engine';
+-- Safe GUI Parent Getting
+local _, CoreGui = xpcall(function()
+    return (gethui and gethui()) or CoreGuiService:FindFirstChild("RobloxGui") or CoreGuiService
+end, function()
+    return Client:WaitForChild("PlayerGui", 5) or CoreGuiService
+end)
+
+-- Fatality Init --
+local Fatality = {}
+
+Fatality.Ascii = "qwertyuiopasdfghjklzxcvbnmQWRTYUIOPASDFGHJKLZXCVBNM"
+Fatality.GLOBAL_ENVIRONMENT = {}
+Fatality.Windows = {}
+Fatality.Flags = {}
+Fatality.DragBlacklist = {}
+
+-- Safe Font Loading (Prevents crashing on some executors)
+Fatality.FontSemiBold = Enum.Font.GothamMedium
+pcall(function()
+    Fatality.FontSemiBold = Font.new('rbxasset://fonts/families/GothamSSm.json', Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
+end)
+
+Fatality.Version = '1.8 - 3D Engine Fix'
 
 -- THEME SYSTEM --
 Fatality.CurrentTheme = {
