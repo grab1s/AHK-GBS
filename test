@@ -4502,6 +4502,11 @@ function Fatality.new(Window: Window)
 	Window.Scale = Window.Scale or UDim2.new(0, 750, 0, 500);
 	Window.Keybind = Window.Keybind or "Insert";
 	Window.Expire = Window.Expire or "never";
+	
+	-- [3D SETTINGS]
+	Window.Is3D = Window.Is3D or false -- Включить 3D?
+	Window.Depth = Window.Depth or 6    -- Расстояние от камеры
+	Window.Sway = Window.Sway or 0.15   -- Плавность (меньше = плавнее/медленнее)
 
 	local OriginalSize = Window.Scale
 	local CurrentKeybind = Window.Keybind
@@ -4521,20 +4526,87 @@ function Fatality.new(Window: Window)
 		return val
 	end
 
-    local Fatalitywin = Instance.new("SurfaceGui")
-    
-    if _G.Vantality3DPart then
-        Fatalitywin.Adornee = _G.Vantality3DPart
-        Fatalitywin.Face = Enum.NormalId.Back -- Обычно камера смотрит в "спину" детали при такой математике
-        Fatalitywin.CanvasSize = Vector2.new(1920, 1080) -- Фиксируем разрешение, чтобы UI не был гигантским
-        Fatalitywin.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
-        Fatalitywin.PixelsPerStud = 50 -- Плотность пикселей
-        Fatalitywin.AlwaysOnTop = true -- Чтобы меню было видно сквозь стены (как в аниме)
-    else
-        Fatalitywin = Instance.new("ScreenGui")
-    end
+	-- // ЛОГИКА СОЗДАНИЯ КОНТЕЙНЕРА (2D vs 3D) //
+	local Fatalitywin
+	local RootPart_3D
+	local SwayConnection
 
-	Fatalitywin.Enabled = false 
+	if Window.Is3D then
+		-- >> 3D РЕЖИМ (Solo Leveling Style)
+		local Camera = workspace.CurrentCamera
+		local RunService = game:GetService("RunService")
+		
+		-- Создаем физическую панель
+		RootPart_3D = Instance.new("Part")
+		RootPart_3D.Name = "Vantality_3D_Anchor"
+		RootPart_3D.Transparency = 1
+		RootPart_3D.CanCollide = false
+		RootPart_3D.CanTouch = false
+		RootPart_3D.CanQuery = false
+		RootPart_3D.CastShadow = false
+		RootPart_3D.Anchored = true
+		RootPart_3D.Size = Vector3.new(1, 1, 0.05)
+		RootPart_3D.Parent = Camera
+
+		-- Создаем SurfaceGui
+		Fatalitywin = Instance.new("SurfaceGui")
+		Fatalitywin.Face = Enum.NormalId.Back
+		Fatalitywin.CanvasSize = Vector2.new(1000, 650) -- Виртуальное разрешение
+		Fatalitywin.PixelsPerStud = 120
+		Fatalitywin.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
+		Fatalitywin.AlwaysOnTop = true -- X-Ray эффект
+		Fatalitywin.LightInfluence = 0
+		Fatalitywin.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+		Fatalitywin.Adornee = RootPart_3D
+		Fatalitywin.Active = true
+		
+		-- Логика движения (Sway/Lag)
+		SwayConnection = RunService.RenderStepped:Connect(function(dt)
+			if not RootPart_3D or not RootPart_3D.Parent then 
+				if SwayConnection then SwayConnection:Disconnect() end
+				return 
+			end
+
+			if Fatal.Toggle then
+				-- Позиция перед лицом
+				local targetCFrame = Camera.CFrame * CFrame.new(0, 0, -Window.Depth)
+				-- Плавная интерполяция
+				RootPart_3D.CFrame = RootPart_3D.CFrame:Lerp(targetCFrame, Window.Sway)
+				-- Поворачиваем размер парты под FOV, чтобы клики работали корректно
+				local dist = (Camera.CFrame.Position - RootPart_3D.Position).Magnitude
+				local height = 2 * math.tan(math.rad(Camera.FieldOfView) / 2) * dist
+				local width = height * (Camera.ViewportSize.X / Camera.ViewportSize.Y)
+				-- Немного уменьшаем область клика до размера UI
+				RootPart_3D.Size = Vector3.new(width * 0.4, height * 0.4, 0.05) 
+			else
+				-- Убираем далеко, когда выключено
+				RootPart_3D.CFrame = CFrame.new(0, 100000, 0)
+			end
+		end)
+	else
+		-- >> 2D РЕЖИМ (Классический)
+		Fatalitywin = Instance.new("ScreenGui")
+		Fatalitywin.ResetOnSpawn = false
+		Fatalitywin.IgnoreGuiInset = true
+		Fatalitywin.ZIndexBehavior = Enum.ZIndexBehavior.Global
+	end
+
+	Fatalitywin.Name = Fatality:RandomString();
+	Fatalitywin.Parent = (gethui and gethui()) or game:GetService("CoreGui");
+	
+	-- Добавляем в список окон для очистки
+	table.insert(Fatality.Windows, Fatalitywin)
+	
+	if not Window.Is3D then
+		protect_gui(Fatalitywin);
+	end
+
+	-- Если окно 3D удаляется, чистим connection
+	Fatalitywin.Destroying:Connect(function()
+		if SwayConnection then SwayConnection:Disconnect() end
+		if RootPart_3D then RootPart_3D:Destroy() end
+	end)
+
 	Fatal.Main = Fatalitywin 
 	
 	local FatalFrame = Instance.new("Frame")
@@ -4639,26 +4711,20 @@ function Fatality.new(Window: Window)
 		end
 	end
 
-	Fatalitywin.Name = Fatality:RandomString();
-if _G.Vantality3DPart then
-    Fatalitywin.Parent = game:GetService("CoreGui") -- SurfaceGui должен лежать в CoreGui или PlayerGui
-else
-    Fatalitywin.Parent = CoreGui;
-end
-	Fatalitywin.ResetOnSpawn = false;
-	Fatalitywin.IgnoreGuiInset = true;
-	Fatalitywin.ZIndexBehavior = Enum.ZIndexBehavior.Global;
-	table.insert(Fatality.Windows,Fatalitywin)
-	protect_gui(Fatalitywin);
-
 	FatalFrame.Active = true;
 	FatalFrame.Name = Fatality:RandomString()
 	FatalFrame.Parent = Fatalitywin
-	FatalFrame.AnchorPoint = Vector2.new(0.5, 0)
+	FatalFrame.AnchorPoint = Vector2.new(0.5, 0.5) -- Изменено на центр для 3D
 	Fatality:Register(FatalFrame, "Background")
 	FatalFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	FatalFrame.BorderSizePixel = 0
-	FatalFrame.Position = UDim2.new(0.5, 0, 0.2);
+	
+	if Window.Is3D then
+		FatalFrame.Position = UDim2.new(0.5, 0, 0.5, 0); -- Центр SurfaceGui
+	else
+		FatalFrame.Position = UDim2.new(0.5, 0, 0.5, 0); -- Центр экрана (было 0.2, но 0.5 универсальнее)
+	end
+	
 	FatalFrame.Size = Window.Scale;
 	FatalFrame.ClipsDescendants = true
 	UICorner.CornerRadius = UDim.new(0, 5)
@@ -4898,10 +4964,13 @@ end
 
 	function Fatal:AddSave(callback) SaveButton.MouseButton1Click:Connect(callback); end;
 
-	Fatality:Drag(FatalFrame,FatalFrame,0.1);
-	Fatality:Drag(Header, FatalFrame, 0.1)
-	Fatality:Drag(Bottom, FatalFrame, 0.1)
-	Fatality:Drag(MenuFrame, FatalFrame, 0.1)
+	-- [ВАЖНО] Отключаем Dragging в 3D режиме, чтобы не ломать управление камерой
+	if not Window.Is3D then
+		Fatality:Drag(FatalFrame,FatalFrame,0.1);
+		Fatality:Drag(Header, FatalFrame, 0.1)
+		Fatality:Drag(Bottom, FatalFrame, 0.1)
+		Fatality:Drag(MenuFrame, FatalFrame, 0.1)
+	end
 
 	UserInputService.InputBegan:Connect(function(input,istyping)
 		if not istyping then
@@ -5648,7 +5717,7 @@ end
 			button.MouseButton1Click:Connect(function() if TAB_WARP then for i,v in next , Fatal.Menus do if v.Root == TAB_WARP.Root then Fatal.MenuSelected = v; v.ValueSelect(true) else v.ValueSelect(false) end; end; end; end);
 			return ResultFrame;
 		end
-		SearchButton.MouseButton1Click:Connect(function() TextBox.Text = ""; SearchToggle(true); table.clear(SearchInformation); table.foreach(ScrollingFrame:GetChildren(),function(i,v) if v:IsA('Frame') then v:Destroy(); end; end); table.foreach(Fatal.ElementContents,function(i,v) local button = get_button(v.Name,v.Path,v._TAB); SearchInformation[v.Path.." - "..Fatality:RandomString()] = { root = button, callback = function() end, }; end); end)
+		SearchButton.MouseButton1Click:Connect(function() TextBox.Text = ""; SearchToggle(true); table.clear(SearchInformation); table.foreach(ScrollingFrame:GetChildren(),function(i,v) if v:IsA('Frame') then v:Destroy(); end; end; table.foreach(Fatal.ElementContents,function(i,v) local button = get_button(v.Name,v.Path,v._TAB); SearchInformation[v.Path.." - "..Fatality:RandomString()] = { root = button, callback = function() end, }; end); end)
 		local DearchDelay = tick();
 		TextBox:GetPropertyChangedSignal('Text'):Connect(function()
 			DearchDelay = tick();
@@ -5687,7 +5756,11 @@ end
 		AboutFrame.Active = true 
 		
 		Fatality:AddDragBlacklist(AboutFrame)
-		Fatality:Drag(AboutFrame, AboutFrame, 0.1)
+		
+		-- Dragging только если не 3D
+		if not Window.Is3D then
+			Fatality:Drag(AboutFrame, AboutFrame, 0.1)
+		end
 
 		UICorner.CornerRadius = UDim.new(0, 4)
 		UICorner.Parent = AboutFrame
